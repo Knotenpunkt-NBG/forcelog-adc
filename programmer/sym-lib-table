@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name programmer-eagle-import)(type Legacy)(uri ${KIPRJMOD}/programmer-eagle-import.lib)(options "")(descr ""))
+  (lib (name conn)(type Legacy)(uri /home/lor/Projekte/Database/kicad/library/conn.lib)(options "")(descr ""))
+)

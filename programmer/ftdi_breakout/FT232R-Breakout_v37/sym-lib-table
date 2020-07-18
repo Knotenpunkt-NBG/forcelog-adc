@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name FT232R-Breakout_v37-eagle-import)(type Legacy)(uri ${KIPRJMOD}/FT232R-Breakout_v37-eagle-import.lib)(options "")(descr ""))
+)

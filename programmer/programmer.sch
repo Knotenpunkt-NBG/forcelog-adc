@@ -1,0 +1,268 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L modules:FT232breakout U1
+U 1 1 5E3DF8C6
+P 4350 3850
+F 0 "U1" H 4325 4865 50  0000 C CNN
+F 1 "FT232breakout" H 4325 4774 50  0000 C CNN
+F 2 "buck:ft232rl_breakout_combined" H 4200 4200 50  0001 C CNN
+F 3 "https://www.banggood.com/FT232RL-FT232-RS232-FTDI-Micro-USB-to-TTL-3_3V-5_5V-Serial-Adapter-Module-Download-Cable-for-Mini-Port-p-1599806.html?rmmds=search&cur_warehouse=CN" H 4200 4200 50  0001 C CNN
+	1    4350 3850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR04
+U 1 1 5E3E0937
+P 4950 3250
+F 0 "#PWR04" H 4950 3100 50  0001 C CNN
+F 1 "+5V" H 4965 3423 50  0000 C CNN
+F 2 "" H 4950 3250 50  0001 C CNN
+F 3 "" H 4950 3250 50  0001 C CNN
+	1    4950 3250
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR05
+U 1 1 5E3E1385
+P 4950 3700
+F 0 "#PWR05" H 4950 3450 50  0001 C CNN
+F 1 "GND" H 4955 3527 50  0000 C CNN
+F 2 "" H 4950 3700 50  0001 C CNN
+F 3 "" H 4950 3700 50  0001 C CNN
+	1    4950 3700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4750 3550 4750 3700
+Wire Wire Line
+	4950 3700 4750 3700
+Connection ~ 4750 3700
+Wire Wire Line
+	4950 3250 4750 3250
+$Comp
+L conn:CONN_01X08 P1
+U 1 1 5E3E1E1F
+P 2050 3800
+F 0 "P1" H 1967 4365 50  0000 C CNN
+F 1 "UART" H 1967 4274 50  0000 C CNN
+F 2 "Connector_JST:JST_XH_B8B-XH-A_1x08_P2.50mm_Vertical" H 2050 3800 50  0001 C CNN
+F 3 "https://www.reichelt.de/jst-stiftleiste-gerade-1x8-polig-xh-jst-xh8p-st-p185078.html?&trstct=pos_0&nbc=1" H 2050 3800 50  0001 C CNN
+	1    2050 3800
+	-1   0    0    -1  
+$EndComp
+$Comp
+L pspice:R R1
+U 1 1 5E3E4682
+P 3100 5650
+F 0 "R1" V 2895 5650 50  0000 C CNN
+F 1 "1k" V 2986 5650 50  0000 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" H 3100 5650 50  0001 C CNN
+F 3 "https://www.reichelt.de/smd-widerstand-1206-150-ohm-250-mw-1-rnd-1206-1-150-p183351.html?&trstct=pol_0&nbc=1" H 3100 5650 50  0001 C CNN
+	1    3100 5650
+	0    1    1    0   
+$EndComp
+$Comp
+L pspice:R R2
+U 1 1 5E3E8F2E
+P 3100 6150
+F 0 "R2" V 2895 6150 50  0000 C CNN
+F 1 "1k" V 2986 6150 50  0000 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" H 3100 6150 50  0001 C CNN
+F 3 "https://www.reichelt.de/smd-widerstand-1206-150-ohm-250-mw-1-rnd-1206-1-150-p183351.html?&trstct=pol_0&nbc=1" H 3100 6150 50  0001 C CNN
+	1    3100 6150
+	0    1    1    0   
+$EndComp
+$Comp
+L pspice:R R3
+U 1 1 5E3ECA59
+P 3100 6600
+F 0 "R3" V 2895 6600 50  0000 C CNN
+F 1 "1k" V 2986 6600 50  0000 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" H 3100 6600 50  0001 C CNN
+F 3 "https://www.reichelt.de/smd-widerstand-1206-150-ohm-250-mw-1-rnd-1206-1-150-p183351.html?&trstct=pol_0&nbc=1" H 3100 6600 50  0001 C CNN
+	1    3100 6600
+	0    1    1    0   
+$EndComp
+$Comp
+L pspice:R R4
+U 1 1 5E3F1203
+P 3100 7000
+F 0 "R4" V 2895 7000 50  0000 C CNN
+F 1 "1k" V 2986 7000 50  0000 C CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder" H 3100 7000 50  0001 C CNN
+F 3 "https://www.reichelt.de/smd-widerstand-1206-150-ohm-250-mw-1-rnd-1206-1-150-p183351.html?&trstct=pol_0&nbc=1" H 3100 7000 50  0001 C CNN
+	1    3100 7000
+	0    1    1    0   
+$EndComp
+Text Label 4750 3950 0    50   ~ 0
+TXLED
+Text Label 4750 4100 0    50   ~ 0
+RXLED
+NoConn ~ 4750 4250
+NoConn ~ 4750 4400
+NoConn ~ 4750 4550
+NoConn ~ 3900 4550
+NoConn ~ 4750 3100
+NoConn ~ 4750 3400
+NoConn ~ 3900 4400
+NoConn ~ 3900 4250
+Text Label 3900 4100 2    50   ~ 0
+DTR
+Text Label 3900 3800 2    50   ~ 0
+RTS
+NoConn ~ 3900 3950
+Text Label 3900 3600 2    50   ~ 0
+RXD
+Text Label 3900 3450 2    50   ~ 0
+TXD
+Text Label 2850 7000 2    50   ~ 0
+RXLED
+Text Label 2850 6600 2    50   ~ 0
+TXLED
+Text Label 2850 5650 2    50   ~ 0
+CHRGLED
+Text Label 2850 6150 2    50   ~ 0
+FINLED
+$Comp
+L power:GND #PWR01
+U 1 1 5E3FAD70
+P 2250 3450
+F 0 "#PWR01" H 2250 3200 50  0001 C CNN
+F 1 "GND" V 2255 3322 50  0000 R CNN
+F 2 "" H 2250 3450 50  0001 C CNN
+F 3 "" H 2250 3450 50  0001 C CNN
+	1    2250 3450
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:+5V #PWR02
+U 1 1 5E3FB5D8
+P 2250 3550
+F 0 "#PWR02" H 2250 3400 50  0001 C CNN
+F 1 "+5V" V 2265 3678 50  0000 L CNN
+F 2 "" H 2250 3550 50  0001 C CNN
+F 3 "" H 2250 3550 50  0001 C CNN
+	1    2250 3550
+	0    1    1    0   
+$EndComp
+Text Label 2250 3650 0    50   ~ 0
+TXD
+Text Label 2250 3750 0    50   ~ 0
+RXD
+Text Label 2250 3850 0    50   ~ 0
+RTS
+Text Label 2250 3950 0    50   ~ 0
+DTR
+Text Label 2250 4150 0    50   ~ 0
+FINLED
+Text Label 2250 4050 0    50   ~ 0
+CHRGLED
+$Comp
+L conn:CONN_01X05 P2
+U 1 1 5E414AD0
+P 4250 6350
+F 0 "P2" H 4328 6391 50  0000 L CNN
+F 1 "LED" H 4328 6300 50  0000 L CNN
+F 2 "Connector_JST:JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical" H 4250 6350 50  0001 C CNN
+F 3 "https://www.reichelt.de/jst-stiftleiste-gerade-1x5-polig-xh-jst-xh5p-st-p185076.html?&trstct=pos_2&nbc=1" H 4250 6350 50  0001 C CNN
+	1    4250 6350
+	1    0    0    1   
+$EndComp
+$Comp
+L power:+5V #PWR03
+U 1 1 5E415DF9
+P 4050 6150
+F 0 "#PWR03" H 4050 6000 50  0001 C CNN
+F 1 "+5V" H 4065 6323 50  0000 C CNN
+F 2 "" H 4050 6150 50  0001 C CNN
+F 3 "" H 4050 6150 50  0001 C CNN
+	1    4050 6150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4050 6250 3900 6250
+Wire Wire Line
+	3900 6250 3900 5650
+Wire Wire Line
+	3900 5650 3350 5650
+Wire Wire Line
+	3750 6350 3750 6150
+Wire Wire Line
+	3750 6150 3350 6150
+Wire Wire Line
+	3750 6350 4050 6350
+Wire Wire Line
+	4050 6450 3650 6450
+Wire Wire Line
+	3650 6450 3650 6600
+Wire Wire Line
+	3650 6600 3350 6600
+Wire Wire Line
+	4050 6550 3850 6550
+Wire Wire Line
+	3850 6550 3850 7000
+Wire Wire Line
+	3850 7000 3350 7000
+$Comp
+L conn:CONN_01X01 P3
+U 1 1 5E41938C
+P 6250 4400
+F 0 "P3" V 6213 4312 50  0000 R CNN
+F 1 "CONN_01X01" V 6122 4312 50  0000 R CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad" H 6250 4400 50  0001 C CNN
+F 3 "" H 6250 4400 50  0000 C CNN
+	1    6250 4400
+	0    -1   -1   0   
+$EndComp
+$Comp
+L conn:CONN_01X01 P4
+U 1 1 5E41988A
+P 7000 4400
+F 0 "P4" V 6963 4312 50  0000 R CNN
+F 1 "CONN_01X01" V 6872 4312 50  0000 R CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad" H 7000 4400 50  0001 C CNN
+F 3 "" H 7000 4400 50  0000 C CNN
+	1    7000 4400
+	0    -1   -1   0   
+$EndComp
+$Comp
+L conn:CONN_01X01 P5
+U 1 1 5E419CE7
+P 7650 4400
+F 0 "P5" V 7613 4312 50  0000 R CNN
+F 1 "CONN_01X01" V 7522 4312 50  0000 R CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad" H 7650 4400 50  0001 C CNN
+F 3 "" H 7650 4400 50  0000 C CNN
+	1    7650 4400
+	0    -1   -1   0   
+$EndComp
+$Comp
+L conn:CONN_01X01 P6
+U 1 1 5E41A099
+P 8300 4400
+F 0 "P6" V 8263 4312 50  0000 R CNN
+F 1 "CONN_01X01" V 8172 4312 50  0000 R CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_DIN965_Pad" H 8300 4400 50  0001 C CNN
+F 3 "" H 8300 4400 50  0000 C CNN
+	1    8300 4400
+	0    -1   -1   0   
+$EndComp
+NoConn ~ 8300 4600
+NoConn ~ 7650 4600
+NoConn ~ 7000 4600
+NoConn ~ 6250 4600
+$EndSCHEMATC

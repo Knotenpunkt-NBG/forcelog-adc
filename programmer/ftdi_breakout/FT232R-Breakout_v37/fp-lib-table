@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name FT232R-Breakout_v37)(type KiCad)(uri "$(KIPRJMOD)/FT232R-Breakout_v37.pretty")(options "")(descr ""))
+)
