@@ -12,7 +12,7 @@
 #include "driver/ledc.h"
 
 #include "defines.h"
-#include "queues.h"
+#include "globals.h"
 
 void status_led(void *arg);
 

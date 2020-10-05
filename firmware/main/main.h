@@ -8,6 +8,8 @@
 #ifndef MAIN_MAIN_H_
 #define MAIN_MAIN_H_
 
+#define EXTERN
+
 #include <stdio.h>
 #include <string.h>
 #include <sys/param.h>
@@ -24,21 +26,23 @@
 #include <lwip/sockets.h>
 #include "sdkconfig.h"
 #include "driver/spi_master.h"
+#include "esp_netif.h"
 
 #include "adc_read.h"
-#include "queues.h"
-#include "events.h"
 #include "tcp_client.h"
 #include "status_led.h"
 #include "defines.h"
 #include "blink.h"
+#include "config.h"
+#include "wifi.h"
+#include "uart.h"
+#include "globals.h"
 
-nvs_handle_t handle_nvs;
 
-char* readUartString(char* out, int i_maxNumChars);
-int readUartCmdlet();
-void sendRgbLedStatus(int i);
-static void connectWifi(void *arg);
-static void serial_config(void *arg);
+
+
+
+
+
 
 #endif /* MAIN_MAIN_H_ */

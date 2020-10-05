@@ -104,3 +104,8 @@ void status_led(void *arg)	//TODO: defining different stati
 			vTaskDelay(100 / portTICK_PERIOD_MS);
 		}
 }
+
+void sendRgbLedStatus(int i)
+{
+	xQueueSend(q_rgb_status, &i, 100/portTICK_PERIOD_MS);
+}

@@ -16,24 +16,25 @@
 #include <lwip/sockets.h>
 #include "esp_wifi.h"
 #include <esp_event.h>
-
-#include "queues.h"
-#include "events.h"
 #include "defines.h"
+#include "globals.h"
+#include "config.h"
 
-struct sockaddr_in str_serverAddressConf;
-struct sockaddr_in str_serverAddressMes;
+struct timeval receiving_timeout;
 
-uint64_t ul_zeroTime;
+
 
 void t_tcpInit(void *arg);
 char* readTcpString(char* out, int i_maxNumChars, int sock);
-int readTcpCmdlet(int sock);
+int readTcpCmdlet(int sock, int *i_cmdlet);
 void sendAck (int sock);
+int sendKeepAlive (int sock);
+int connSockConf(void);
+int connSockMes	(void);
 
 void t_tcpSendMes (void * param);
-void t_tcpSendConf (void * param);
-void t_tcpRecvConf (void * param);
+void t_tcpConf (void * param);
 void t_tcpIdle (void* param);
+void t_udpWait (void* param);
 
 #endif /* MAIN_TCP_CLIENT_H_ */

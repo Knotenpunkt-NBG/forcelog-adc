@@ -20,12 +20,11 @@
 #include "driver/ledc.h"
 
 #include "defines.h"
-#include "events.h"
-#include "queues.h"
+#include "globals.h"
 
-nvs_handle_t h_nvs_Blink;
-TaskHandle_t ht_blinkRun;
-esp_timer_handle_t h_timerBlink;
+
+
+
 
 void callback_timerBlink(void* arg);
 void t_blinkIdle (void *arg);
@@ -42,7 +41,7 @@ struct {
 	uint8_t		b_isRunning;
 }struct_blinkConfig;
 
-ledc_timer_config_t ledc_timer;
+
 ledc_channel_config_t ledc_channel;
 
 void saveBlinkConf(void);

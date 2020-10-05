@@ -13,22 +13,14 @@
 #include "freertos/queue.h"
 #include "driver/gpio.h"
 #include <nvs_flash.h>
+#include "esp_log.h"
 
 #include "esp_timer.h"
 #include "sdkconfig.h"
 #include <unistd.h>
 
 #include "defines.h"
-#include "events.h"
-#include "queues.h"
-
-
-
-nvs_handle_t h_nvs_ADC;
-TaskHandle_t xHandle;
-esp_timer_handle_t periodic_timer;
-
-
+#include "globals.h"
 
 void periodic_timer_callback(void* arg);
 

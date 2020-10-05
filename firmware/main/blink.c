@@ -17,10 +17,13 @@ void t_blinkInit (void *arg)
 			.name = "periodicBlink"
 	};
 	esp_timer_create(&args_blinkTimer, &h_timerBlink);
-	struct_blinkConfig.ui_blinkDuration = 1000;
+	/*struct_blinkConfig.ui_blinkDuration = 1000;
 	struct_blinkConfig.ui_blinkPeriod = 2000;
 	struct_blinkConfig.ui_blinkFrequency = 1000;
 	struct_blinkConfig.b_blinkEnabled = 1;
+	struct_blinkConfig.ui_blinkBrightness = 1023;*/
+
+	struct_blinkConfig.ui_blinkFrequency = 1000;
 
 	ledc_timer.duty_resolution = LEDC_TIMER_10_BIT; // resolution of PWM duty
 	ledc_timer.freq_hz = struct_blinkConfig.ui_blinkFrequency;                    // frequency of PWM signal
@@ -37,6 +40,7 @@ void t_blinkInit (void *arg)
 	ledc_channel_config(&ledc_channel);
 
 	ht_blinkRun = NULL;
+	loadBlinkConf();
 	xTaskCreate(t_blinkIdle, "t_blinkIdle", 2048,NULL, 10, NULL);
 
 	vTaskDelete(NULL);
@@ -48,7 +52,8 @@ void t_blinkConfig (void *arg)
 	{
 		vTaskSuspend( ht_blinkRun );
 	}
-	uint32_t i_cmdlet= 0;
+	uint32_t i_cmdlet = 0;
+	uint64_t ul_temp = 0;
 	xQueueReceive(q_cmdlet, &i_cmdlet, portMAX_DELAY);
 	switch (i_cmdlet)
 	{
@@ -84,12 +89,9 @@ void t_blinkConfig (void *arg)
 		break;
 
 	case CMD_bper: //sets Blink Period
-		//const char mystring[] = "ack\n";
-		//sprintf((char*)mystring, "ack\n");
-		//xQueueSend(q_tcpConf, &mystring, 0);
-		xEventGroupSync(eg_adc, BIT_TCPQUEUE_READY, BIT_TCPQUEUE_READY,portMAX_DELAY);
-		xQueueReceive(q_conf, &struct_blinkConfig.ui_blinkPeriod, portMAX_DELAY);
-		if (struct_blinkConfig.b_isRunning ==1)
+		xQueueReceive(q_conf, &ul_temp, portMAX_DELAY);
+		struct_blinkConfig.ui_blinkPeriod = (uint32_t)ul_temp;
+		if (struct_blinkConfig.b_isRunning == 1 )
 		{
 			esp_timer_start_periodic(h_timerBlink, struct_blinkConfig.ui_blinkPeriod * 1000);
 			xEventGroupSetBits(eg_blink, BIT_BLINK_FIRE);
@@ -97,8 +99,9 @@ void t_blinkConfig (void *arg)
 		break;
 
 	case CMD_bdur: //sets blink duration
-		xQueueReceive(q_conf, &struct_blinkConfig.ui_blinkDuration, portMAX_DELAY);
-		if (struct_blinkConfig.b_isRunning ==1)
+		xQueueReceive(q_conf, &ul_temp, portMAX_DELAY);
+		struct_blinkConfig.ui_blinkDuration = (uint32_t)ul_temp;
+		if (struct_blinkConfig.b_isRunning == 1 )
 		{
 			esp_timer_start_periodic(h_timerBlink, struct_blinkConfig.ui_blinkPeriod * 1000);
 			xEventGroupSetBits(eg_blink, BIT_BLINK_FIRE);
@@ -106,8 +109,9 @@ void t_blinkConfig (void *arg)
 		break;
 
 	case CMD_bfrq: //sets blink pwm frequency
-		xQueueReceive(q_conf, &struct_blinkConfig.ui_blinkFrequency, portMAX_DELAY);
-		if (struct_blinkConfig.b_isRunning ==1)
+		xQueueReceive(q_conf, &ul_temp, portMAX_DELAY);
+		struct_blinkConfig.ui_blinkFrequency = (uint32_t)ul_temp;
+		if (struct_blinkConfig.b_isRunning == 1 )
 		{
 			esp_timer_start_periodic(h_timerBlink, struct_blinkConfig.ui_blinkPeriod * 1000);
 			xEventGroupSetBits(eg_blink, BIT_BLINK_FIRE);
@@ -115,7 +119,8 @@ void t_blinkConfig (void *arg)
 		break;
 
 	case CMD_bbrt: //sets blink pwm duty cycle (brightness)
-		xQueueReceive(q_conf, &struct_blinkConfig.ui_blinkBrightness, portMAX_DELAY);
+		xQueueReceive(q_conf, &ul_temp, portMAX_DELAY);
+		struct_blinkConfig.ui_blinkBrightness = (uint32_t)ul_temp;
 		if (struct_blinkConfig.b_isRunning ==1)
 		{
 			esp_timer_start_periodic(h_timerBlink, struct_blinkConfig.ui_blinkPeriod * 1000);
@@ -125,6 +130,11 @@ void t_blinkConfig (void *arg)
 
 	case CMD_save: //saves config to non volatile storage
 		saveBlinkConf();
+		if (struct_blinkConfig.b_isRunning ==1)
+		{
+			esp_timer_start_periodic(h_timerBlink, struct_blinkConfig.ui_blinkPeriod * 1000);
+			xEventGroupSetBits(eg_blink, BIT_BLINK_FIRE);
+		}
 		break;
 
 	case CMD_load: //loads config from non volatile storage
@@ -136,7 +146,7 @@ void t_blinkConfig (void *arg)
 		}
 		break;
 
-	case CMD_bsht: //single shot blink without tcp message
+	case CMD_blnk: //single shot blink without tcp message
 		ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, struct_blinkConfig.ui_blinkBrightness);
 		ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
 		vTaskDelay(struct_blinkConfig.ui_blinkDuration / portTICK_PERIOD_MS);
@@ -148,7 +158,7 @@ void t_blinkConfig (void *arg)
 		printf("inv\n");
 		break;
 	}
-
+	xEventGroupSetBits(eg_tcp, BIT_CONFIG_READY);
 	xTaskCreate(t_blinkIdle, "t_blinkIdle", 1024,NULL, 10, NULL);
 	vTaskDelete(NULL);
 }
@@ -171,7 +181,7 @@ void t_blinkRun(void *arg)
 		ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, struct_blinkConfig.ui_blinkBrightness);
 		ledc_update_duty(ledc_channel.speed_mode, ledc_channel.channel);
 		time_since_boot = esp_timer_get_time();
-		xQueueSend(q_time, &time_since_boot,  0);
+		xQueueSend(q_time_blink, &time_since_boot,  0);
 		xEventGroupSetBits(eg_tcp, BIT_SENDBLINK);
 		vTaskDelay(struct_blinkConfig.ui_blinkDuration / portTICK_PERIOD_MS);
 		ledc_set_duty(ledc_channel.speed_mode, ledc_channel.channel, 0);
@@ -184,8 +194,9 @@ void loadBlinkConf(void)
 	//Loading Config
 	nvs_open("nvs_Blink", NVS_READWRITE, &h_nvs_Blink);
 	nvs_get_u32(h_nvs_Blink, "k_blinkDuration", &struct_blinkConfig.ui_blinkDuration);
-	nvs_get_u32(h_nvs_Blink, "k_blinkPeriod", &struct_blinkConfig.ui_blinkDuration);
+	nvs_get_u32(h_nvs_Blink, "k_blinkPeriod", &struct_blinkConfig.ui_blinkPeriod);
 	nvs_get_u8(h_nvs_Blink, "k_blinkEnabled", &struct_blinkConfig.b_blinkEnabled);
+	nvs_get_u32(h_nvs_Blink, "k_blinkBright", &struct_blinkConfig.ui_blinkBrightness);
 	nvs_close(h_nvs_Blink);
 }
 
@@ -196,6 +207,7 @@ void saveBlinkConf(void)
 	nvs_set_u32(h_nvs_Blink, "k_blinkDuration", struct_blinkConfig.ui_blinkDuration);
 	nvs_set_u32(h_nvs_Blink, "k_blinkPeriod", struct_blinkConfig.ui_blinkPeriod);
 	nvs_set_u8(h_nvs_Blink, "k_blinkEnabled", struct_blinkConfig.b_blinkEnabled);
+	nvs_set_u32(h_nvs_Blink, "k_blinkBright", struct_blinkConfig.ui_blinkBrightness);
 	nvs_commit(h_nvs_Blink);
 	nvs_close(h_nvs_Blink);
 }

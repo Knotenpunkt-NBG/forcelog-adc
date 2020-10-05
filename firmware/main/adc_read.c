@@ -52,7 +52,7 @@ void t_ADCconfig (void *arg)
 			esp_timer_start_periodic(periodic_timer, struct_ADCConf.ul_period);
 		}
 		break;
-	case CMD_cali:
+	case CMD_rcal:
 		printf("calibrating\n");
 		xQueueReceive(q_conf, &d_cal, portMAX_DELAY);
 		struct_ADCConf.d_calValue = calADC(d_cal);
@@ -64,6 +64,7 @@ void t_ADCconfig (void *arg)
 		}
 		break;
 	case CMD_strt:
+	case CMD_wait:
 		printf("Starting..\n");
 		if (xHandle == NULL)
 		{
@@ -92,6 +93,12 @@ void t_ADCconfig (void *arg)
 			esp_timer_start_periodic(periodic_timer, struct_ADCConf.ul_period);
 		}
 		break;
+
+	case CMD_save:
+		break;
+
+	case CMD_load:
+			break;
 	default:
 		printf("inv\n");
 		break;
@@ -104,18 +111,20 @@ void t_ADCidle (void *arg)
 {
 	xEventGroupWaitBits(eg_adc, BIT_ADC_BREAK, true, true, portMAX_DELAY);
 	esp_timer_stop(periodic_timer);
-	printf("breaking\n");
+	ESP_LOGD(TAG_ADC, "breaking ADCIdle");
 	xTaskCreate(t_ADCconfig, "t_ADCconfig", 2048, NULL, 10, NULL);
 	vTaskDelete(NULL);
 }
 
 void t_ADCrun(void *arg)
 {
+	xEventGroupWaitBits(eg_adc, BIT_ADC_WAIT, true, true, portMAX_DELAY);
+	ESP_LOGI(TAG_ADC, "recording");
 	while (1)
 	{
 		xEventGroupWaitBits(eg_adc,BIT_ADC_FIRE,true,true,portMAX_DELAY);
 		uint64_t time_since_boot = esp_timer_get_time();
-		xQueueSend(q_time, &time_since_boot,  0);
+		xQueueSend(q_time_mes, &time_since_boot,  0);
 		double d_momValue = ((double) readAdc() - struct_ADCConf.ui_tareValue) / struct_ADCConf.d_calValue;
 		xQueueSend(q_measurement, &d_momValue,  0);
 		xEventGroupSetBits(eg_tcp, BIT_SENDMES);
@@ -212,7 +221,6 @@ void saveAdcConf(void)
 
 void periodic_timer_callback(void* arg)
 {
-
 	xEventGroupSetBits(eg_adc, BIT_ADC_FIRE);
 }
 
