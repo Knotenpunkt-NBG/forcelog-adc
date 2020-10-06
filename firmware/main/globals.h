@@ -23,12 +23,23 @@
 #include "esp_log.h"
 
 //structs wifi
-EXTERN wifi_config_t sta_config;
+//EXTERN wifi_config_t sta_config;
 
 //structs tcp
 EXTERN struct sockaddr_in str_serverAddressConf;
 EXTERN struct sockaddr_in str_serverAddressMes;
 EXTERN struct sockaddr_in str_serverAddressUdp;
+
+//structs blink
+EXTERN struct stu_blinkconfig{
+	uint32_t	ui_blinkPeriod;
+	uint32_t	ui_blinkDuration;
+	uint32_t	ui_blinkFrequency;
+	uint8_t		b_blinkEnabled;
+	uint32_t	ui_blinkBrightness;
+	uint8_t		b_isRunning;
+}struct_blinkConfig;
+ledc_channel_config_t stu_blink_channel;
 
 //timing
 EXTERN uint64_t ul_zeroTime;
@@ -41,7 +52,6 @@ EventGroupHandle_t eg_tcpRun;
 EventGroupHandle_t eg_uart;
 EventGroupHandle_t eg_blink;
 
-
 //Queues
 QueueHandle_t q_measurement;
 QueueHandle_t q_time_mes;
@@ -53,9 +63,10 @@ QueueHandle_t q_cmdlet;
 
 //Semaphores
 SemaphoreHandle_t xs_sockets;
+SemaphoreHandle_t hs_blinkConfig;
 
-//Non Volatie Storage
-nvs_handle_t handle_nvs;
+//Non Volatile Storage
+nvs_handle_t hnvs_conf_0;
 nvs_handle_t h_nvs_Blink;
 nvs_handle_t h_nvs_ADC;
 
@@ -68,6 +79,9 @@ ledc_timer_config_t ledc_timer;
 TaskHandle_t ht_blinkRun;
 TaskHandle_t xHandle;
 TaskHandle_t h_t_tcpIdle;
+TaskHandle_t ht_tcpSendMes;
+TaskHandle_t ht_tcpConf;
+TaskHandle_t ht_udpWait;
 
 //Tags
 static const char* TAG_ADC = "ADC";
@@ -76,6 +90,9 @@ static const char* TAG_UDP = "UDP";
 
 //Functions
 EXTERN void	sendRgbLedStatus(int i);
-EXTERN void connectWifi(void *arg);
+
+
+//Tasks
+EXTERN void t_blinkRun(void *arg);
 
 #endif /* MAIN_GLOBVARS_H_ */

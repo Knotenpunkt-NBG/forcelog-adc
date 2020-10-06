@@ -11,6 +11,9 @@
 
 void t_tcpInit(void *arg)
 {
+	printf("WAITING WIFI WAITING WIFI WAITING WIFI\n");
+	xEventGroupWaitBits(s_wifi_event_group,WIFI_CONNECTED_BIT,	true,true,portMAX_DELAY);
+	printf("STARTING TCP STARTING TCP STARTING TCP\n");
 	ul_zeroTime = 0;
 	receiving_timeout.tv_sec = 0;
 	receiving_timeout.tv_usec = 5000;
@@ -19,11 +22,9 @@ void t_tcpInit(void *arg)
 	str_serverAddressUdp.sin_family			=	AF_INET;
 	str_serverAddressUdp.sin_port			=	htons(4244);
 	str_serverAddressUdp.sin_addr.s_addr	=	htonl(INADDR_ANY);
-	xEventGroupWaitBits(s_wifi_event_group,	WIFI_CONNECTED_BIT,	true,true,portMAX_DELAY);
+
 	int sock_mes = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	//int sock_conf = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	printf("socket mes:  %d\n", sock_mes);
-	//printf("socket conf:  %d\n", sock_conf);
 
 	int i = 0;
 	while (connect(sock_mes, (struct sockaddr *)&str_serverAddressMes, sizeof(struct sockaddr_in)) == -1)
@@ -40,9 +41,9 @@ void t_tcpInit(void *arg)
 		vTaskDelay(10 / portTICK_PERIOD_MS);
 	}
 
-	xTaskCreate	(t_tcpSendMes,	"t_tcpSendMes",		4096,(void*)sock_mes,	10,NULL);
-	xTaskCreate	(t_tcpConf, "t_tcpConf",	4096,NULL	,10,		NULL);
-	xTaskCreate	(t_tcpIdle,		"t_tcpIdle",		1024,(void*)sock_mes,	10,h_t_tcpIdle);
+	xTaskCreate	(t_tcpSendMes,	"t_tcpSendMes",		4096,	(void*)sock_mes,	10,		NULL);
+	xTaskCreate	(t_tcpConf,		"t_tcpConf",		4096,	NULL	,			10,		NULL);
+	xTaskCreate	(t_tcpIdle,		"t_tcpIdle",		1024,	(void*)sock_mes,	10,		h_t_tcpIdle);
 	xEventGroupWaitBits(eg_tcp,	BIT_TCPSENDMES_READY,	true,true,portMAX_DELAY);
 	xEventGroupWaitBits(eg_tcp,	BIT_TCPSENDCONF_READY,	true,true,portMAX_DELAY);
 	xEventGroupWaitBits(eg_tcp,	BIT_TCPIDLE_READY,		true,true,portMAX_DELAY);
@@ -156,12 +157,16 @@ void t_tcpConf (void* param)
 			ESP_LOGV(TAG_TCP, "Config CMDlet:%d\n", i_cmdlet);
 			switch (i_cmdlet)
 			{
+			case CMD_man: //inquires manual
+				break;
+			case CMD_info: //inquires all the information
+				break;
 			//SINGLE INSTRUCTION CMDLETS
 			case CMD_tare: //tare
 			case CMD_stop: //stops the sampling and kills the tasks
 			case CMD_strt: //starts the adc measurements as soon as socket mes is connected without wating for an trigger (udp or pin)
 			case CMD_benb: //enables blink
-			case CMD_blnk: //single shot blink without tcp message
+			case CMD_blnk: //single shot blink without TCP message
 			case CMD_zero: //sets the momentary time to zero
 			case CMD_bdis: //disables blink
 			case CMD_save: //saves config of ADC and blink to non volatile storage
@@ -172,6 +177,7 @@ void t_tcpConf (void* param)
 			case CMD_logd: //Sets logging to debug
 			case CMD_logv: //Sets logging to verbose (lowest)
 			case CMD_scal: //starts calibration once a known weight has been placed
+			case CMD_conn: //connects to the access point
 				fConfig(i_cmdlet, NULL);
 				sendAck(sock);
 				break;
@@ -181,9 +187,16 @@ void t_tcpConf (void* param)
 			case CMD_bdur: //duration of blink
 			case CMD_bper: //period of blink
 			case CMD_bfrq: //sets frequency of blink (1-78125Hz)
-			case CMD_mper: //sets the sampleperiod in us
+			case CMD_mper: //sets the sample period in us
 			case CMD_vcal: //reads calibration value from server and writes it to adc
 			case CMD_rcal: //calibrates with an known weight and sends the factor back to the server
+			case CMD_ssid: //SSID of access point
+			case CMD_pass: //pass for access point
+			case CMD_ipco: //IP for configuration server
+			case CMD_ipme: //IP for logging server
+			case CMD_poco: //port for configuration server
+			case CMD_pome: //port for logging server
+			case CMD_potr: //port for UDP trigger
 				if (i_flag == 0)
 				{
 					sendAck(sock);
@@ -243,6 +256,7 @@ void t_udpWait (void* param)
 		readTcpCmdlet(sock_udp, &i_cmdlet);
 	}
 	xEventGroupSetBits(eg_adc, BIT_ADC_WAIT);
+	esp_timer_start_periodic(h_timerBlink, struct_blinkConfig.ui_blinkPeriod * 1000);
 	ESP_LOGI(TAG_UDP, "UDP trigger received");
 	shutdown(sock_udp, 0);
 	close(sock_udp);
@@ -315,7 +329,6 @@ int connSockConf (void)
 	receiving_timeout.tv_sec = 0;
 	receiving_timeout.tv_usec = 5000;
 	inet_ntop(AF_INET, &str_serverAddressConf.sin_addr.s_addr, (char*)str, sizeof(str));
-	//inet_ntop(str_serverAddressConf.sin_addr.s_addr, buf, *str, INET6_ADDRSTRLEN) == NULL)
 	ESP_LOGI(TAG_TCP, "Connecting to Socket Conf at  %s:%d\n", str , ntohs(str_serverAddressConf.sin_port));
 	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	while (connect(sock, (struct sockaddr *)&str_serverAddressConf, sizeof(struct sockaddr_in)) < 0)

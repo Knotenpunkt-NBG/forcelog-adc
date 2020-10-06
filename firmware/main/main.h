@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/param.h>
-#include <esp_event.h>
+#include "esp_event.h"
 #include <nvs_flash.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -27,6 +27,8 @@
 #include "sdkconfig.h"
 #include "driver/spi_master.h"
 #include "esp_netif.h"
+#include "lwip/err.h"
+#include "lwip/sys.h"
 
 #include "adc_read.h"
 #include "tcp_client.h"
@@ -35,13 +37,10 @@
 #include "blink.h"
 #include "config.h"
 #include "wifi.h"
-#include "uart.h"
+#include "serial.h"
 #include "globals.h"
 
-
-
-
-
+//void connectWifi(void *arg);
 
 
 

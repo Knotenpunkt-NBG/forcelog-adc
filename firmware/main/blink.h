@@ -23,26 +23,12 @@
 #include "globals.h"
 
 
-
-
-
 void callback_timerBlink(void* arg);
-void t_blinkIdle (void *arg);
-void t_blinkRun(void *arg);
-void t_blinkConfig (void *arg);
+
 void t_blinkInit (void *arg);
 
-struct {
-	uint32_t	ui_blinkPeriod;
-	uint32_t	ui_blinkDuration;
-	uint32_t	ui_blinkFrequency;
-	uint8_t		b_blinkEnabled;
-	uint32_t	ui_blinkBrightness;
-	uint8_t		b_isRunning;
-}struct_blinkConfig;
 
 
-ledc_channel_config_t ledc_channel;
 
 void saveBlinkConf(void);
 void loadBlinkConf(void);

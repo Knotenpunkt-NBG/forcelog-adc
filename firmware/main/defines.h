@@ -82,6 +82,7 @@
 #define BIT_BLINK_FIRE			BIT0
 #define BIT_BLINK_BREAK			BIT1
 #define BIT_BLINK_START			BIT2
+#define BIT_BLINK_WAIT			BIT3
 
 //Events UART
 #define BIT_CONFIG_FINISHED		BIT0
@@ -119,6 +120,18 @@
 #define CMD_logi	('l' << 8 * 3) + ('o' << 8 * 2) + ('g' << 8 * 1) + ('i' << 8 * 0)
 #define CMD_logd	('l' << 8 * 3) + ('o' << 8 * 2) + ('g' << 8 * 1) + ('d' << 8 * 0)
 #define CMD_logv	('l' << 8 * 3) + ('o' << 8 * 2) + ('g' << 8 * 1) + ('v' << 8 * 0)
+
+#define CMD_man		('m' << 8 * 3) + ('a' << 8 * 2) + ('n' << 8 * 1) + (0x00 << 8 * 0)
+#define CMD_info		('i' << 8 * 3) + ('n' << 8 * 2) + ('f' << 8 * 1) + ('o' << 8 * 0)
+
+#define CMD_conn	('c' << 8 * 3) + ('o' << 8 * 2) + ('n' << 8 * 1) + ('n' << 8 * 0)
+#define CMD_ssid	('s' << 8 * 3) + ('s' << 8 * 2) + ('i' << 8 * 1) + ('d' << 8 * 0)
+#define CMD_pass	('p' << 8 * 3) + ('a' << 8 * 2) + ('s' << 8 * 1) + ('s' << 8 * 0)
+#define CMD_ipco	('i' << 8 * 3) + ('p' << 8 * 2) + ('c' << 8 * 1) + ('o' << 8 * 0)
+#define CMD_ipme	('i' << 8 * 3) + ('p' << 8 * 2) + ('m' << 8 * 1) + ('e' << 8 * 0)
+#define CMD_poco	('p' << 8 * 3) + ('o' << 8 * 2) + ('c' << 8 * 1) + ('o' << 8 * 0)
+#define CMD_pome	('p' << 8 * 3) + ('o' << 8 * 2) + ('m' << 8 * 1) + ('e' << 8 * 0)
+#define CMD_potr	('p' << 8 * 3) + ('o' << 8 * 2) + ('t' << 8 * 1) + ('r' << 8 * 0)
 
 //ADC defines
 #define ADC_TARE_CYCLES		10
