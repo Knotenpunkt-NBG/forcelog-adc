@@ -1,0 +1,2 @@
+idf_component_register(SRCS "main.c" "adc.c" "com_tcp.c" "status_led.c" "blink.c" "config.c" "wifi.c" "com_serial.c" "trigger.c" "batmon.c" "temp_int.c" "local_storage.c"
+                    INCLUDE_DIRS "")

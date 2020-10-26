@@ -5,8 +5,8 @@
  *      Author: lor
  */
 
-#ifndef MAIN_SERIAL_H_
-#define MAIN_SERIAL_H_
+#ifndef MAIN_COM_SERIAL_H_
+#define MAIN_COM_SERIAL_H_
 
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
@@ -20,13 +20,13 @@
 #include "defines.h"
 
 
-void serial_config(void *arg);
-void serial_idle(void *arg);
 
-void serial_init();
+void tserialRun(void *arg);
+
+void fserialInit(void);
 void	readUartString	(char* out, int i_maxNumChars);
 int		readUartCmdlet	(int *i_cmdlet);
 
-extern uart_config_t uart_config;
+//extern uart_config_t uart_config;
 
-#endif /* MAIN_SERIAL_H_ */
+#endif /* MAIN_COM_SERIAL_H_ */

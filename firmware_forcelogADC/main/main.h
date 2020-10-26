@@ -29,19 +29,23 @@
 #include "esp_netif.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "freertos/semphr.h"
 
-#include "adc_read.h"
-#include "tcp_client.h"
+#include "adc.h"
+#include "com_tcp.h"
 #include "status_led.h"
 #include "defines.h"
 #include "blink.h"
 #include "config.h"
 #include "wifi.h"
-#include "serial.h"
+#include "trigger.h"
+#include "com_serial.h"
 #include "globals.h"
+#include "batmon.h"
+#include "temp_int.h"
+#include "local_storage.h"
 
-//void connectWifi(void *arg);
 
-
+uint8_t fcheckModuleId ();
 
 #endif /* MAIN_MAIN_H_ */
