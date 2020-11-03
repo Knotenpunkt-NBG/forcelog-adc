@@ -11,6 +11,8 @@ void app_main()
 	//Creating Semaphores
 	hs_blinkConfig = xSemaphoreCreateBinary();
 	hs_wifiConfig = xSemaphoreCreateBinary();
+	hs_pointerQueue = xSemaphoreCreateBinary();
+	xSemaphoreGive(hs_pointerQueue);
 
 	gpio_config_t io_conf;
 	io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
@@ -29,14 +31,22 @@ void app_main()
 
 	nvs_flash_init();
 
-	//Creating queues
-	q_rgb_status 	=	xQueueCreate(	10, sizeof(uint32_t));
-	q_measurement 	=	xQueueCreate(	10, sizeof(double));
-	q_time_mes		=	xQueueCreate(	10, sizeof(uint64_t));
-	q_time_blink	=	xQueueCreate(	3,	sizeof(uint64_t));
-	q_tcpConf		=	xQueueCreate(	10,	sizeof(char *));
-	q_temperature	=	xQueueCreate(	3,	sizeof(float));
-	q_time_temp		=	xQueueCreate(	3,	sizeof(uint64_t));
+	//Creating queues q_time_temp
+	q_rgb_status 		=	xQueueCreate(	10, sizeof(uint32_t));
+	q_tcpConf			=	xQueueCreate(	10,	sizeof(char *));
+	q_pointer			=	xQueueCreate(	1,	sizeof(int *));
+
+	q_value_mes_tcp		=	xQueueCreate(	10, sizeof(double));
+	q_time_mes_tcp		=	xQueueCreate(	10, sizeof(uint64_t));
+	q_time_blink_tcp	=	xQueueCreate(	3,	sizeof(uint64_t));
+	q_value_tempint_tcp	=	xQueueCreate(	3,	sizeof(float));
+	q_time_tempint_tcp	=	xQueueCreate(	3,	sizeof(uint64_t));
+
+	q_value_mes_sd		=	xQueueCreate(	10, sizeof(double));
+	q_time_mes_sd		=	xQueueCreate(	10, sizeof(uint64_t));
+	q_time_blink_sd		=	xQueueCreate(	3,	sizeof(uint64_t));
+	q_value_tempint_sd	=	xQueueCreate(	3,	sizeof(float));
+	q_time_tempint_sd	=	xQueueCreate(	3,	sizeof(uint64_t));
 
 
 	//Creating Event Groups
@@ -47,7 +57,7 @@ void app_main()
 	eg_tempInt	=	xEventGroupCreate();
 
 	//Loading Config
-	fLoadConfig(hnvs_conf_0);
+
 
 	// Create a 1-Wire bus, using the RMT timeslot driver
 	owb_rmt_driver_info rmt_driver_info;
@@ -62,16 +72,7 @@ void app_main()
 	}
 
 
-	//Creating tasks
-	fbatMonInit();
-	fserialInit();
-	xTaskCreate(status_led,		"status_led",		2048, NULL, 10, NULL);
-	fblinkInit();
-	fWifiInit();
-	ftcpInit();
-	xTaskCreate	(f_tempIntInit,		"f_tempIntInit",		2048,	NULL	,	10,		NULL);
-
-	//f_tempIntInit();
+	//INITIALISING TASKS
 	gb_moduleID = fcheckModuleId();
 	if (gb_moduleID == (uint8_t)MODULE_ID_HX711)
 	{
@@ -82,8 +83,30 @@ void app_main()
 	{
 		ESP_LOGE(TAG_CONF, "ADC MODULE MISMATCH! MODULE(0x%02X) does not equal Firmware(0x%02X)\n", gb_moduleID,MODULE_ID_HX711);
 	}
+	fstorageInit();
+	fserialInit();
+	xTaskCreate(status_led,		"status_led",		2048, NULL, 10, NULL);
 
-	flocalStorageInit();
+	fWifiInit();
+	ftcpInit();
+	fblinkInit();
+	fbatMonInit();
+	ftempIntInit();
+
+	//STARTING TASKS
+	vTaskResume(ht_storageRun);
+	vTaskResume(ht_blinkRun);
+	vTaskResume(ht_tcpMes);
+	vTaskResume(ht_tcpConf);
+//	vTaskResume(ht_adcRun);
+	vTaskResume(ht_wifiRun);
+	vTaskResume(ht_batmonRun);
+	vTaskResume(ht_serialRun);
+//	vTaskResume(ht_t_tempIntRun);
+
+//	fLoadConfig(hnvs_conf_0);
+
+
 	while(1)
 		vTaskDelay(100);
 }

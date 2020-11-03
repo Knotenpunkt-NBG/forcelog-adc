@@ -21,18 +21,20 @@ void fserialInit(void)
 
 	uart_driver_install(0, 1024 * 2, 0, 0, NULL, 0);
 	uart_param_config(0, &uart_config);
-	xTaskCreate(tserialRun,	"serial_config",	4096, NULL, 10, NULL);
+	xTaskCreate(tserialRun,	"serial_config",	4096, NULL, 10, &ht_serialRun);
 }
 
 void tserialRun(void *arg)
 {
+	vTaskSuspend(NULL);
+	ESP_LOGD(TAG_UART, "tserialRun STARTED");
 	int i_cmdlet = 0;
 	int i_flagConfig = 0;
 	char rx_buffer[64];
 	int i_flag = 0;
 	while (1)
 	{
-		i_flag = readUartCmdlet(&i_cmdlet);
+		i_flag = freadUartCmdlet(&i_cmdlet);
 		ESP_LOGD(TAG_UART, "i_cmdlet:%d", i_cmdlet);
 
 		switch (i_cmdlet)
@@ -51,12 +53,11 @@ void tserialRun(void *arg)
 			{
 				if (i_flag == 0)
 					printf(":ack:\n");
-				readUartString((char*)rx_buffer, 50);
+				freadUartString((char*)rx_buffer, 50);
 			}
 			i_flagConfig = fConfig(i_cmdlet, rx_buffer);
 			if (i_flagConfig)
 			{
-				ESP_LOGD(TAG_TCP, "CONFIG FLAG:%d\n", i_flagConfig);
 				printf((char*)rx_buffer);
 			}
 			i_cmdlet = 0;
@@ -65,7 +66,7 @@ void tserialRun(void *arg)
 	}
 }
 
-int readUartCmdlet(int *i_cmdlet)
+int freadUartCmdlet(int *i_cmdlet)
 {
 	int i_flag = 0;
 	*i_cmdlet = 0;
@@ -97,7 +98,7 @@ int readUartCmdlet(int *i_cmdlet)
 }
 
 
-void readUartString(char* out, int i_maxNumChars) {
+void freadUartString(char* out, int i_maxNumChars) {
 	uint8_t *data = (uint8_t *) malloc(i_maxNumChars);
 	while(1)
 	{

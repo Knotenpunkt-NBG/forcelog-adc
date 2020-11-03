@@ -12,10 +12,10 @@ void t_udpWait (void* param)
 	ESP_LOGI(TAG_UDP, "Waiting for UDP trigger");
 	int sock_udp = socket (AF_INET, SOCK_DGRAM, 0);
 	int i_cmdlet = 0;
-	int err = bind(sock_udp, (struct sockaddr *)&stu_serverAddressUdp, sizeof(struct sockaddr_in));
-	if (err < 0) {
-		ESP_LOGI(TAG_UDP, "Socket unable to bind: errno %d", errno);
-	}
+//	int err = bind(sock_udp, (struct sockaddr *)&stu_serverAddressUdp, sizeof(struct sockaddr_in));
+//	if (err < 0) {
+//		ESP_LOGI(TAG_UDP, "Socket unable to bind: errno %d", errno);
+//	}
 	while (i_cmdlet != CMD_rec)
 	{
 		fcheckTrigger(sock_udp, &i_cmdlet);

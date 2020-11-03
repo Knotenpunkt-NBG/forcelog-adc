@@ -16,7 +16,7 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_tare: //TARE: sets the momentary value to zero
 		if (!b_recording)
 		{
-			gui_tareValue = ftareADC();
+			uint32_t gui_tareValue = ftareADC();
 			sprintf((char*)str_value, "|tare|%d|\t\tOK, tare successful|\n", gui_tareValue);
 			i_flag = 1;
 		}
@@ -29,7 +29,7 @@ int fConfig (int i_cmdlet, char* str_value)
 		if (!b_recording)
 		{
 			double d_weight = atof((char*)str_value);
-			gd_calValue = fcalADC(d_weight);
+			double gd_calValue = fcalADC(d_weight, 0);
 			sprintf((char*)str_value, "|cali|%.*f|\t\tOK, calibration finished|\n", 20, gd_calValue);
 			i_flag = 1;
 		}
@@ -41,7 +41,7 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_vcal: //CALibration Value: reads calibration value from server and writes it to adc
 		if (!b_recording)
 		{
-			gd_calValue = atof((char*)str_value);
+			double gd_calValue = atof((char*)str_value);
 			sprintf((char*)str_value, "|vcal|%.*f|\t\tOK, calibration set|\n",20, gd_calValue);
 			i_flag = 1;
 		}
@@ -49,39 +49,84 @@ int fConfig (int i_cmdlet, char* str_value)
 			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot set calibration value while recording!|\n", ERR_RECORDING);
 		break;
 
-	case CMD_peek: //STaRT: starts the adc measurements as soon as socket mes is connected without waiting for an trigger (udp or pin)
+	case CMD_peek: //PEEK: starts the adc measurements as soon as socket mes is connected without waiting for an trigger (udp or pin)
 		if (!b_recording)
 		{
 			b_recording = 1;
-			xEventGroupSetBits(eg_adc, BIT_ADC_START);
-			xEventGroupSetBits(eg_blink, BIT_BLINK_START);
-			vTaskDelay(10 / portTICK_PERIOD_MS);
-			xEventGroupSetBits(eg_adc, BIT_ADC_WAIT);
-			xEventGroupSetBits(eg_blink, BIT_BLINK_WAIT);
+
+//			while(xTaskNotify(ht_adcRun,CMD_wait,eSetValueWithoutOverwrite) != pdPASS)
+//				vTaskDelay(1/ portTICK_PERIOD_MS);
+//			while(xTaskNotify(ht_blinkRun,CMD_wait,eSetValueWithoutOverwrite) != pdPASS)
+//				vTaskDelay(1/ portTICK_PERIOD_MS);
+//			while(xTaskNotify(ht_tempIntRun,CMD_wait,eSetValueWithoutOverwrite) != pdPASS)
+//				vTaskDelay(1/ portTICK_PERIOD_MS);
+//			while(xTaskNotify(ht_storageRun,CMD_wait,eSetValueWithoutOverwrite) != pdPASS)
+//				vTaskDelay(1/ portTICK_PERIOD_MS);
+
+			while(xTaskNotify(ht_tcpMes,CMD_peek,eSetValueWithoutOverwrite) != pdPASS)
+							vTaskDelay(1/ portTICK_PERIOD_MS);
+
+//			while(xTaskNotify(ht_adcRun,CMD_trig,eSetValueWithoutOverwrite) != pdPASS)
+//				vTaskDelay(1/ portTICK_PERIOD_MS);
+//			while(xTaskNotify(ht_blinkRun,CMD_trig,eSetValueWithoutOverwrite) != pdPASS)
+//				vTaskDelay(1/ portTICK_PERIOD_MS);
+//			while(xTaskNotify(ht_tempIntRun,CMD_trig,eSetValueWithoutOverwrite) != pdPASS)
+//				vTaskDelay(1/ portTICK_PERIOD_MS);
+//			while(xTaskNotify(ht_storageRun,CMD_trig,eSetValueWithoutOverwrite) != pdPASS)
+//				vTaskDelay(1/ portTICK_PERIOD_MS);
+
 			sprintf((char*)str_value, "|peek|1|\t\tOK, started peeking|\n");
 			i_flag = 1;
 		}
 		else
-			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot peek while recording!|\n", ERR_RECORDING);
+			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot peek while recording or peeking!|\n", ERR_RECORDING);
 		break;
+	case CMD_strt: //STaRT: starts without wating for trigger
+	{
+		ESP_LOGD(TAG_CONF, "CMDlet:start\n");
+		if (b_recording)
+		{
+			ESP_LOGD(TAG_CONF, "SENDING Notifications\n");
+			b_recording = 1;
+			while(xTaskNotify(ht_adcRun,CMD_wait,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_blinkRun,CMD_wait,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_tempIntRun,CMD_wait,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_storageRun,CMD_wait,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
 
+			while(xTaskNotify(ht_adcRun,CMD_trig,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_blinkRun,CMD_trig,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_tempIntRun,CMD_trig,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_storageRun,CMD_trig,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			sprintf((char*)str_value, "|stop|1|\t\tOK, stopped recording|\n");
+			i_flag = 1;
+		}
+		else
+			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot stop while in idle!|\n", ERR_RECORDING);
+	}
+		break;
 	case CMD_stop: //STOP: stops the sampling, kills the tasks and recreates them
 	{
 		ESP_LOGD(TAG_CONF, "CMDlet:stop\n");
 		if (b_recording)
 		{
-			ESP_LOGD(TAG_CONF, "SENDING EVENTS\n");
+			ESP_LOGD(TAG_CONF, "SENDING Notifications\n");
 			b_recording = 0;
-			xEventGroupSetBits(eg_adc, BIT_ADC_FIRE);
-			xEventGroupSetBits(eg_blink, BIT_BLINK_FIRE);
-			xEventGroupWaitBits(eg_adc, BIT_ADC_STOP, true, true, portMAX_DELAY);
-			xEventGroupWaitBits(eg_blink, BIT_BLINK_STOP, true, true, portMAX_DELAY);
-
-			ESP_LOGD(TAG_CONF, "STOPPING TIMERS\n");
-			xTimerStop(h_timerBlink, portMAX_DELAY);
-			xTimerDelete(h_timerBlink, portMAX_DELAY);
-			esp_timer_stop(htim_periodicAdc);
-			vTaskDelay(50 / portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_adcRun,CMD_stop,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_blinkRun,CMD_stop,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_tempIntRun,CMD_stop,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			while(xTaskNotify(ht_storageRun,CMD_stop,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
 			sprintf((char*)str_value, "|stop|1|\t\tOK, stopped recording|\n");
 			i_flag = 1;
 		}
@@ -90,6 +135,17 @@ int fConfig (int i_cmdlet, char* str_value)
 	}
 	break;
 
+	case CMD_mkfs: //formats SD card
+		if (!b_recording)
+		{
+			while(xTaskNotify(ht_storageRun,CMD_mkfs,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			sprintf((char*)str_value, "|mkfs|1|\t\tOK, formatting SD card|\n");
+			i_flag = 1;
+		}
+		else
+			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot wait while recording!|\n", ERR_RECORDING);
+		break;
 	case CMD_wait: //WAIT: starts the adc in an fast to trigger status until trigger (udp or pin) is received
 		if (!b_recording)
 		{
@@ -108,8 +164,12 @@ int fConfig (int i_cmdlet, char* str_value)
 			uint64_t ul_mesPeriod = atoll((char*)str_value);
 			if (fsetADCSpeed(ul_mesPeriod))
 			{
-				gul_adcPeriod = ul_mesPeriod;
-				sprintf((char*)str_value, "|mper|%"PRIu64"|\t\tOK, ADC period set to x us|\n", gul_adcPeriod);
+				uint64_t* ptr_ull = malloc(sizeof(uint64_t));
+				*ptr_ull = ul_mesPeriod;
+				while(xTaskNotify(ht_adcRun,CMD_mper,eSetValueWithoutOverwrite) != pdPASS)
+					vTaskDelay(1/ portTICK_PERIOD_MS);
+				xQueueSend(q_pointer,&ptr_ull, portMAX_DELAY);
+				sprintf((char*)str_value, "|mper|%"PRIu64"|\t\tOK, ADC period set to x us|\n", ul_mesPeriod);
 				i_flag = 1;
 			}
 			else
@@ -124,13 +184,15 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_bper: //Blink PERiod: period of blink
 		if (!b_recording)
 		{
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
 			uint32_t ui_blinkPeriod = atoi((char*)str_value);
-			if (ui_blinkPeriod > gui_blinkDuration)
-			{
-				gui_blinkPeriod = ui_blinkPeriod;
-				sprintf((char*)str_value, "|bper|%d|\t\tOK, blink period set to x ms|\n", gui_blinkPeriod);
-				i_flag = 1;
-			}
+			while(xTaskNotify(ht_blinkRun,CMD_bper,eSetValueWithoutOverwrite) != pdPASS)
+				taskYIELD();
+			xQueueSend(q_pointer,&ui_blinkPeriod, portMAX_DELAY);
+			while(uxQueueMessagesWaiting(q_pointer));
+			xSemaphoreGive(hs_pointerQueue);
+			sprintf((char*)str_value, "|bper|%d|\t\tOK, blink period set to x ms|\n", ui_blinkPeriod);
+			i_flag = 1;
 		}
 		else
 			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot set blink period while recording!|\n", ERR_RECORDING);
@@ -138,14 +200,15 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_bdur: //Blink DURation: duration of blink
 		if (!b_recording)
 		{
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
 			uint32_t ui_blinkDuration = atoi((char*)str_value);
-			if (ui_blinkDuration < gui_blinkPeriod)
-			{
-				ESP_LOGD(TAG_BLINK, "Set blink duration to %d\n", ui_blinkDuration);
-				gui_blinkDuration = ui_blinkDuration;
-				sprintf((char*)str_value, "|bdur|%d|\t\tOK, blink duration set to x ms|\n", gui_blinkDuration);
+			while(xTaskNotify(ht_blinkRun,CMD_bdur,eSetValueWithoutOverwrite) != pdPASS)
+				taskYIELD();
+			xQueueSend(q_pointer,&ui_blinkDuration, portMAX_DELAY);
+			while(uxQueueMessagesWaiting(q_pointer));
+			xSemaphoreGive(hs_pointerQueue);
+				sprintf((char*)str_value, "|bdur|%d|\t\tOK, blink duration set to x ms|\n", ui_blinkDuration);
 				i_flag = 1;
-			}
 		}
 		else
 			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot set blink duration while recording!|\n", ERR_RECORDING);
@@ -157,8 +220,13 @@ int fConfig (int i_cmdlet, char* str_value)
 			if ((0 < ui_blinkBrightness) && (ui_blinkBrightness < 1024))
 			{
 				ESP_LOGD(TAG_BLINK, "Set blink brightness to %d\n", ui_blinkBrightness);
-				gui_blinkBrightness = ui_blinkBrightness;
-				sprintf((char*)str_value, "|bbrt|%d|\t\tOK, blink brightness set|\n", gui_blinkBrightness);
+				xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+				while(xTaskNotify(ht_blinkRun,CMD_bbrt,eSetValueWithoutOverwrite) != pdPASS)
+					taskYIELD();
+				xQueueSend(q_pointer,&ui_blinkBrightness, portMAX_DELAY);
+				while(uxQueueMessagesWaiting(q_pointer));
+				xSemaphoreGive(hs_pointerQueue);
+				sprintf((char*)str_value, "|bbrt|%d|\t\tOK, blink brightness set|\n", ui_blinkBrightness);
 				i_flag = 1;
 			}
 		}
@@ -171,8 +239,13 @@ int fConfig (int i_cmdlet, char* str_value)
 			uint32_t ui_blinkFrequency = atoi((char*)str_value);
 			if ((1 < ui_blinkFrequency) && (ui_blinkFrequency < 78125))
 			{
-				gui_blinkFrequency = ui_blinkFrequency;
-				sprintf((char*)str_value, "|bfrq|%d|\t\tOK, blink frequency set|\n", gui_blinkFrequency);
+				xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+				while(xTaskNotify(ht_blinkRun,CMD_bfrq,eSetValueWithoutOverwrite) != pdPASS)
+					taskYIELD();
+				xQueueSend(q_pointer,&ui_blinkFrequency, portMAX_DELAY);
+				while(uxQueueMessagesWaiting(q_pointer));
+				xSemaphoreGive(hs_pointerQueue);
+				sprintf((char*)str_value, "|bfrq|%d|\t\tOK, blink frequency set|\n", ui_blinkFrequency);
 				i_flag = 1;
 			}
 		}
@@ -197,12 +270,8 @@ int fConfig (int i_cmdlet, char* str_value)
 		break;
 
 	case CMD_blnk: //BLiNK: single shot blink without tcp message
-		ESP_LOGD(TAG_BLINK, "CMDlet:blnk\n");
-		ledc_set_duty(stu_ledcBlinkChannel.speed_mode, stu_ledcBlinkChannel.channel, gui_blinkBrightness);
-		ledc_update_duty(stu_ledcBlinkChannel.speed_mode, stu_ledcBlinkChannel.channel);
-		vTaskDelay(gui_blinkDuration / portTICK_PERIOD_MS);
-		ledc_set_duty(stu_ledcBlinkChannel.speed_mode, stu_ledcBlinkChannel.channel, 0);
-		ledc_update_duty(stu_ledcBlinkChannel.speed_mode, stu_ledcBlinkChannel.channel);
+		while(xTaskNotify(ht_blinkRun,CMD_blnk,eSetValueWithoutOverwrite) != pdPASS)
+			taskYIELD();
 		sprintf((char*)str_value, "|blnk|1|\t\tOK, blinking|\n");
 		i_flag = 1;
 		break;
@@ -211,7 +280,7 @@ int fConfig (int i_cmdlet, char* str_value)
 		if (!b_recording)
 		{
 			fSaveConfig(hnvs_conf_0);
-			sprintf((char*)str_value, "|save|1|\t\tOK, config save to non volatile storage|\n");
+			sprintf((char*)str_value, "|save|1|\t\tOK, config saved to non volatile storage|\n");
 			i_flag = 1;
 		}
 		else
@@ -257,8 +326,13 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_ssid: //ssid of access point
 		if (!b_recording)
 		{
-			strcpy((char*) sta_config.sta.ssid, str_value);
-			sprintf((char*)str_value, "|ssid|%s|\t\tOK, SSID of AP set to|\n", sta_config.sta.ssid);
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+			ESP_LOGD(TAG_CONF, "SSID:%s",str_value);
+			while(xTaskNotify(ht_wifiRun,CMD_ssid,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			xQueueSend(q_pointer,&str_value, portMAX_DELAY);
+			while(uxQueueMessagesWaiting(q_pointer));
+			xSemaphoreGive(hs_pointerQueue);
 			i_flag = 1;
 		}
 		else
@@ -267,8 +341,12 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_pass: //pass for access point
 		if (!b_recording)
 		{
-			strcpy((char*) sta_config.sta.password, str_value);
-			sprintf((char*)str_value, "|pass|%s|\t\tOK, password of AP set to|\n", sta_config.sta.password);
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+			while(xTaskNotify(ht_wifiRun,CMD_pass,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			xQueueSend(q_pointer,&str_value, portMAX_DELAY);
+			while(uxQueueMessagesWaiting(q_pointer));
+			xSemaphoreGive(hs_pointerQueue);
 			i_flag = 1;
 		}
 		else
@@ -278,10 +356,18 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_ipco: //ip for configuration server
 		if (!b_recording)
 		{
-			inet_pton(AF_INET, (char*)str_value, &stu_serverAddressConf.sin_addr.s_addr);
+			uint32_t ui_temp = 0;
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+			while(xTaskNotify(ht_tcpConf,CMD_ipco,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			inet_pton(AF_INET, (char*)str_value, &ui_temp);
+			xQueueSend(q_pointer,&ui_temp, portMAX_DELAY);
+			while(uxQueueMessagesWaiting(q_pointer));
+			xSemaphoreGive(hs_pointerQueue);
+
 			char ipConf[16];
-			inet_ntop(AF_INET, &stu_serverAddressConf.sin_addr.s_addr, (char*)ipConf, sizeof(ipConf));
-			sprintf((char*)str_value, "|ipco|%d|\t\tOK, IP of config server set to %s|\n", stu_serverAddressConf.sin_addr.s_addr, ipConf);
+			inet_ntop(AF_INET, &ui_temp, ipConf, sizeof(ipConf));
+			sprintf((char*)str_value, "|ipco|%d|\t\tOK, IP of config server set to %s|\n", ui_temp, ipConf);
 			i_flag = 1;
 		}
 		else
@@ -290,10 +376,18 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_ipme: //ip for logging server
 		if (!b_recording)
 		{
-			inet_pton(AF_INET, (char*)str_value, &stu_serverAddressMes.sin_addr.s_addr);
+			uint32_t ui_temp = 0;
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+			while(xTaskNotify(ht_tcpMes,CMD_ipme,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			inet_pton(AF_INET, (char*)str_value, &ui_temp);
+			xQueueSend(q_pointer,&ui_temp, portMAX_DELAY);
+			while(uxQueueMessagesWaiting(q_pointer));
+			xSemaphoreGive(hs_pointerQueue);
+
 			char ipConf[16];
-			inet_ntop(AF_INET, &stu_serverAddressMes.sin_addr.s_addr, (char*)ipConf, sizeof(ipConf));
-			sprintf((char*)str_value, "|ipco|%d|\t\tOK, IP of config server set to %s|\n", stu_serverAddressMes.sin_addr.s_addr, ipConf);
+			inet_ntop(AF_INET, &ui_temp, ipConf, sizeof(ipConf));
+			sprintf((char*)str_value, "|ipco|%d|\t\tOK, IP of measurement server set to %s|\n", ui_temp, ipConf);
 			i_flag = 1;
 		}
 		else
@@ -302,8 +396,15 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_poco: //port for configuration server
 		if (!b_recording)
 		{
-			stu_serverAddressConf.sin_port = htons(atoi((char*)str_value));
-			sprintf((char*)str_value, "|ipco|%d|\t\tOK, port of config server set to %d|\n", stu_serverAddressConf.sin_port, ntohs(stu_serverAddressConf.sin_port));
+			uint32_t ui_temp = 0;
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+			while(xTaskNotify(ht_tcpConf,CMD_poco,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			ui_temp = htons(atoi((char*)str_value));
+			xQueueSend(q_pointer,&ui_temp, portMAX_DELAY);
+			while(uxQueueMessagesWaiting(q_pointer));
+			xSemaphoreGive(hs_pointerQueue);
+			sprintf((char*)str_value, "|ipco|%d|\t\tOK, port of config server set to %d|\n", ui_temp, ntohs(ui_temp));
 			i_flag = 1;
 		}
 		else
@@ -312,8 +413,15 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_pome: //port for logging server
 		if (!b_recording)
 		{
-			stu_serverAddressMes.sin_port = htons(atoi((char*)str_value));
-			sprintf((char*)str_value, "|ipco|%d|\t\tOK, port of measurement server set to %d|\n", stu_serverAddressMes.sin_port, ntohs(stu_serverAddressMes.sin_port));
+			uint32_t ui_temp = 0;
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+			while(xTaskNotify(ht_tcpMes,CMD_pome,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
+			ui_temp = htons(atoi((char*)str_value));
+			xQueueSend(q_pointer,&ui_temp, portMAX_DELAY);
+			while(uxQueueMessagesWaiting(q_pointer));
+			xSemaphoreGive(hs_pointerQueue);
+			sprintf((char*)str_value, "|ipco|%d|\t\tOK, port of measurement server set to %d|\n", ui_temp, ntohs(ui_temp));
 			i_flag = 1;
 		}
 		else
@@ -322,9 +430,9 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_potr: //port for UDP trigger
 		if (!b_recording)
 		{
-			stu_serverAddressUdp.sin_port = htons(atoi((char*)str_value));
-			sprintf((char*)str_value, "|ipco|%d|\t\tOK, port of trigger set to %d|\n", stu_serverAddressUdp.sin_port, ntohs(stu_serverAddressUdp.sin_port));
-			i_flag = 1;
+			//			stu_serverAddressUdp.sin_port = htons(atoi((char*)str_value));
+			//			sprintf((char*)str_value, "|ipco|%d|\t\tOK, port of trigger set to %d|\n", stu_serverAddressUdp.sin_port, ntohs(stu_serverAddressUdp.sin_port));
+			//			i_flag = 1;
 		}
 		else
 			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot set port while recording!|\n", ERR_RECORDING);
@@ -333,26 +441,27 @@ int fConfig (int i_cmdlet, char* str_value)
 	case CMD_conn: //connects to the access point
 		if (!b_recording)
 		{
-
+			while(xTaskNotify(ht_wifiRun,CMD_conn,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
 		}
 		else
 			sprintf((char*)str_value, "|err|%d|\t\tERROR cannot reconnect while recording!|\n", ERR_RECORDING);
 		break;
 
 	case CMD_bath: //BATtery High: sets the high value of the battery monitor
-		ESP_LOGD(TAG_CONF, "CMD_bath\n");
-		xTimerStop(h_timerBatMon, portMAX_DELAY);
-		gf_batVolHigh = atof((str_value));
-		gi_batRawHigh = adc1_get_raw(ADC1_CHANNEL_4);
-		xTimerStart(h_timerBatMon, portMAX_DELAY);
+//		ESP_LOGD(TAG_CONF, "CMD_bath\n");
+//		xTimerStop(h_timerBatMon, portMAX_DELAY);
+//		gf_batVolHigh = atof((str_value));
+//		gi_batRawHigh = adc1_get_raw(ADC1_CHANNEL_4);
+//		xTimerStart(h_timerBatMon, portMAX_DELAY);
 
 		break;
 	case CMD_batl: //BATtery Low: sets the low value of the battery monitor
-		ESP_LOGD(TAG_CONF, "CMD_batl\n");
-		xTimerStop(h_timerBatMon, portMAX_DELAY);
-		gf_batVolLow = atof((str_value));
-		gi_batRawLow = adc1_get_raw(ADC1_CHANNEL_4);
-		xTimerStart(h_timerBatMon, portMAX_DELAY);
+//		ESP_LOGD(TAG_CONF, "CMD_batl\n");
+//		xTimerStop(h_timerBatMon, portMAX_DELAY);
+//		gf_batVolLow = atof((str_value));
+//		gi_batRawLow = adc1_get_raw(ADC1_CHANNEL_4);
+//		xTimerStart(h_timerBatMon, portMAX_DELAY);
 		break;
 
 	case CMD_scow://scans 1-Wire bus
@@ -371,44 +480,22 @@ int fConfig (int i_cmdlet, char* str_value)
 
 int fSaveConfig (uint32_t nvs_id)
 {
-	nvs_open("storage", NVS_READWRITE, &nvs_id);
-	nvs_set_u16(nvs_id, "k_serverPortMes", stu_serverAddressMes.sin_port);
-	nvs_set_u16(nvs_id, "k_srvPortConf", stu_serverAddressConf.sin_port);
-	nvs_set_u32(nvs_id, "k_serverIp", stu_serverAddressMes.sin_addr.s_addr);
-	nvs_set_u32(nvs_id, "k_serverIp", stu_serverAddressConf.sin_addr.s_addr);
-	nvs_set_str(nvs_id, "k_ssid", (char*) sta_config.sta.ssid);
-	nvs_set_str(nvs_id, "k_pass", (char*) sta_config.sta.password);
-	nvs_commit(nvs_id);
-	nvs_close(nvs_id);
+	xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
 
-	nvs_open("nvs_ADC", NVS_READWRITE, &h_nvs_ADC);
-	nvs_set_u32(h_nvs_ADC, "k_tareValue", gui_tareValue);
-	char* pc_calValue = malloc(21); //since it is not possible to store float or double in nvs, so the calibration value is converted to a string
-	sprintf(pc_calValue, "%.*f", 15, gd_calValue);
-	nvs_set_str(h_nvs_ADC, "k_calValue", pc_calValue);
-	ESP_LOGD(TAG_ADC, "calValue saved:%s", pc_calValue);
-	free(pc_calValue);
-	nvs_set_u64(h_nvs_ADC, "k_adcPeriod", gul_adcPeriod);
-	nvs_commit(h_nvs_ADC);
-	nvs_close(h_nvs_ADC);
+	while(xTaskNotify(ht_storageRun,CMD_save,eSetValueWithoutOverwrite) != pdPASS)
+		vTaskDelay(1/ portTICK_PERIOD_MS);
+	xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+	xSemaphoreGive(hs_pointerQueue);
 
-	nvs_open("nvs_Blink", NVS_READWRITE, &h_nvs_Blink);
-	nvs_set_u32(h_nvs_Blink, "k_blinkDuration", gui_blinkDuration);
-	nvs_set_u32(h_nvs_Blink, "k_blinkPeriod", gui_blinkPeriod);
-	nvs_set_u8(h_nvs_Blink, "k_blinkEnabled", gb_blinkEnabled);
-	nvs_set_u32(h_nvs_Blink, "k_blinkBright", gui_blinkBrightness);
-	nvs_commit(h_nvs_Blink);
-	nvs_close(h_nvs_Blink);
-
-	uint32_t ui_temp = 0;
-	nvs_open("nvs_batmon", NVS_READWRITE, &h_nvs_batmon);
-	nvs_set_i32(h_nvs_batmon, "k_batRawLow", gi_batRawLow);
-	ui_temp = (uint32_t)(gf_batVolLow * 1000);
-	nvs_set_u32(h_nvs_batmon, "k_batVolLow", ui_temp);
-	nvs_set_i32(h_nvs_batmon, "k_batRawHigh", gi_batRawHigh);
-	ui_temp = (uint32_t)(gf_batVolHigh * 1000);
-	nvs_set_u32(h_nvs_batmon, "k_batVolHigh", ui_temp);
-	nvs_close(h_nvs_batmon);
+//	uint32_t ui_temp = 0;
+//	nvs_open("nvs_batmon", NVS_READWRITE, &h_nvs_batmon);
+//	nvs_set_i32(h_nvs_batmon, "k_batRawLow", gi_batRawLow);
+//	ui_temp = (uint32_t)(gf_batVolLow * 1000);
+//	nvs_set_u32(h_nvs_batmon, "k_batVolLow", ui_temp);
+//	nvs_set_i32(h_nvs_batmon, "k_batRawHigh", gi_batRawHigh);
+//	ui_temp = (uint32_t)(gf_batVolHigh * 1000);
+//	nvs_set_u32(h_nvs_batmon, "k_batVolHigh", ui_temp);
+//	nvs_close(h_nvs_batmon);
 
 	nvs_open("nvs_tempi", NVS_READWRITE, &h_nvs_tempi);
 	uint64_t ul_romTempInt = fuLongFromRomCode(stu_romCode_probe_int);
@@ -420,46 +507,33 @@ int fSaveConfig (uint32_t nvs_id)
 
 int fLoadConfig (uint32_t nvs_id)
 {
-	nvs_open("storage", NVS_READWRITE, &nvs_id);
-	nvs_get_u16(nvs_id, "k_serverPortMes", &stu_serverAddressMes.sin_port);
-	nvs_get_u16(nvs_id, "k_srvPortConf", &stu_serverAddressConf.sin_port);
-	nvs_get_u32(nvs_id, "k_serverIp", &stu_serverAddressMes.sin_addr.s_addr);
-	nvs_get_u32(nvs_id, "k_serverIp", &stu_serverAddressConf.sin_addr.s_addr);
-	size_t required_size = 0;
-	nvs_get_str(nvs_id, "k_ssid", NULL, &required_size);
-	nvs_get_str(nvs_id, "k_ssid", (char*) sta_config.sta.ssid, &required_size);
-	nvs_get_str(nvs_id, "k_pass", NULL, &required_size);
-	nvs_get_str(nvs_id, "k_pass", (char*) sta_config.sta.password, &required_size);
-	nvs_close(nvs_id);
+	ESP_LOGD(TAG_CONF, "LOADING");
+	xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+	ESP_LOGD(TAG_CONF, "NOTIFYING SD CARD");
+	while(xTaskNotify(ht_storageRun,CMD_load,eSetValueWithoutOverwrite) != pdPASS)
+		vTaskDelay(1/ portTICK_PERIOD_MS);
+	xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+	xSemaphoreGive(hs_pointerQueue);
 
-	nvs_open("nvs_ADC", NVS_READWRITE, &h_nvs_ADC);
-	nvs_get_u32(h_nvs_ADC, "k_tareValue", &gui_tareValue);
-	char* pc_calValue = malloc(21); //since it is not possible to store float or double in nvs it is converted to a string
-	nvs_get_str(h_nvs_ADC, "k_calValue", NULL, &required_size);
-	nvs_get_str(h_nvs_ADC, "k_calValue", pc_calValue, &required_size);
-	gd_calValue = atof(pc_calValue);
-	free(pc_calValue);
-	nvs_get_u64(h_nvs_ADC, "k_adcPeriod", &gul_adcPeriod);
-	nvs_close(h_nvs_ADC);
-
-	nvs_open("nvs_Blink", NVS_READWRITE, &h_nvs_Blink);
-	nvs_get_u32(h_nvs_Blink, "k_blinkDuration", &gui_blinkDuration);
-	nvs_get_u32(h_nvs_Blink, "k_blinkPeriod", &gui_blinkPeriod);
-	nvs_get_u8(h_nvs_Blink, "k_blinkEnabled", &gb_blinkEnabled);
-	nvs_get_u32(h_nvs_Blink, "k_blinkBright", &gui_blinkBrightness);
-	nvs_close(h_nvs_Blink);
-
-	uint32_t ui_temp = 0;
-	nvs_open("nvs_batmon", NVS_READWRITE, &h_nvs_batmon);
-	nvs_get_i32(h_nvs_batmon, "k_batRawLow", &gi_batRawLow);
-	nvs_get_u32(h_nvs_batmon, "k_batVolLow", &ui_temp);
-	gf_batVolLow = (float) ui_temp;
-	gf_batVolLow /=  1000;
-	nvs_get_i32(h_nvs_batmon, "k_batRawHigh", &gi_batRawHigh);
-	nvs_get_u32(h_nvs_batmon, "k_batVolHigh", &ui_temp);
-	gf_batVolHigh = (float) ui_temp;
-	gf_batVolHigh /=  1000;
-	nvs_close(h_nvs_batmon);
+	//
+	//	nvs_open("nvs_Blink", NVS_READWRITE, &h_nvs_Blink);
+	//	nvs_get_u32(h_nvs_Blink, "k_blinkDuration", &gui_blinkDuration);
+	//	nvs_get_u32(h_nvs_Blink, "k_blinkPeriod", &gui_blinkPeriod);
+	//	nvs_get_u8(h_nvs_Blink, "k_blinkEnabled", &gb_blinkEnabled);
+	//	nvs_get_u32(h_nvs_Blink, "k_blinkBright", &gui_blinkBrightness);
+	//	nvs_close(h_nvs_Blink);
+	//
+	//	uint32_t ui_temp = 0;
+	//	nvs_open("nvs_batmon", NVS_READWRITE, &h_nvs_batmon);
+	//	nvs_get_i32(h_nvs_batmon, "k_batRawLow", &gi_batRawLow);
+	//	nvs_get_u32(h_nvs_batmon, "k_batVolLow", &ui_temp);
+	//	gf_batVolLow = (float) ui_temp;
+	//	gf_batVolLow /=  1000;
+	//	nvs_get_i32(h_nvs_batmon, "k_batRawHigh", &gi_batRawHigh);
+	//	nvs_get_u32(h_nvs_batmon, "k_batVolHigh", &ui_temp);
+	//	gf_batVolHigh = (float) ui_temp;
+	//	gf_batVolHigh /=  1000;
+	//	nvs_close(h_nvs_batmon);
 
 	return 0;
 }
@@ -491,7 +565,7 @@ void fscanOwb(void)
 	{
 		char rom_code_s[17];
 		owb_string_from_rom_code(search_state.rom_code, rom_code_s, sizeof(rom_code_s));
-//		printf("  %d : %s\n", num_devices, rom_code_s);
+		//		printf("  %d : %s\n", num_devices, rom_code_s);
 		device_rom_codes[num_devices] = search_state.rom_code;
 		++num_devices;
 		owb_search_next(owb, &search_state, &found);
@@ -542,11 +616,11 @@ void fscanOwb(void)
 uint64_t fuLongFromRomCode (OneWireBus_ROMCode stu_romCode)
 {
 	uint64_t ul_romCode = 0;
-    for (int i = sizeof(stu_romCode.bytes) - 1; i >= 0; i--)
-    {
-        ul_romCode |=  stu_romCode.bytes[i];
-        ul_romCode <<= 8;
-    }
+	for (int i = sizeof(stu_romCode.bytes) - 1; i >= 0; i--)
+	{
+		ul_romCode |=  stu_romCode.bytes[i];
+		ul_romCode <<= 8;
+	}
 	return ul_romCode;
 }
 

@@ -7,9 +7,9 @@
 
 #include "temp_int.h"
 
+//TODO: once multidevice support is implemented in hardware, rewrite 1-wire scan and initialisation
 
-
-void f_tempIntInit(void*args)
+void ftempIntInit(void)
 {
 
 
@@ -20,12 +20,12 @@ void f_tempIntInit(void*args)
 //		ds18b20_free(&devices[i]);
 //	}
 //	owb_uninitialize(owb);
-	xTaskCreate	(t_tempIntRun,		"t_tempIntRun",		2048,	NULL	,	10,		NULL);
-	vTaskDelete(NULL);
+	xTaskCreate	(ttempIntRun,		"t_tempIntRun",		2048,	NULL	,	10,		&ht_tempIntRun);
 }
 
-void t_tempIntRun(void*arg)
+void ttempIntRun(void*arg)
 {
+	vTaskSuspend(NULL);
 	ESP_LOGI(TAG_TEMPINT, "INITIALISING TEMPERATURE INTERNAL");
 	uint64_t time_since_boot = 0;
 
@@ -70,9 +70,10 @@ void t_tempIntRun(void*arg)
 //			printf("\nTemperature readings (degrees C): sample %d\n", ++sample_count);
 
 			time_since_boot = esp_timer_get_time();
-			xQueueSend(q_time_temp, &time_since_boot,  0);
-			xQueueSend(q_temperature, &readings[0],  0);
-			xEventGroupSetBits(eg_tcp, BIT_TCPSEND);
+			xQueueSend(q_time_tempint_tcp, &time_since_boot,  0);
+			xQueueSend(q_value_tempint_tcp, &readings[0],  0);
+			while(xTaskNotify(ht_tcpMes,CMD_TEMPINT_READY,eSetValueWithoutOverwrite) != pdPASS)
+				vTaskDelay(1/ portTICK_PERIOD_MS);
 
 //			for (int i = 0; i < num_devices; ++i)
 //			{

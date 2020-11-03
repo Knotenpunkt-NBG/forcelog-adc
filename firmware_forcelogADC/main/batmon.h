@@ -23,9 +23,9 @@
 
 
 void fbatMonInit(void);
-void t_batmonRun (void* param);
+void tbatmonRun (void* param);
 void callback_timerBatmon(void* arg);
-void floadBatConfig (void);
-float map(int x, int us_batRawLow, float f_batVolLow, int us_batRawHigh, float f_batVolHigh);
+void fconfigBatMon(uint32_t ui_cmdlet, struct stu_batmonConfig* batmonConfig_mom);
+float fmap(int x, int us_batRawLow, float f_batVolLow, int us_batRawHigh, float f_batVolHigh);
 
 #endif /* MAIN_BATMON_H_ */

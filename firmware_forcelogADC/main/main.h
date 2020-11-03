@@ -43,7 +43,7 @@
 #include "globals.h"
 #include "batmon.h"
 #include "temp_int.h"
-#include "local_storage.h"
+#include "storage.h"
 
 
 uint8_t fcheckModuleId ();

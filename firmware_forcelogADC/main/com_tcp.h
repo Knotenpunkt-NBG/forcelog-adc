@@ -17,6 +17,7 @@
 #include "esp_wifi.h"
 #include <esp_event.h>
 #include "driver/uart.h"
+#include "freertos/semphr.h"
 
 #include "defines.h"
 #include "globals.h"
@@ -27,15 +28,17 @@ struct timeval receiving_timeout;
 
 
 void ftcpInit();
-char* readTcpString(char* out, int i_maxNumChars, int sock);
-int readTcpCmdlet(int sock, int *i_cmdlet);
-void sendAck (int sock);
-int sendKeepAlive (int sock);
-int connSockConf(void);
-int connSockMes	(void);
+char* freadTcpString(char* out, int i_maxNumChars, int sock);
+int freadTcpCmdlet(int sock, int *i_cmdlet);
+void fsendAck (int sock);
+int fsendKeepAlive (int sock);
+int fconnSockConf(struct sockaddr_in* stu_serverAddressConf);
+int fconnSockMes	(struct sockaddr_in* stu_serverAddressMes);
+int fconnSock (struct sockaddr_in* serverAddr);
+void fconfigTcp(uint32_t ui_cmdlet,struct stu_adcConfig* p_adcConfig_mom, struct sockaddr_in* serverAddress_mom);
 
-void t_tcpSend (void * param);
-void t_tcpConf (void * param);
+void ttcpMes (void * param);
+void ttcpConf (void * param);
 
 
 #endif /* MAIN_COM_TCP_H_ */

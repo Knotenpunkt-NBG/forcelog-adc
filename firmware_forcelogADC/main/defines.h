@@ -83,8 +83,10 @@
 #define BIT_ADC_START			BIT1
 #define BIT_ADC_WAIT			BIT2
 #define BIT_ADC_STOP			BIT3
-#define BIT_ADC_FIRE			BIT5
-#define BIT_ADC_BREAK			BIT6
+#define BIT_ADC_FIRE			BIT4
+
+
+
 
 
 //ADC Config Events
@@ -98,7 +100,7 @@
 #define BIT_TCPSEND				BIT4
 
 //TCP
-#define TICKS_RECON_MES			10			//defines how many ticks to wait until measurement socket tries a reconnect
+#define TICKS_RECON_MES			10			//defines how many ticks to wait until measurement socket tries a keepalive
 #define	CYCLES_RECON_CONF		100			//how many cycles of timeout to wait until a keepalive is sent
 #define TICKS_TIMEOUT_CONF		5			//how many ticks to wait until config socket times out
 
@@ -115,16 +117,24 @@
 #define CMD_stop	('s' << 8 * 3) + ('t' << 8 * 2) + ('o' << 8 * 1) + ('p' << 8 * 0)
 #define CMD_wait	('w' << 8 * 3) + ('a' << 8 * 2) + ('i' << 8 * 1) + ('t' << 8 * 0)
 #define CMD_rec		('r' << 8 * 3) + ('e' << 8 * 2) + ('c' << 8 * 1) + (0x00 << 8 * 0)
+#define CMD_strt	('s' << 8 * 3) + ('t' << 8 * 2) + ('r' << 8 * 1) + ('t' << 8 * 0)
+#define CMD_fire	('f' << 8 * 3) + ('i' << 8 * 2) + ('r' << 8 * 1) + ('e' << 8 * 0)
+#define CMD_trig	('t' << 8 * 3) + ('r' << 8 * 2) + ('i' << 8 * 1) + ('g' << 8 * 0)
+
 
 //CMDlets ADC
 #define CMD_cali	('c' << 8 * 3) + ('a' << 8 * 2) + ('l' << 8 * 1) + ('i' << 8 * 0)
 #define CMD_vcal	('v' << 8 * 3) + ('c' << 8 * 2) + ('a' << 8 * 1) + ('l' << 8 * 0)
 #define CMD_mper	('m' << 8 * 3) + ('p' << 8 * 2) + ('e' << 8 * 1) + ('r' << 8 * 0)
 #define CMD_tare	('t' << 8 * 3) + ('a' << 8 * 2) + ('r' << 8 * 1) + ('e' << 8 * 0)
+#define CMD_fire	('f' << 8 * 3) + ('i' << 8 * 2) + ('r' << 8 * 1) + ('e' << 8 * 0)
+#define CMD_sesd	('s' << 8 * 3) + ('e' << 8 * 2) + ('s' << 8 * 1) + ('d' << 8 * 0)
+#define CMD_setc	('s' << 8 * 3) + ('e' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_retc	('r' << 8 * 3) + ('e' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_resd	('r' << 8 * 3) + ('e' << 8 * 2) + ('s' << 8 * 1) + ('d' << 8 * 0)
 
 //CMDlets general config
-#define CMD_load	('l' << 8 * 3) + ('o' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
-#define CMD_save	('s' << 8 * 3) + ('a' << 8 * 2) + ('v' << 8 * 1) + ('e' << 8 * 0)
+
 #define CMD_loge	('l' << 8 * 3) + ('o' << 8 * 2) + ('g' << 8 * 1) + ('e' << 8 * 0)
 #define CMD_logw	('l' << 8 * 3) + ('o' << 8 * 2) + ('g' << 8 * 1) + ('w' << 8 * 0)
 #define CMD_logi	('l' << 8 * 3) + ('o' << 8 * 2) + ('g' << 8 * 1) + ('i' << 8 * 0)
@@ -133,6 +143,7 @@
 #define CMD_zero	('z' << 8 * 3) + ('e' << 8 * 2) + ('r' << 8 * 1) + ('o' << 8 * 0)
 #define CMD_man		('m' << 8 * 3) + ('a' << 8 * 2) + ('n' << 8 * 1) + (0x00 << 8 * 0)
 #define CMD_info	('i' << 8 * 3) + ('n' << 8 * 2) + ('f' << 8 * 1) + ('o' << 8 * 0)
+
 
 //CMDlets blink
 #define CMD_bper	('b' << 8 * 3) + ('p' << 8 * 2) + ('e' << 8 * 1) + ('r' << 8 * 0)
@@ -153,6 +164,27 @@
 #define CMD_pome	('p' << 8 * 3) + ('o' << 8 * 2) + ('m' << 8 * 1) + ('e' << 8 * 0)
 #define CMD_potr	('p' << 8 * 3) + ('o' << 8 * 2) + ('t' << 8 * 1) + ('r' << 8 * 0)
 
+//CMDlets storage
+#define CMD_mkfs	('m' << 8 * 3) + ('k' << 8 * 2) + ('f' << 8 * 1) + ('s' << 8 * 0)
+
+#define CMD_init	('i' << 8 * 3) + ('n' << 8 * 2) + ('i' << 8 * 1) + ('t' << 8 * 0)
+#define CMD_load	('l' << 8 * 3) + ('o' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
+#define CMD_ldad	('l' << 8 * 3) + ('d' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
+#define CMD_ldtc	('l' << 8 * 3) + ('d' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_ldtm	('l' << 8 * 3) + ('d' << 8 * 2) + ('t' << 8 * 1) + ('m' << 8 * 0)
+#define CMD_ldbl	('l' << 8 * 3) + ('d' << 8 * 2) + ('b' << 8 * 1) + ('l' << 8 * 0)
+#define CMD_ldlc	('l' << 8 * 3) + ('d' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_defl	('d' << 8 * 3) + ('e' << 8 * 2) + ('f' << 8 * 1) + ('l' << 8 * 0)
+
+#define CMD_save	('s' << 8 * 3) + ('a' << 8 * 2) + ('v' << 8 * 1) + ('e' << 8 * 0)
+#define CMD_svad	('s' << 8 * 3) + ('v' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
+#define CMD_svtc	('s' << 8 * 3) + ('v' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_svtm	('s' << 8 * 3) + ('v' << 8 * 2) + ('t' << 8 * 1) + ('m' << 8 * 0)
+#define CMD_svbl	('s' << 8 * 3) + ('v' << 8 * 2) + ('b' << 8 * 1) + ('l' << 8 * 0)
+#define CMD_svlc	('s' << 8 * 3) + ('v' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_defs	('d' << 8 * 3) + ('e' << 8 * 2) + ('f' << 8 * 1) + ('s' << 8 * 0)
+
+
 //CMDlets One Wire Bus
 #define CMD_scow	('s' << 8 * 3) + ('c' << 8 * 2) + ('o' << 8 * 1) + ('w' << 8 * 0)
 #define CMD_stpi	('s' << 8 * 3) + ('t' << 8 * 2) + ('p' << 8 * 1) + ('i' << 8 * 0)
@@ -160,6 +192,20 @@
 //CMDlets Battery monitor
 #define CMD_bath	('b' << 8 * 3) + ('a' << 8 * 2) + ('t' << 8 * 1) + ('h' << 8 * 0)
 #define CMD_batl	('b' << 8 * 3) + ('a' << 8 * 2) + ('t' << 8 * 1) + ('l' << 8 * 0)
+
+//STATI OF THE ADC
+#define STATUS_IDLE			1
+#define STATUS_PEEKING		2
+#define STATUS_RECORDING	3
+
+//NOTIFY MESSAGES
+#define CMD_TRIGGER				5
+#define CMD_MEAS_READY			6
+#define CMD_BLINK_READY			7
+#define CMD_TEMPINT_READY		8
+#define CMD_SAVE_BATMON			9
+#define CMD_BATMON_READY		10
+
 
 //ADC defines
 #define ADC_TARE_CYCLES		10
@@ -190,10 +236,12 @@
 							":user:WIFI:\n"\
 							":ssid:%s:	SSID of access point:\n"\
 							":pass:%s:	Password of access point:\n"\
+							":user:SOCKETS\n"\
 							":ipme:%s:	IP of measurement server:\n"\
 							":pome:%d:	Port of measurement server:\n"\
 							":ipco:%s:	IP of config server:\n"\
 							":poco:%d:	Port of config server:\n"\
+							":iptr:%s:\t\tIP of trigger\n"\
 							":potr:%d:	Port of Trigger:\n"\
 
 #define MEASUREMENT_MESSAGE	":moid:%02X:		Module ID:\n"\

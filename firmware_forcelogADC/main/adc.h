@@ -28,17 +28,20 @@
 #define GPIO_HX711_RATE_PIN 22
 #define GPIO_OUTPUT_ADC ((1ULL<<GPIO_HX711_SCK_PIN) | (1ULL<<GPIO_HX711_RATE_PIN))
 
-void fadcTimerCallback(void* arg);
 
-void fADCInit (void);
-void t_ADCrun(void *arg);
 
 
 
 
 uint32_t freadAdc (void);
 uint32_t ftareADC (void);
-double fcalADC (double d_calWheight);
+
+void fadcTimerCallback(void* arg);
+
+void fADCInit (void);
+void tadcRun(void *arg);
+void fadcConfig(uint32_t CMDlet, struct stu_adcConfig *adcConfig_mom, struct stu_cellConfig *cellConfig_mom);
+double fcalADC(double d_calWheight, uint32_t ui_tareValue);
 int fsetADCSpeed(uint64_t ui_adcPeriod);
 
 #endif /* MAIN_ADC_H_ */

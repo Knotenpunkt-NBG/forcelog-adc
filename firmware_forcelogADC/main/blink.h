@@ -26,11 +26,12 @@
 #include "globals.h"
 
 
+
 void callback_timerBlink(void* arg);
 
 void fblinkInit (void);
 
-
+void fblinkConfig(uint32_t CMDlet, struct stu_blinkConfig *blinkConfig_mom, ledc_timer_config_t* ledcTimerConfig_mom, ledc_channel_config_t* ledcChannelConfig_mom);
 
 
 

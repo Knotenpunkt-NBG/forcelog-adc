@@ -26,8 +26,8 @@
 #define DS18B20_RESOLUTION   (DS18B20_RESOLUTION_12_BIT)
 
 
-void f_tempIntInit(void*args);
-void t_tempIntRun(void*arg);
+void ftempIntInit(void);
+void ttempIntRun(void*arg);
 
 
 

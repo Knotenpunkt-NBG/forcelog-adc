@@ -24,8 +24,8 @@
 void tserialRun(void *arg);
 
 void fserialInit(void);
-void	readUartString	(char* out, int i_maxNumChars);
-int		readUartCmdlet	(int *i_cmdlet);
+void	freadUartString	(char* out, int i_maxNumChars);
+int		freadUartCmdlet	(int *i_cmdlet);
 
 //extern uart_config_t uart_config;
 
