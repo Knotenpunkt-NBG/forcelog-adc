@@ -13,6 +13,10 @@
 #include "defines.h"
 #include "globals.h"
 
+
+void t_udpWait (void* param);
+void t_pinWait(void* param);
+
 int fcheckTrigger(int sock, int *i_cmdlet);
 
 

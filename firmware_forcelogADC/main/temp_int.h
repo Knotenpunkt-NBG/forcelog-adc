@@ -27,7 +27,7 @@
 
 
 void ftempIntInit(void);
-void ttempIntRun(void*arg);
+void ttempIntRun(void* param);
 
 
 

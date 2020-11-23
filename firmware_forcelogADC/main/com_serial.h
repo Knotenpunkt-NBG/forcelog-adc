@@ -21,10 +21,18 @@
 
 
 
-void tserialRun(void *arg);
+void tserialRun(void* param);
 
 void fserialInit(void);
-void	freadUartString	(char* out, int i_maxNumChars);
+
+/**
+ * @brief Read string from UART.
+ * @param[in] out Pointer to initialised bus instance.
+ * @param[in] i_maxNumChars Max Number of characters to be read befor timeout is thrown.
+ * @return status
+ */
+int	freadUartString	(char* out, int i_maxNumChars);
+
 int		freadUartCmdlet	(int *i_cmdlet);
 
 //extern uart_config_t uart_config;

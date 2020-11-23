@@ -7,7 +7,7 @@
 
 #include "status_led.h"
 
-void status_led(void *arg)	//TODO: defining different stati
+void status_led	(void *param)	//TODO: defining different stati
 {
 	int ch = 0;
 	ledc_timer_config_t ledc_timer = {
@@ -105,7 +105,7 @@ void status_led(void *arg)	//TODO: defining different stati
 	}
 }
 
-void sendRgbLedStatus(int i)
+void sendRgbLedStatus	(int i)
 {
 	xQueueSend(q_rgb_status, &i, 100/portTICK_PERIOD_MS);
 }

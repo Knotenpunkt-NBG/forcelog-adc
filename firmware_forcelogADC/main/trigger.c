@@ -7,6 +7,12 @@
 
 #include "trigger.h"
 
+
+void t_pinWait(void* param)
+{
+	vTaskDelete(NULL);
+}
+
 void t_udpWait (void* param)
 {
 	ESP_LOGI(TAG_UDP, "Waiting for UDP trigger");
@@ -20,14 +26,15 @@ void t_udpWait (void* param)
 	{
 		fcheckTrigger(sock_udp, &i_cmdlet);
 	}
-	xEventGroupSetBits(eg_adc, BIT_ADC_WAIT);
+//	xEventGroupSetBits(eg_adc, BIT_ADC_WAIT);
 	ESP_LOGI(TAG_UDP, "UDP trigger received");
 	shutdown(sock_udp, 0);
 	close(sock_udp);
 	vTaskDelete(NULL);
 }
 
-int fcheckTrigger(int sock, int *i_cmdlet)
+int fcheckTrigger	(int sock,
+					int *i_cmdlet)
 {
 	int i_flag = 0;
 	*i_cmdlet = 0;
@@ -44,4 +51,3 @@ int fcheckTrigger(int sock, int *i_cmdlet)
 	ESP_LOGV(TAG_TCP, "CMDlet received:%d\n",*i_cmdlet);
 	return i_flag;
 }
-

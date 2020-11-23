@@ -24,6 +24,7 @@
 #include "esp_log.h"
 #include "owb.h"
 #include "ds18b20.h"
+#include <lwip/sockets.h>
 #include "defines.h"
 
 EXTERN uint8_t gb_moduleID;
@@ -62,6 +63,27 @@ struct stu_mesCell
 	double 		d_measurement;
 	uint64_t	ul_time;
 };
+struct stu_triggerConfig
+{
+	bool b_pinMode;
+	uint32_t ui_timeout;
+	struct sockaddr_in trigSocket;
+};
+struct stu_wifiConfig
+{
+	char c_wifiType;
+	wifi_config_t wifiConfig;
+};
+struct stu_initConfig
+{
+	struct stu_adcConfig adc;
+	struct stu_cellConfig cell;
+	struct stu_blinkConfig blink;
+	struct stu_triggerConfig trigger;
+	struct stu_wifiConfig wifi;
+	struct sockaddr_in tcpConf;
+	struct sockaddr_in tcpMes;
+};
 
 
 //Temperature internal
@@ -72,37 +94,21 @@ OneWireBus_ROMCode stu_romCode_probe_int;
 int num_devices;
 
 
-//FLAGS
-EXTERN bool b_staOrAp;
-EXTERN bool b_recording;
-EXTERN bool b_peeking;
-
-
-//BLINK
-uint32_t	gui_blinkPeriod;
-uint32_t	gui_blinkDuration;
-uint32_t	gui_blinkBrightness;
-uint32_t	gui_blinkFrequency;
-uint8_t		gb_blinkEnabled;
-
-
 //timing
 EXTERN uint64_t ul_zeroTime;
 
 
 //Event groups
 EventGroupHandle_t s_wifi_event_group;
-EventGroupHandle_t eg_adc;
-EventGroupHandle_t eg_tcp;
-EventGroupHandle_t eg_blink;
-EventGroupHandle_t eg_batmon;
-EventGroupHandle_t eg_tempInt;
 
 
 //Queues
 QueueHandle_t q_pointer;
 QueueHandle_t q_rgb_status;
-QueueHandle_t q_tcpConf;
+QueueHandle_t q_tcpMessages;
+QueueHandle_t q_uartMessages;
+QueueHandle_t q_pconfigIn;
+QueueHandle_t q_pconfigOut;
 
 QueueHandle_t q_value_mes_tcp;
 QueueHandle_t q_time_mes_tcp;
@@ -118,24 +124,13 @@ QueueHandle_t q_time_tempint_sd;
 
 
 //Semaphores
-SemaphoreHandle_t xs_sockets;
-SemaphoreHandle_t hs_blinkConfig;
-SemaphoreHandle_t hs_wifiConfig;
 SemaphoreHandle_t hs_oneWire;
 SemaphoreHandle_t hs_pointerQueue;
-
-
-//Non Volatile Storage
-nvs_handle_t hnvs_conf_0;
-nvs_handle_t h_nvs_Blink;
-nvs_handle_t h_nvs_ADC;
-nvs_handle_t h_nvs_batmon;
-nvs_handle_t h_nvs_tempi;
+SemaphoreHandle_t hs_configCom;
 
 
 //Timers
 esp_timer_handle_t 	htim_periodicAdc;
-
 TimerHandle_t 		h_timerBlink;
 TimerHandle_t 		h_timerBatMon;
 
@@ -151,17 +146,16 @@ TaskHandle_t ht_wifiRun;
 TaskHandle_t ht_batmonRun;
 TaskHandle_t ht_serialRun;
 TaskHandle_t ht_tempIntRun;
-
+TaskHandle_t ht_configRun;
 
 //Functions
 EXTERN void	sendRgbLedStatus(int i);
-EXTERN bool fcmdCheck(int i_cmdlet);
 EXTERN void fsetLogLevel(int i);
 
 
 //Tasks
 EXTERN void t_blinkRun(void *arg);
-EXTERN void t_udpWait (void* param);
+
 
 
 #endif /* MAIN_GLOBVARS_H_ */

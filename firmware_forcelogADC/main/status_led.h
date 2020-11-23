@@ -14,6 +14,6 @@
 #include "defines.h"
 #include "globals.h"
 
-void status_led(void *arg);
+void status_led(void* param);
 
 #endif /* MAIN_STATUS_LED_H_ */

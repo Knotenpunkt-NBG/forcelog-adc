@@ -17,7 +17,7 @@
 #include "defines.h"
 
 void fWifiInit(void);
-void tWifiRun(void*param);
+void tWifiRun(void* param);
 void fWifiConfig(uint32_t ui_cmdlet, wifi_config_t* stu_wifiConfig_mom);
 void fWifiConnSTA(wifi_config_t* stu_wifiConfig_mom);
 

@@ -23,14 +23,14 @@ void ftempIntInit(void)
 	xTaskCreate	(ttempIntRun,		"t_tempIntRun",		2048,	NULL	,	10,		&ht_tempIntRun);
 }
 
-void ttempIntRun(void*arg)
+void ttempIntRun(void* param)
 {
 	vTaskSuspend(NULL);
 	ESP_LOGI(TAG_TEMPINT, "INITIALISING TEMPERATURE INTERNAL");
 	uint64_t time_since_boot = 0;
 
 	// Create DS18B20 devices on the 1-Wire bus
-	xEventGroupWaitBits(eg_tempInt, BIT_TEMP_START, true, true, portMAX_DELAY);
+//	xEventGroupWaitBits(eg_tempInt, BIT_TEMP_START, true, true, portMAX_DELAY);
 		DS18B20_Info * ds18b20_info = ds18b20_malloc();  // heap allocation
 		stu_temp_probe_int = ds18b20_info;
 

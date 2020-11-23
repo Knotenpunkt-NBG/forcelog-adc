@@ -13,7 +13,7 @@ void fblinkInit (void)
 	xTaskCreate(t_blinkRun,		"t_blinkRun",		2048, NULL, 10, &ht_blinkRun);
 }
 
-void t_blinkRun(void *arg)
+void t_blinkRun(void* param)
 {
 	vTaskSuspend(NULL);
 	ledc_channel_config_t ledcChannelConfig_mom;
@@ -42,9 +42,12 @@ void t_blinkRun(void *arg)
 		uint64_t time_since_boot = 0;
 		while((ui_cmdlet != CMD_trig) && (ui_cmdlet != CMD_stop))
 		{
+			vTaskResume(ht_configRun);
 			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
 		}
-		xTimerStart(h_timerBlink, portMAX_DELAY);
+		if(ui_cmdlet == CMD_trig)
+			xTimerStart(h_timerBlink, portMAX_DELAY);
+
 		while(ui_cmdlet != CMD_stop)
 		{
 			ledc_set_duty(ledcChannelConfig_mom.speed_mode, ledcChannelConfig_mom.channel, blinkConfig_mom.ui_blinkBrightness);
@@ -67,33 +70,23 @@ void t_blinkRun(void *arg)
 	}
 }
 
-void fblinkConfig(uint32_t CMDlet, struct stu_blinkConfig *blinkConfig_mom, ledc_timer_config_t* ledcTimerConfig_mom, ledc_channel_config_t* ledcChannelConfig_mom)
+void fblinkConfig	(uint32_t CMDlet,
+					struct stu_blinkConfig *blinkConfig_mom,
+					ledc_timer_config_t* ledcTimerConfig_mom,
+					ledc_channel_config_t* ledcChannelConfig_mom)
 {
-	struct stu_blinkConfig* p_blinkConfig_ext = 0;
-
 	switch(CMDlet)
 	{
 	case CMD_load:
-		xQueuePeek(q_pointer, &p_blinkConfig_ext, portMAX_DELAY);
-		blinkConfig_mom->b_blinkEnabled		= p_blinkConfig_ext->b_blinkEnabled;
-		blinkConfig_mom->ui_blinkBrightness	= p_blinkConfig_ext->ui_blinkBrightness;
-		blinkConfig_mom->ui_blinkDuration	= p_blinkConfig_ext->ui_blinkDuration;
-		blinkConfig_mom->ui_blinkFrequency	= p_blinkConfig_ext->ui_blinkFrequency;
-		blinkConfig_mom->ui_blinkPeriod		= p_blinkConfig_ext->ui_blinkPeriod;
-		free(p_blinkConfig_ext);
-
-		ledcTimerConfig_mom->duty_resolution = LEDC_TIMER_10_BIT; // resolution of PWM duty
-		ledcTimerConfig_mom->freq_hz = blinkConfig_mom->ui_blinkFrequency;                    // frequency of PWM signal
-		ledcTimerConfig_mom->speed_mode = LEDC_HS_MODE;           // timer mode
-		ledcTimerConfig_mom->timer_num = LEDC_HS_TIMER;           // timer index
-		ledcTimerConfig_mom->clk_cfg = LEDC_AUTO_CLK;              // Auto select the source clock
-		ledc_timer_config(ledcTimerConfig_mom);
-
-		xQueueReceive(q_pointer, &p_blinkConfig_ext, portMAX_DELAY);
-		break;
 	case CMD_svbl:
+	case CMD_bper:
+	case CMD_bdur:
+	case CMD_bbrt:
+	case CMD_ldbl:
+	case CMD_defl:
+	case CMD_defs:
 		xQueueSend(q_pointer,&blinkConfig_mom, portMAX_DELAY);
-		while(uxQueueMessagesWaiting(q_pointer));
+		vTaskSuspend( NULL );
 		break;
 	case CMD_blnk:
 		ledc_set_duty(ledcChannelConfig_mom->speed_mode, ledcChannelConfig_mom->channel, blinkConfig_mom->ui_blinkBrightness);
@@ -102,22 +95,15 @@ void fblinkConfig(uint32_t CMDlet, struct stu_blinkConfig *blinkConfig_mom, ledc
 		ledc_set_duty(ledcChannelConfig_mom->speed_mode, ledcChannelConfig_mom->channel, 0);
 		ledc_update_duty(ledcChannelConfig_mom->speed_mode, ledcChannelConfig_mom->channel);
 		break;
-	case CMD_bper:
-		xQueueReceive(q_pointer, &(blinkConfig_mom->ui_blinkPeriod), portMAX_DELAY);
-		break;
-	case CMD_bdur:
-		xQueueReceive(q_pointer, &(blinkConfig_mom->ui_blinkDuration), portMAX_DELAY);
-		break;
-	case CMD_bbrt:
-		xQueueReceive(q_pointer, &(blinkConfig_mom->ui_blinkBrightness), portMAX_DELAY);
-		break;
 	case CMD_bfrq:
-		xQueueReceive(q_pointer, &(blinkConfig_mom->ui_blinkFrequency), portMAX_DELAY);
+		xQueueSend(q_pointer,&blinkConfig_mom, portMAX_DELAY);
+		vTaskSuspend(NULL);
 		ledcTimerConfig_mom->freq_hz = blinkConfig_mom->ui_blinkFrequency;
 		ledc_timer_config(ledcTimerConfig_mom);
 		ledc_channel_config(ledcChannelConfig_mom);
 		break;
 	default:
+		ESP_LOGD(TAG_BLINK, "CMDLET NOT IN CONFIG");
 		break;
 	}
 }

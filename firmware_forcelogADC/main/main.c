@@ -9,8 +9,8 @@ void app_main()
 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 
 	//Creating Semaphores
-	hs_blinkConfig = xSemaphoreCreateBinary();
-	hs_wifiConfig = xSemaphoreCreateBinary();
+	hs_configCom = xSemaphoreCreateBinary();
+	xSemaphoreGive(hs_configCom);
 	hs_pointerQueue = xSemaphoreCreateBinary();
 	xSemaphoreGive(hs_pointerQueue);
 
@@ -33,8 +33,11 @@ void app_main()
 
 	//Creating queues q_time_temp
 	q_rgb_status 		=	xQueueCreate(	10, sizeof(uint32_t));
-	q_tcpConf			=	xQueueCreate(	10,	sizeof(char *));
-	q_pointer			=	xQueueCreate(	1,	sizeof(int *));
+	q_tcpMessages		=	xQueueCreate(	10,	sizeof(char *));
+	q_uartMessages		=	xQueueCreate(	10,	sizeof(char *));
+	q_pointer			=	xQueueCreate(	1,	sizeof(void *));
+	q_pconfigIn			=	xQueueCreate(	5,	sizeof(void *));
+	q_pconfigOut		=	xQueueCreate(	5,	sizeof(void *));
 
 	q_value_mes_tcp		=	xQueueCreate(	10, sizeof(double));
 	q_time_mes_tcp		=	xQueueCreate(	10, sizeof(uint64_t));
@@ -47,14 +50,6 @@ void app_main()
 	q_time_blink_sd		=	xQueueCreate(	3,	sizeof(uint64_t));
 	q_value_tempint_sd	=	xQueueCreate(	3,	sizeof(float));
 	q_time_tempint_sd	=	xQueueCreate(	3,	sizeof(uint64_t));
-
-
-	//Creating Event Groups
-	eg_adc		=	xEventGroupCreate();
-	eg_tcp		=	xEventGroupCreate();
-	eg_blink	=	xEventGroupCreate();
-	eg_batmon	=	xEventGroupCreate();
-	eg_tempInt	=	xEventGroupCreate();
 
 	//Loading Config
 
@@ -73,20 +68,18 @@ void app_main()
 
 
 	//INITIALISING TASKS
+	xTaskCreate(status_led,		"status_led",		2048, NULL, 10, NULL);
 	gb_moduleID = fcheckModuleId();
-	if (gb_moduleID == (uint8_t)MODULE_ID_HX711)
-	{
-		ESP_LOGD(TAG_CONF, "MODULE ID CORRECT:0x%02X\n", gb_moduleID);
-		fADCInit();
-	}
-	else
+	if (gb_moduleID != (uint8_t)MODULE_ID_HX711)
 	{
 		ESP_LOGE(TAG_CONF, "ADC MODULE MISMATCH! MODULE(0x%02X) does not equal Firmware(0x%02X)\n", gb_moduleID,MODULE_ID_HX711);
+		while(1)
+			vTaskDelay(100);
 	}
 	fstorageInit();
-	fserialInit();
-	xTaskCreate(status_led,		"status_led",		2048, NULL, 10, NULL);
 
+	fserialInit();
+	fADCInit();
 	fWifiInit();
 	ftcpInit();
 	fblinkInit();
@@ -98,13 +91,14 @@ void app_main()
 	vTaskResume(ht_blinkRun);
 	vTaskResume(ht_tcpMes);
 	vTaskResume(ht_tcpConf);
-//	vTaskResume(ht_adcRun);
+	vTaskResume(ht_adcRun);
 	vTaskResume(ht_wifiRun);
 	vTaskResume(ht_batmonRun);
 	vTaskResume(ht_serialRun);
 //	vTaskResume(ht_t_tempIntRun);
-
-//	fLoadConfig(hnvs_conf_0);
+	fconfigInit();
+//	while(xTaskNotify(ht_configRun,CMD_init,eSetValueWithoutOverwrite) != pdPASS)
+//		vTaskDelay(1/ portTICK_PERIOD_MS);
 
 
 	while(1)
@@ -131,34 +125,5 @@ uint8_t fcheckModuleId ()
 	}
 	gpio_set_level(PIN_MODULE_ID_SELECT, 1);
 	return b_moduleId;
-}
-
-bool fcmdCheck(int i_cmdlet) //checks if cmdlet needs an aditional string as input
-{
-	bool b_flag = 0;
-	switch (i_cmdlet)
-	{
-	case CMD_bbrt: //brightness of blink (0-1023)
-	case CMD_bdur: //duration of blink
-	case CMD_bper: //period of blink
-	case CMD_bfrq: //sets frequency of blink (1-78125Hz)
-	case CMD_mper: //sets the sample period in us
-	case CMD_vcal: //reads calibration value from server and writes it to adc
-	case CMD_cali: //calibrates with an known weight and sends the factor back to the server
-	case CMD_ssid: //SSID of access point
-	case CMD_pass: //pass for access point
-	case CMD_ipco: //IP for configuration server
-	case CMD_ipme: //IP for logging server
-	case CMD_poco: //port for configuration server
-	case CMD_pome: //port for logging server
-	case CMD_potr: //port for UDP trigger
-	case CMD_bath:
-	case CMD_batl:
-		b_flag = 1;
-		break;
-	default:
-		break;
-	}
-	return b_flag;
 }
 

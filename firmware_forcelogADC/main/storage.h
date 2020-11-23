@@ -14,6 +14,8 @@
 #include <sys/stat.h>
 #include "esp_err.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 #include "esp_wifi.h"
 #include <lwip/sockets.h>
@@ -44,7 +46,7 @@
 #define max_files	2
 
 void fstorageInit(void);
-void tstorageRun (void*param);
+void tstorageRun(void* param);
 void fsdConfig(uint32_t ui_cmdlet);
 esp_err_t fFormatSD();
 
@@ -56,13 +58,15 @@ size_t alloc_unit_size;
 
 struct stu_initConfig
 {
-	uint8_t adc;
-	uint8_t wifi;
-	uint8_t blink;
-	uint8_t tempi;
-	uint8_t tcpMes;
-	uint8_t tcpConf;
-	uint8_t trigger;
+	char tcpConf[FILENAME_MAX_SIZE];
+	char tcpMes[FILENAME_MAX_SIZE];
+	char adc[FILENAME_MAX_SIZE];
+	char wifi[FILENAME_MAX_SIZE];
+	char blink[FILENAME_MAX_SIZE];
+	char tempi[FILENAME_MAX_SIZE];
+
+
+	char trigger[FILENAME_MAX_SIZE];
 };
 
 

@@ -28,17 +28,19 @@ struct timeval receiving_timeout;
 
 
 void ftcpInit();
-char* freadTcpString(char* out, int i_maxNumChars, int sock);
-int freadTcpCmdlet(int sock, int *i_cmdlet);
+//Reads string from tcp socket
+//RETURN:
+//1 if string has been read
+//0 if no string has been found
+//-1 if string has been found but without delimiter (\n, \0 or \r)
+int freadTcpString(char* out, int i_maxNumChars, int sock);
 void fsendAck (int sock);
 int fsendKeepAlive (int sock);
-int fconnSockConf(struct sockaddr_in* stu_serverAddressConf);
-int fconnSockMes	(struct sockaddr_in* stu_serverAddressMes);
 int fconnSock (struct sockaddr_in* serverAddr);
 void fconfigTcp(uint32_t ui_cmdlet,struct stu_adcConfig* p_adcConfig_mom, struct sockaddr_in* serverAddress_mom);
 
-void ttcpMes (void * param);
-void ttcpConf (void * param);
+void ttcpMes (void* param);
+void ttcpConf (void* param);
 
 
 #endif /* MAIN_COM_TCP_H_ */

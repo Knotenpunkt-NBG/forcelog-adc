@@ -35,7 +35,7 @@ static void event_handler(void* arg, esp_event_base_t event_base,
 		ip_event_got_ip_t* event = (ip_event_got_ip_t*) event_data;
 		ESP_LOGI(TAG_WIFI, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
 		s_retry_num = 0;
-		while(xTaskNotify(ht_tcpConf,CMD_mkfs,eSetValueWithoutOverwrite) != pdPASS)
+		while(xTaskNotify(ht_tcpConf,CMD_conn,eSetValueWithoutOverwrite) != pdPASS)
 			vTaskDelay(1/ portTICK_PERIOD_MS);
 		xEventGroupSetBits(s_wifi_event_group, WIFI_CONNECTED_BIT);
 	}
@@ -46,11 +46,10 @@ void fWifiInit(void)
 	xTaskCreate(tWifiRun,		"tWifiRun",		4096, NULL, 10, &ht_wifiRun);
 }
 
-void tWifiRun(void*param)
+void tWifiRun(void* param)
 {
 	vTaskSuspend(NULL);
 	uint32_t ui_cmdlet = 0;
-	ESP_LOGD(TAG_WIFI, "STARTING WIFI");
 	wifi_config_t stu_wifiConfig_mom;
 
 	while(1)
@@ -64,38 +63,25 @@ void tWifiRun(void*param)
 
 void fWifiConfig(uint32_t ui_cmdlet, wifi_config_t* stu_wifiConfig_mom)
 {
-	wifi_config_t* stu_wifiConfig_ext;
-	char* string = NULL;
 	switch(ui_cmdlet)
 	{
+	case CMD_save:
 	case CMD_load:
-		xQueuePeek(q_pointer, &stu_wifiConfig_ext, portMAX_DELAY);
-		strcpy((char*)(stu_wifiConfig_mom->sta.ssid), (char*)(stu_wifiConfig_ext->sta.ssid));
-		strcpy((char*)(stu_wifiConfig_mom->sta.password), (char*)(stu_wifiConfig_ext->sta.password));
-		stu_wifiConfig_mom->sta.threshold.authmode = stu_wifiConfig_ext->sta.threshold.authmode;
-		stu_wifiConfig_mom->sta.pmf_cfg.capable = stu_wifiConfig_ext->sta.pmf_cfg.capable;
-		stu_wifiConfig_mom->sta.pmf_cfg.required = stu_wifiConfig_ext->sta.pmf_cfg.required;
-		xQueueReceive(q_pointer, &stu_wifiConfig_ext, portMAX_DELAY);
-		free(stu_wifiConfig_ext);
+	case CMD_defs:
+	case CMD_svwi:
+	case CMD_ldwi:
+	case CMD_defl:
+	case CMD_ssid:
+	case CMD_pass:
+		xQueueSend(q_pointer,&stu_wifiConfig_mom, portMAX_DELAY);
+		vTaskSuspend( NULL );
 		break;
 	case CMD_conn:
 		fWifiConnSTA(stu_wifiConfig_mom);
-		break;
-	case CMD_save:
-		xQueueSend(q_pointer,&stu_wifiConfig_mom, portMAX_DELAY);
-		while(uxQueueMessagesWaiting(q_pointer));
-		break;
-	case CMD_ssid:
-		xQueuePeek(q_pointer, &string, portMAX_DELAY);
-		strcpy((char*)(stu_wifiConfig_mom->sta.ssid), string);
-		xQueueReceive(q_pointer, &string, portMAX_DELAY);
-		break;
-	case CMD_pass:
-		xQueuePeek(q_pointer, &string, portMAX_DELAY);
-		strcpy((char*)(stu_wifiConfig_mom->sta.password), string);
-		xQueueReceive(q_pointer, &string, portMAX_DELAY);
+
 		break;
 	default:
+		ESP_LOGD(TAG_WIFI, "WRONG CMDLET");
 		break;
 	}
 }

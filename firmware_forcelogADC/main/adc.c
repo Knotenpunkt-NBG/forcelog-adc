@@ -33,9 +33,8 @@ void fADCInit (void)
 }
 
 //TODO: modularise adc functions to select different modules with sdkconfig.default
-//TODO: Change event groups to direct to task notification
 
-void tadcRun(void *arg)
+void tadcRun(void* param)
 {
 	struct stu_adcConfig adcConfig_mom;
 	struct stu_cellConfig cellConfig_mom;
@@ -48,14 +47,15 @@ void tadcRun(void *arg)
 		{
 			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
 			fadcConfig(ui_cmdlet, &adcConfig_mom, &cellConfig_mom);
-			vTaskDelay(1);
 		}
 
 		while((ui_cmdlet != CMD_trig) && (ui_cmdlet != CMD_stop))
 		{
+			vTaskResume(ht_configRun);
 			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
 		}
-		esp_timer_start_periodic(htim_periodicAdc, adcConfig_mom.ul_adcPeriod);
+		if (ui_cmdlet == CMD_trig)
+			esp_timer_start_periodic(htim_periodicAdc, adcConfig_mom.ul_adcPeriod);
 
 		while (ui_cmdlet != CMD_stop)
 		{
@@ -123,7 +123,8 @@ uint32_t ftareADC()
 	return ui_tareValue;
 }
 
-double fcalADC(double d_calWheight, uint32_t ui_tareValue)
+double fcalADC	(double d_calWheight,
+				uint32_t ui_tareValue)
 {
 	double d_calValue = 0.0;
 	uint32_t ui_momValue = 0;
@@ -137,7 +138,7 @@ double fcalADC(double d_calWheight, uint32_t ui_tareValue)
 	return d_calValue;
 }
 
-int fsetADCSpeed(uint64_t ui_adcPeriod)
+int fsetADCSpeed	(uint64_t ui_adcPeriod)
 {
 	bool b_flag = 1;
 	if (ui_adcPeriod < ADC_MIN_PERIOD)
@@ -159,21 +160,22 @@ int fsetADCSpeed(uint64_t ui_adcPeriod)
 	return b_flag;
 }
 
-void fadcTimerCallback(void* arg)
+void fadcTimerCallback	(void* arg)
 {
-	while(xTaskNotify(ht_adcRun,BIT_ADC_FIRE,eSetValueWithoutOverwrite) != pdPASS)
+	while(xTaskNotify(ht_adcRun,CMD_fire,eSetValueWithoutOverwrite) != pdPASS)
 		vTaskDelay(1/ portTICK_PERIOD_MS);
 }
 
-void fadcConfig(uint32_t CMDlet, struct stu_adcConfig *adcConfig_mom, struct stu_cellConfig *cellConfig_mom)
+void fadcConfig	(uint32_t CMDlet,
+				struct stu_adcConfig *adcConfig_mom,
+				struct stu_cellConfig *cellConfig_mom)
 {
-	struct stu_adcConfig* p_adcConfig_ext = 0;
-	struct stu_cellConfig* p_cellConfig_ext = 0;
-	uint64_t* ptr_ull = 0;
 	double* pd_calWeight = 0;
 
 	switch (CMDlet)
 	{
+	case 0:
+		break;
 	case CMD_setc:
 		adcConfig_mom->b_sendTCP = true;
 		break;
@@ -198,41 +200,21 @@ void fadcConfig(uint32_t CMDlet, struct stu_adcConfig *adcConfig_mom, struct stu
 		xQueueSend(q_pointer, &cellConfig_mom, portMAX_DELAY);
 		break;
 	case CMD_vcal:
-		break;
 	case CMD_mper:
-		xQueueReceive(q_pointer, &ptr_ull, portMAX_DELAY);
-		adcConfig_mom->ul_adcPeriod = *ptr_ull;
-		free(ptr_ull);
-		break;
-	case CMD_info:
-		break;
 	case CMD_svad:
+	case CMD_defl:
+	case CMD_ldad:
 		xQueueSend(q_pointer,&adcConfig_mom, portMAX_DELAY);
-		while(uxQueueMessagesWaiting(q_pointer));
-		break;
-	case CMD_svlc:
-		xQueueSend(q_pointer,&cellConfig_mom, portMAX_DELAY);
-		while(uxQueueMessagesWaiting(q_pointer));
+		vTaskSuspend( NULL );
 		break;
 	case CMD_ldlc:
-		xQueuePeek(q_pointer, &p_cellConfig_ext, portMAX_DELAY);
-		cellConfig_mom->d_calValue		= p_cellConfig_ext->d_calValue;
-		cellConfig_mom->ui_tareValue	= p_cellConfig_ext->ui_tareValue;
-		free(p_cellConfig_ext);
-		xQueueReceive(q_pointer, &p_cellConfig_ext, portMAX_DELAY);
+	case CMD_svlc:
+		xQueueSend(q_pointer,&cellConfig_mom, portMAX_DELAY);
+		vTaskSuspend( NULL );
 		break;
-	case CMD_load:
-		xQueuePeek(q_pointer, &p_adcConfig_ext, portMAX_DELAY);
-		adcConfig_mom->b_sendSD		= p_adcConfig_ext->b_sendSD;
-		adcConfig_mom->b_sendTCP	= p_adcConfig_ext->b_sendTCP;
-		adcConfig_mom->ul_adcPeriod	= p_adcConfig_ext->ul_adcPeriod;
-		free(p_adcConfig_ext);
-		xQueueReceive(q_pointer, &p_adcConfig_ext, portMAX_DELAY);
-		break;
-
 	default:
+		ESP_LOGW(TAG_ADC, "WRONG CMDLET");
 		break;
 	}
-	ESP_LOGD(TAG_ADC, "LEAVING ADC CONFIG");
 }
 

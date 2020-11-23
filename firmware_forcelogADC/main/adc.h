@@ -36,11 +36,11 @@
 uint32_t freadAdc (void);
 uint32_t ftareADC (void);
 
-void fadcTimerCallback(void* arg);
+void fadcTimerCallback(void* param);
 
 void fADCInit (void);
 void tadcRun(void *arg);
-void fadcConfig(uint32_t CMDlet, struct stu_adcConfig *adcConfig_mom, struct stu_cellConfig *cellConfig_mom);
+void fadcConfig(uint32_t CMDlet, struct stu_adcConfig* adcConfig_mom, struct stu_cellConfig* cellConfig_mom);
 double fcalADC(double d_calWheight, uint32_t ui_tareValue);
 int fsetADCSpeed(uint64_t ui_adcPeriod);
 

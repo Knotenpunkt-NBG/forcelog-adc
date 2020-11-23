@@ -17,11 +17,12 @@ void ftcpInit()
 	//	stu_serverAddressUdp.sin_family			=	AF_INET;
 	//	stu_serverAddressUdp.sin_addr.s_addr	=	htonl(INADDR_ANY);
 
-	xTaskCreate	(ttcpMes,		"t_tcpSendMes",		4096,	NULL	,	10,		&ht_tcpMes);
-	xTaskCreate	(ttcpConf,		"t_tcpConf",		4096,	NULL	,	10,		&ht_tcpConf);
+	xTaskCreate	(ttcpMes,		"t_tcpSendMes",		4096,	NULL	,	8,		&ht_tcpMes);
+	xTaskCreate	(ttcpConf,		"t_tcpConf",		4096,	NULL	,	8,		&ht_tcpConf);
 }
 
 //TODO: add bundling of measurements for higher throughput with less overhead max size of buffer:1400B
+//TODO: combine all queues into one with size of a struct
 void ttcpMes (void* param)
 {
 	vTaskSuspend(NULL);
@@ -35,14 +36,16 @@ void ttcpMes (void* param)
 	float f_temperature = 0.0;
 	while(ui_cmdlet != CMD_conn)
 	{
+		ESP_LOGD(TAG_TCP, "MES CMDLET WAITING");
 		xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
+		ESP_LOGD(TAG_TCP, "MES CMDLET RECEIVED");
 		fconfigTcp(ui_cmdlet, &adcConfig_mom, &serverAddr_mom);
 		vTaskDelay(1);
 	}
 	while(1)
 	{
 		ESP_LOGD(TAG_TCP,"STARTING SOCK MES\n");
-		while((ui_cmdlet != CMD_strt) || (ui_cmdlet != CMD_peek))
+		while((ui_cmdlet != CMD_wait) || (ui_cmdlet != CMD_peek))
 		{
 			if(sock == 0)
 				sock = fconnSock(&serverAddr_mom);
@@ -50,12 +53,17 @@ void ttcpMes (void* param)
 				fconfigTcp(ui_cmdlet, &adcConfig_mom, &serverAddr_mom);
 		}
 
-		if(ui_cmdlet == CMD_strt)
+		if(ui_cmdlet == CMD_wait)
 		{
 			//write configuration message
+			vTaskResume(ht_configRun);
+			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
 		}
-		ui_cmdlet = 0;
-		ul_zeroTime = 0;
+		else
+		{
+			vTaskResume(ht_configRun);
+		}
+		ul_zeroTime = esp_timer_get_time();
 		while(ui_cmdlet != CMD_stop)
 		{
 			//Sends measurements
@@ -68,7 +76,7 @@ void ttcpMes (void* param)
 				if (send(sock, (char *)data, strlen((const char*)data), 0) == -1)
 				{
 					close(sock);
-					sock = fconnSockMes(&serverAddr_mom);
+					sock = fconnSock(&serverAddr_mom);
 				}
 				ESP_LOGV(TAG_TCP, "SENDING MEASUREMENT\n");
 				ui_cmdlet = 0;
@@ -82,7 +90,7 @@ void ttcpMes (void* param)
 				if (send(sock, (char *)data, strlen((const char*)data), 0) == -1)
 				{
 					close(sock);
-					sock = fconnSockMes(&serverAddr_mom);
+					sock = fconnSock(&serverAddr_mom);
 				}
 				ESP_LOGV(TAG_TCP, "SENDING BLINK\n");
 				ui_cmdlet = 0;
@@ -97,7 +105,7 @@ void ttcpMes (void* param)
 				if (send(sock, (char *)data, strlen((const char*)data), 0) == -1)
 				{
 					close(sock);
-					sock = fconnSockMes(&serverAddr_mom);
+					sock = fconnSock(&serverAddr_mom);
 				}
 				ESP_LOGV(TAG_TCP, "SENDING Temperature\n");
 				ui_cmdlet = 0;
@@ -108,7 +116,7 @@ void ttcpMes (void* param)
 				{
 					ESP_LOGV(TAG_TCP, "KEEPALIVE MES FAILED\n");
 					close(sock);
-					sock = fconnSockMes(&serverAddr_mom);
+					sock = fconnSock(&serverAddr_mom);
 				}
 			}
 			else
@@ -119,12 +127,7 @@ void ttcpMes (void* param)
 		}
 		close(sock);
 		sock = 0;
-
-
 	}
-
-
-
 }
 
 void ttcpConf (void* param)
@@ -135,132 +138,122 @@ void ttcpConf (void* param)
 	struct sockaddr_in stu_serverAddressConf;
 	int i_cycles = 0;
 	int sock = 0;
-	int i_cmdlet = 0;
 	int i_flag = 0;
-	int i_flagConfig = 0;
-	char rx_buffer[128];
 	char* pc_txMessage;
-	while(ui_cmdlet != CMD_conn)
-	{
-		xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
-		fconfigTcp(ui_cmdlet, NULL, &stu_serverAddressConf);
-		vTaskDelay(1);
-	}
-	sock = fconnSockConf(&stu_serverAddressConf);
+	char* pc_configOut = NULL;
+	char* pc_configIn = malloc(64);
+	receiving_timeout.tv_sec = 0;
+	receiving_timeout.tv_usec = 5000;
+
 	while(1)
 	{
-		xEventGroupWaitBits(eg_tcp, BIT_TCPQUEUE_READY, false, true, TICKS_TIMEOUT_CONF);
-		if (xEventGroupGetBits(eg_tcp) & BIT_TCPQUEUE_READY)
+		while(ui_cmdlet != CMD_conn)
 		{
-			xQueueReceive(q_tcpConf, &pc_txMessage, portMAX_DELAY);
-			send(sock, pc_txMessage, strlen((const char*)pc_txMessage), 0);
-			free(pc_txMessage);
-			xEventGroupClearBits(eg_tcp, BIT_TCPQUEUE_READY);
+			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
+			fconfigTcp(ui_cmdlet, NULL, &stu_serverAddressConf);
+			vTaskDelay(1);
 		}
-
-		i_flag = freadTcpCmdlet(sock, &i_cmdlet);
-		if (i_cmdlet != 0)
+		sock = fconnSock(&stu_serverAddressConf);
+		setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,&receiving_timeout,sizeof(receiving_timeout));
+		send(sock, (const char*) GREETING_MESSAGE, strlen((const char*)GREETING_MESSAGE), 0);
+		while(1)
 		{
-			ESP_LOGD(TAG_TCP, "CMDlet:%#08x\n", i_cmdlet);
-			switch (i_cmdlet)
+			if(xQueueReceive(q_tcpMessages, &pc_txMessage, 1)>0)
 			{
-			case CMD_man: //inquires manual
-				send(sock, (const char*) MANUAL, strlen((const char*)MANUAL), 0);
-				break;
-			case CMD_info: //inquires all the information
-				//send(sock, (const char*) INQUIRE_MESSAGE, strlen((const char*)INQUIRE_MESSAGE), 0);
-				break;
-
-			default:
-				if (fcmdCheck(i_cmdlet))
-				{
-					if (i_flag == 0)
-						fsendAck(sock);
-					freadTcpString((char*)rx_buffer, 50, sock);
-				}
-				i_flagConfig = fConfig(i_cmdlet, rx_buffer);
-				if (i_flagConfig)
-				{
-					send(sock, (char *)rx_buffer, strlen((const char*)rx_buffer), 0);
-				}
-				i_cmdlet = 0;
-				break;
+				send(sock, pc_txMessage, strlen((const char*)pc_txMessage), 0);
+				free(pc_txMessage);
 			}
-		}
-		else if (i_cmdlet == 0)
-		{
-			i_cycles++;
-			if (i_cycles == CYCLES_RECON_CONF)
-			{
-				ESP_LOGV(TAG_TCP, "Sending Keepalive\n");
-				if (fsendKeepAlive(sock) < 0)
-				{
-					ESP_LOGW(TAG_TCP, "Keepalive port config failed errno:%d\n", errno);
-					sock = fconnSockConf(&stu_serverAddressConf);
-				}
-				i_cycles = 0;
-			}
-		}
-	}
-}
+			i_flag = freadTcpString(pc_configIn, 64, sock);
 
-char* freadTcpString(char* out, int i_maxNumChars, int sock)
-{
-	uint8_t *data = (uint8_t *) malloc(i_maxNumChars);
-	while(1)
-	{
-		int i_len = recv(sock, data, i_maxNumChars, 0);
-		for (int i = 0; i < i_len; i++)
-		{
-			if((data[i]== '\r') || (data[i] == '\n') || (data[i] == '\0'))
+			if (i_flag <= 0)
 			{
-				out[i] = '\0';
+				i_cycles++;
+				if (i_cycles == CYCLES_RECON_CONF)
+				{
+					ESP_LOGV(TAG_TCP, "Sending Keepalive\n");
+					if (fsendKeepAlive(sock) < 0)
+					{
+						ESP_LOGW(TAG_TCP, "Keepalive port config failed errno:%d\n", errno);
+						sock = fconnSock(&stu_serverAddressConf);
+					}
+					i_cycles = 0;
+				}
+			}
+			else if (i_flag == 0 )
+			{
+				ESP_LOGD(TAG_TCP, "SENDING ERROR MESSAGE\n");
+				send(sock, (const char*)MESS_INVALID, strlen((const char*)MESS_INVALID), 0);
 			}
 			else
 			{
-				out[i] = data[i];
+//				ESP_LOGD(TAG_TCP, "CMDLET:%s", pc_configIn);
+				xSemaphoreTake(hs_configCom, portMAX_DELAY);
+				xQueueSend(q_pconfigIn,&pc_configIn, portMAX_DELAY);
+				xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
+				while (pc_configOut != 0)
+				{
+					send(sock, (const char*) pc_configOut, strlen((const char*)pc_configOut), 0);
+
+					while(freadTcpString(pc_configIn, 64, sock) <= 0)
+						vTaskDelay(100 / portTICK_PERIOD_MS);
+					xQueueSend(q_pconfigIn,&pc_configIn, portMAX_DELAY);
+					xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
+				}
+				xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
+				send(sock, (const char*) pc_configOut, strlen((const char*)pc_configOut), 0);
+				xSemaphoreGive(hs_configCom);
+				vTaskResume(ht_configRun);
 			}
 		}
-		out[i_len+1] = '\0';
-		if(out[0] != '\0')
-			break;
 	}
-	return out;
 }
 
-int freadTcpCmdlet(int sock, int *i_cmdlet)
+
+
+int freadTcpString	(char* out,
+					int i_maxNumChars,
+					int sock)
 {
 	int i_flag = 0;
-	*i_cmdlet = 0;
-	char data = '\0';
-	for (int i = 0; i<4 ; i++)
+	uint8_t c_single = 0;
+	for (int i = 0; i < i_maxNumChars; i++)
 	{
-		recv(sock, &data, 1, 0);
-		if ((data== '\r') || (data == '\n') || (data == '\0'))
+		if(recv(sock, &c_single, 1, 0) > 0)
 		{
+			if((c_single== '\r') || (c_single == '\n') || (c_single == '\0'))
+			{
+				out[i] = '\0';
+				i_flag = 1;
+				break;
+			}
+			else
+			{
+				out[i] = c_single;
+				if(i == i_maxNumChars-1)
+					i_flag = 0;
+			}
+		}
+		else
+		{
+			i_flag = -1;
 			break;
 		}
-		*i_cmdlet += (data << (8*(3-i)));
 	}
-	recv(sock, &data, 1, MSG_PEEK);
-	if (data == ':')
-	{
-		recv(sock, &data, 1, 0);
-		i_flag = 1;
-	}
-	ESP_LOGV(TAG_TCP, "CMDlet received:%d\n",*i_cmdlet);
 	return i_flag;
 }
+
 
 void fsendAck (int sock)
 {
 	send(sock, (const char*) "|ack|\n", strlen((const char*)"|ack|\n"), 0);
 }
 
+
 int fsendKeepAlive (int sock)
 {
 	return send(sock, (const char*) "​\u200B", strlen((const char*)"\u200B"),0);
 }
+
 
 int fconnSock (struct sockaddr_in* serverAddr)
 {
@@ -280,115 +273,33 @@ int fconnSock (struct sockaddr_in* serverAddr)
 }
 
 
-int fconnSockConf (struct sockaddr_in* stu_serverAddressConf)
+void fconfigTcp	(uint32_t ui_cmdlet,
+				struct stu_adcConfig* p_adcConfig_mom,
+				struct sockaddr_in* serverAddress_mom)
 {
-	char str[16] = "";
-	int sock = 0;
-	int i = 0;
-	receiving_timeout.tv_sec = 0;
-	receiving_timeout.tv_usec = 5000;
-	inet_ntop(AF_INET, &stu_serverAddressConf->sin_addr.s_addr, (char*)str, sizeof(str));
-	ESP_LOGI(TAG_TCP, "Connecting to Socket Conf at  %s:%d\n", str , ntohs(stu_serverAddressConf->sin_port));
-	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	while (connect(sock, (struct sockaddr*) stu_serverAddressConf, sizeof(struct sockaddr_in)) < 0)
-	{
-		close(sock);
-		sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-		if (i == 100)
-		{
-			ESP_LOGW(TAG_TCP, "Could not connect to config Socket at %s:%d. errno = %d\n",
-					str , ntohs(stu_serverAddressConf->sin_port), errno);
-			i = 0;
-		}
-		i++;
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-	}
-	while (setsockopt(sock,SOL_SOCKET,SO_RCVTIMEO,&receiving_timeout,sizeof(receiving_timeout)) < 0)
-	{
-		ESP_LOGE(TAG_TCP, "failed to set config timeout errno=%d\n", errno);
-	}
-	return sock;
-}
-
-int fconnSockMes (struct sockaddr_in* stu_serverAddressMes)
-{
-	char str[16] = "";
-	int sock = 0;
-	int i = 0;
-	inet_ntop(AF_INET, &stu_serverAddressMes->sin_addr.s_addr, (char*)str, sizeof(str));
-	ESP_LOGI(TAG_TCP, "Connecting to measurement socket at  %s:%d\n", str , ntohs(stu_serverAddressMes->sin_port));
-	sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	while (connect(sock, (struct sockaddr *)&stu_serverAddressMes, sizeof(struct sockaddr_in)) < 0)
-	{
-		close(sock);
-		sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-		if (i == 100)
-		{
-			ESP_LOGW(TAG_TCP, "Could not connect to measurement Socket at %s:%d. errno = %d\n",
-					str , ntohs(stu_serverAddressMes->sin_port), errno);
-			i = 0;
-		}
-		i++;
-		vTaskDelay(10 / portTICK_PERIOD_MS);
-	}
-	return sock;
-}
-
-void fconfigTcp(uint32_t ui_cmdlet,struct stu_adcConfig* p_adcConfig_mom, struct sockaddr_in* serverAddress_mom)
-{
-	struct stu_adcConfig* p_adcConfig_ext = NULL;
-	struct sockaddr_in* serverAddress_ext = NULL;
 	switch(ui_cmdlet)
 	{
+	case 0:
+		break;
+	case CMD_poco:
+	case CMD_pome:
+	case CMD_ipco:
+	case CMD_ipme:
 	case CMD_ldtm:
 	case CMD_ldtc:
-		xQueuePeek(q_pointer, &serverAddress_ext, portMAX_DELAY);
-		serverAddress_mom->sin_addr.s_addr = serverAddress_ext->sin_addr.s_addr;
-		serverAddress_mom->sin_port = serverAddress_ext->sin_port;
-		serverAddress_mom->sin_family = serverAddress_ext->sin_family;
-		free(serverAddress_ext);
-		xQueueReceive(q_pointer, &serverAddress_ext, portMAX_DELAY);
-		break;
-
-	case CMD_ldad:
-		xQueuePeek(q_pointer, &p_adcConfig_ext, portMAX_DELAY);
-		p_adcConfig_mom->uc_numDecimals		= p_adcConfig_ext->uc_numDecimals;
-		free(p_adcConfig_ext);
-		xQueueReceive(q_pointer, &p_adcConfig_ext, portMAX_DELAY);
-		break;
-
 	case CMD_svtm:
 	case CMD_svtc:
 		xQueueSend(q_pointer,&serverAddress_mom, portMAX_DELAY);
-		while(uxQueueMessagesWaiting(q_pointer));
+		vTaskSuspend(NULL);
 		break;
 
+	case CMD_ldad:
 	case CMD_svad:
 		xQueueSend(q_pointer,&p_adcConfig_mom, portMAX_DELAY);
-		while(uxQueueMessagesWaiting(q_pointer));
+		vTaskSuspend(NULL);
 		break;
-	case CMD_ipco:
-	case CMD_ipme:
-	{
-		uint32_t ui_temp = 0;
-		xQueuePeek(q_pointer, &ui_temp, portMAX_DELAY);
-		serverAddress_mom->sin_addr.s_addr = ui_temp;
-		xQueueReceive(q_pointer, &ui_temp, portMAX_DELAY);
-		break;
-	}
-	case CMD_poco:
-	case CMD_pome:
-	{
-		uint32_t ui_temp = 0;
-		xQueuePeek(q_pointer, &ui_temp, portMAX_DELAY);
-		serverAddress_mom->sin_port = ui_temp;
-		xQueueReceive(q_pointer, &ui_temp, portMAX_DELAY);
-		break;
-	}
-
-
 	default:
+		ESP_LOGD(TAG_TCP, "WRONG CMDLET");
 		break;
 	}
 }
