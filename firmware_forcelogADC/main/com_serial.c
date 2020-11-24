@@ -50,7 +50,7 @@ void tserialRun	(void* param)
 			{
 				xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
 				printf("%s", pc_configOut);
-				vTaskResume(ht_configRun);
+				xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_STORAGE_FIN | BIT_COMM_FIN | BIT_CONFIG_FIN, portMAX_DELAY );
 			}
 			else //config requested more info
 			{
@@ -76,7 +76,7 @@ void tserialRun	(void* param)
 						}
 						printf("%s", pc_configOut);
 						pc_configOut = 0;
-						vTaskResume(ht_configRun);
+						xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_STORAGE_FIN | BIT_COMM_FIN | BIT_CONFIG_FIN, portMAX_DELAY );
 
 					}
 					//timeout

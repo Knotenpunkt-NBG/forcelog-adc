@@ -72,6 +72,7 @@ struct stu_triggerConfig
 struct stu_wifiConfig
 {
 	char c_wifiType;
+	char ac_apPass[65];
 	wifi_config_t wifiConfig;
 };
 struct stu_initConfig
@@ -83,6 +84,7 @@ struct stu_initConfig
 	struct stu_wifiConfig wifi;
 	struct sockaddr_in tcpConf;
 	struct sockaddr_in tcpMes;
+	struct stu_batmonConfig batMon;
 };
 
 
@@ -100,7 +102,7 @@ EXTERN uint64_t ul_zeroTime;
 
 //Event groups
 EventGroupHandle_t s_wifi_event_group;
-
+EventGroupHandle_t eg_sync;
 
 //Queues
 QueueHandle_t q_pointer;

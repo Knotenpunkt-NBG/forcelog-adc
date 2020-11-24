@@ -14,6 +14,9 @@ void app_main()
 	hs_pointerQueue = xSemaphoreCreateBinary();
 	xSemaphoreGive(hs_pointerQueue);
 
+	//Creating Event Groups
+	eg_sync = xEventGroupCreate();
+
 	gpio_config_t io_conf;
 	io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
 	io_conf.mode = GPIO_MODE_INPUT;

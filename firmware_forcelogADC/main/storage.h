@@ -56,20 +56,5 @@ BYTE pdrv;
 FATFS* fs;
 size_t alloc_unit_size;
 
-struct stu_initConfig
-{
-	char tcpConf[FILENAME_MAX_SIZE];
-	char tcpMes[FILENAME_MAX_SIZE];
-	char adc[FILENAME_MAX_SIZE];
-	char wifi[FILENAME_MAX_SIZE];
-	char blink[FILENAME_MAX_SIZE];
-	char tempi[FILENAME_MAX_SIZE];
-
-
-	char trigger[FILENAME_MAX_SIZE];
-};
-
-
-
 
 #endif /* MAIN_STORAGE_H_ */

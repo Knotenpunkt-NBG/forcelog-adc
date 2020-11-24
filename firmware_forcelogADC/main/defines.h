@@ -16,6 +16,12 @@
 #define STR_(X) #X
 #define STR(X) STR_(X)
 
+//Eventgroup BITs
+#define BIT_CONFIG_FIN		BIT1
+#define BIT_COMM_FIN		BIT2
+#define BIT_STORAGE_FIN		BIT3
+#define BIT_RECEIVER_FIN	BIT4
+
 //STORAGE
 #define FILENAME_MAX_SIZE	20
 
@@ -90,11 +96,13 @@
 #define FLAG_STATION			0
 #define FLAG_AP					1
 #define NUM_WIFI_RECON			3
+#define TYPE_STA				0
+#define TYPE_AP					1
 
 
 //ADC Config Events
-#define ADC_MIN_PERIOD			12500
-#define ADC_CAL_PERIOD			100000
+#define ADC_MIN_PERIOD			12500		//the minimal measurement period for the module ; has to be moved to the module itself
+#define ADC_CAL_PERIOD			100000		//the measurement period used for calibration ; has to be moved to module
 
 //TCP
 #define TICKS_RECON_MES			10			//defines how many ticks to wait until measurement socket tries a keepalive

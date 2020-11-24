@@ -281,153 +281,73 @@ void fsdConfig(uint32_t ui_cmdlet)
 		break;
 
 	case CMD_init:
-		p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-		f = fopen(MOUNT_POINT"/config/init.def", "r");
+		f = fopen(MOUNT_POINT"/config/def.ini", "r");
 		if (f == 0)
 		{
-			ESP_LOGW(TAG_STORAGE, MOUNT_POINT"/config/init.def");
+			ESP_LOGW(TAG_STORAGE, MOUNT_POINT"/config/def.ini");
 		}
 		else
 		{
-		fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		}
-		fclose(f);
+			p_initConfig	=	malloc(sizeof(struct stu_initConfig));
+			fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
+			fclose(f);
 
-		xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
-
-		ESP_LOGD(TAG_STORAGE, "INIT ADC");
-		sprintf(ac_fileAddress, MOUNT_POINT"/config/adc/%s.cfg", p_initConfig->adc);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT OPEN %s", ac_fileAddress);
-		}
-		else
-		{
+			xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
 			while(xTaskNotify(ht_adcRun,CMD_ldad,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
 			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
-			fread((struct stu_adcConfig*)pv_config_mom, sizeof(struct stu_adcConfig), 1, f);
+			*((struct stu_adcConfig*)pv_config_mom) = p_initConfig->adc;
 			vTaskResume(ht_adcRun);
 
 			while(xTaskNotify(ht_tcpMes,CMD_ldad,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
 			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
-			fread((struct stu_adcConfig*)pv_config_mom, sizeof(struct stu_adcConfig), 1, f);
-			fclose(f);
-//			vTaskDelay(100/ portTICK_PERIOD_MS);
+			*((struct stu_adcConfig*)pv_config_mom) = p_initConfig->adc;
 			vTaskResume(ht_tcpMes);
-		}
 
-		ESP_LOGD(TAG_STORAGE, "INIT TCP CONF");
-		sprintf(ac_fileAddress, MOUNT_POINT"/config/tcpconf/%s.cfg", p_initConfig->tcpConf);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT OPEN %s", ac_fileAddress);
-		}
-		else
-		{
-			ESP_LOGD(TAG_STORAGE, "TCP CONF NOTIFY");
 			while(xTaskNotify(ht_tcpConf,CMD_ldtc,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
 			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
-			fread((struct sockaddr_in*)pv_config_mom, sizeof(struct sockaddr_in), 1, f);
-			fclose(f);
-//			vTaskDelay(100/ portTICK_PERIOD_MS);
+			*((struct sockaddr_in*)pv_config_mom) = p_initConfig->tcpConf;
 			vTaskResume(ht_tcpConf);
-			ESP_LOGD(TAG_STORAGE, "TCP CONF RESUMED");
-		}
 
-
-		ESP_LOGD(TAG_STORAGE, "INIT WIFI CONF");
-		sprintf(ac_fileAddress, MOUNT_POINT"/config/wifi/%s.cfg", p_initConfig->tcpConf);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT OPEN %s", ac_fileAddress);
-		}
-		else
-		{
 			while(xTaskNotify(ht_wifiRun,CMD_ldwi,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
 			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
-			fread((wifi_config_t*)pv_config_mom, sizeof(wifi_config_t), 1, f);
-			fclose(f);
+			*((struct stu_wifiConfig*)pv_config_mom) = p_initConfig->wifi;
 			vTaskResume(ht_wifiRun);
-		}
 
-		ESP_LOGD(TAG_STORAGE, "INIT TCP MES");
-		sprintf(ac_fileAddress, MOUNT_POINT"/config/tcpmes/%s.cfg", p_initConfig->tcpMes);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT OPEN %s", ac_fileAddress);
-		}
-		else
-		{
-			ESP_LOGD(TAG_STORAGE, "NOTIFY MES");
 			while(xTaskNotify(ht_tcpMes,CMD_ldtm,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
-			ESP_LOGD(TAG_STORAGE, "WAITING FOR MES CONFIG");
 			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
-			fread((struct sockaddr_in*)pv_config_mom, sizeof(struct sockaddr_in), 1, f);
-			fclose(f);
-//			vTaskDelay(100/ portTICK_PERIOD_MS);
+			*((struct sockaddr_in*)pv_config_mom) = p_initConfig->tcpMes;
 			vTaskResume(ht_tcpMes);
-		}
 
-		ESP_LOGD(TAG_STORAGE, "INIT BLINK");
-		sprintf(ac_fileAddress, MOUNT_POINT"/config/blink/%s.cfg", p_initConfig->blink);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT OPEN %s", ac_fileAddress);
-		}
-		else
-		{
 			while(xTaskNotify(ht_blinkRun,CMD_ldbl,eSetValueWithoutOverwrite) != pdPASS)
-							taskYIELD();
+				taskYIELD();
 			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
-			fread((struct stu_blinkConfig*)pv_config_mom, sizeof(struct stu_blinkConfig), 1, f);
-			fclose(f);
+			*((struct stu_blinkConfig*)pv_config_mom) = p_initConfig->blink;
 			vTaskResume(ht_blinkRun);
-		}
 
-		ESP_LOGD(TAG_STORAGE, "INIT CELL");
-		sprintf(ac_fileAddress, MOUNT_POINT"/config/cell/def.cfg");
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT OPEN %s", ac_fileAddress);
-		}
-		else
-		{
 			while(xTaskNotify(ht_adcRun,CMD_ldlc,eSetValueWithoutOverwrite) != pdPASS)
-							taskYIELD();
+				taskYIELD();
 			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
-			fread((struct stu_cellConfig*)pv_config_mom, sizeof(struct stu_cellConfig), 1, f);
-			fclose(f);
+			*((struct stu_cellConfig*)pv_config_mom) = p_initConfig->blink;
 			vTaskResume(ht_adcRun);
-		}
 
-		ESP_LOGD(TAG_STORAGE, "INIT BATMON");
-		f = fopen(MOUNT_POINT"/config/batmon.def", "r");
-		if (f == 0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT OPEN %s", ac_fileAddress);
-		}
-		else
-		{
 			while(xTaskNotify(ht_batmonRun,CMD_init,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
 			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
+			*((struct stu_batmonConfig*)pv_config_mom) = p_initConfig->batMon;
 			fread((struct stu_batmonConfig*)pv_config_mom, sizeof(struct stu_batmonConfig), 1, f);
 			fclose(f);
 			vTaskResume(ht_batmonRun);
+
+			free(p_initConfig);
+			xSemaphoreGive(hs_pointerQueue);
 		}
-		free(p_initConfig);
-		xSemaphoreGive(hs_pointerQueue);
+
+
 		vTaskResume(ht_configRun);
 		ESP_LOGD(TAG_STORAGE, "FINISHED INIT");
 		break;
@@ -835,26 +755,38 @@ void fsdConfig(uint32_t ui_cmdlet)
 			fwrite((wifi_config_t*)pv_config_mom, sizeof(wifi_config_t), 1, f);
 			fclose(f);
 			sprintf(pc_response, "|svwi|%s|\t\tConfig saved.\n", ac_fileAddress);
-			vTaskResume(ht_wifiRun);
+			xEventGroupSync( eg_sync, BIT_STORAGE_FIN, BIT_STORAGE_FIN | BIT_CONFIG_FIN | BIT_RECEIVER_FIN, portMAX_DELAY );
 		}
 		xQueueSend(q_pointer, &pc_response, portMAX_DELAY);
-		vTaskResume(ht_configRun);
-		vTaskSuspend(NULL);
+		xEventGroupSync( eg_sync, BIT_STORAGE_FIN, BIT_STORAGE_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 		free(pc_response);
 		break;
 	case CMD_defs:
 
 	case CMD_inad:
-		xQueueReceive(q_pointer, &pc_fileName, portMAX_DELAY);
+		pc_response = malloc(128);
 		p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-		f = fopen(MOUNT_POINT"/config/init", "r");
-		fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-		strcpy(p_initConfig->adc,pc_fileName);
-		f = fopen(MOUNT_POINT"/config/init", "w");
-		fwrite(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-		free(p_initConfig);
+		f = fopen(MOUNT_POINT"/config/def.ini", "r+");
+		if(f == 0)
+		{
+			sprintf(pc_response, "|inad|0|\t\tCould not find ini file.\n");
+		}
+		else
+		{
+			while(xTaskNotify(ht_adcRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
+				taskYIELD();
+			xQueueReceive(q_pointer, &pv_config_mom, portMAX_DELAY);
+			fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
+			p_initConfig->adc = *(struct stu_adcConfig*)pv_config_mom;
+			xEventGroupSync( eg_sync, BIT_STORAGE_FIN, BIT_STORAGE_FIN | BIT_RECEIVER_FIN, portMAX_DELAY );
+			fwrite(p_initConfig, sizeof(struct stu_initConfig), 1, f);
+			fclose(f);
+			free(p_initConfig);
+			sprintf(pc_response, "|inad|0|\t\tADC config written to ini.\n");
+		}
+		xQueueSend(q_pointer, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync, BIT_STORAGE_FIN, BIT_STORAGE_FIN | BIT_COMM_FIN | BIT_CONFIG_FIN, portMAX_DELAY );
+		free(pc_response);
 		break;
 	case CMD_intc:
 		xQueueReceive(q_pointer, &pc_fileName, portMAX_DELAY);
@@ -971,182 +903,91 @@ esp_err_t fFormatSD()
 		ESP_LOGD(TAG_REDUND, "INITALISING");
 		mkdir(MOUNT_POINT"/redund", 0777);
 		mkdir(MOUNT_POINT"/config", 0777);
+		mkdir(MOUNT_POINT"/config/adc", 0777);
+		mkdir(MOUNT_POINT"/config/cell", 0777);
+		mkdir(MOUNT_POINT"/config/wifi", 0777);
+		mkdir(MOUNT_POINT"/config/blink", 0777);
+		mkdir(MOUNT_POINT"/config/tcpmes", 0777);
+		mkdir(MOUNT_POINT"/config/tcpconf", 0777);
+		mkdir(MOUNT_POINT"/config/trig", 0777);
 
 		ESP_LOGD(TAG_REDUND, "WRITING INIT CONFIG");
 		f = fopen(MOUNT_POINT"/config/init.def", "w");
 		struct stu_initConfig initConfig =
 		{
-				.adc		=	"def",
-				.wifi		=	"def",
-				.blink		=	"def",
-				.tempi		=	"def",
-				.tcpMes		=	"def",
-				.tcpConf	=	"def",
-				.trigger	=	"def"
+				.adc =
+				{
+						.b_sendTCP		= 1,
+						.b_sendSD		= 0,
+						.ul_adcPeriod	= 1000000,
+						.uc_numDecimals	= 2
+				},
+				.cell =
+				{
+						.ac_name 		= "default",
+						.d_calValue		= 1.0,
+						.ui_tareValue	= 0,
+						.ul_cellID		= 0
+				},
+				.batMon =
+				{
+						.i_batRawLow	= 0,
+						.f_batVolLow	= 0,
+						.i_batRawHigh	= 1023,
+						.f_batVolHigh	= 3.3,
+				},
+				.blink =
+				{
+						.ui_blinkPeriod		= 10000,
+						.ui_blinkDuration	= 100,
+						.ui_blinkBrightness	= 200,
+						.ui_blinkFrequency	= 50000,
+						.b_blinkEnabled		= 1
+				},
+				.trigger =
+				{
+						.b_pinMode = 1,
+						.ui_timeout	= 60000,
+						.trigSocket =
+						{
+								.sin_family			=	AF_INET,
+								.sin_addr.s_addr	=	0,
+								.sin_port			=	37904
+						}
+				},
+				.wifi =
+				{
+						.c_wifiType	= TYPE_AP,
+						.ac_apPass = "",
+						.wifiConfig
+						{
+							.ap =
+							{
+									.ssid	= "espdefaultinit",
+									.ssid_len = strlen("espdefaultinit"),
+									.password = "espdefaultinit",
+									.channel = 9,
+									.authmode = WIFI_AUTH_WPA_WPA2_PSK,
+									.max_connection = 1
+							}
+						}
+				},
+				.tcpMes =
+				{
+						.sin_family			=	AF_INET,
+						.sin_addr.s_addr	=	0,
+						.sin_port			=	37392
+				},
+				.tcpConf =
+				{
+						.sin_family			=	AF_INET,
+						.sin_addr.s_addr	=	0,
+						.sin_port			=	37648
+				}
+
 		};
 		fwrite(&initConfig, sizeof(struct stu_initConfig), 1, f);
 		fclose(f);
-
-		mkdir(MOUNT_POINT"/config/adc", 0777);
-		f = fopen(MOUNT_POINT"/config/adc/def.cfg", "w");
-		if (f==0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT CREATE FILE "MOUNT_POINT"/config/adc/def.cfg");
-		}
-		else
-		{
-		struct stu_adcConfig adcConfig_default =
-		{
-				.b_sendSD = false,
-				.b_sendTCP = true,
-				.uc_numDecimals = 2
-		};
-		fwrite(&adcConfig_default, sizeof(struct stu_adcConfig), 1, f);
-		fclose(f);
-		}
-
-		mkdir(MOUNT_POINT"/config/cell", 0777);
-		f = fopen(MOUNT_POINT"/config/cell/def.cfg", "w");
-		if (f==0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT CREATE FILE "MOUNT_POINT"/config/cell/def.cfg");
-		}
-		else
-		{
-		struct stu_cellConfig cellConfig_default =
-		{
-				.ac_name 		=	"default",
-				.ul_cellID		=	0,
-				.d_calValue 	= 	1.0,
-				.ui_tareValue	=	0
-		};
-		fwrite(&cellConfig_default, sizeof(struct stu_cellConfig), 1, f);
-		fclose(f);
-		}
-
-		mkdir(MOUNT_POINT"/config/wifi", 0777);
-		f = fopen(MOUNT_POINT"/config/wifi/def.cfg", "w");
-		if (f==0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT CREATE FILE "MOUNT_POINT"/config/wifi/def.cfg");
-		}
-		else
-		{
-			wifi_config_t wifiConfig_default =
-			{
-					.sta=
-					{
-							.ssid = "",
-							.password = "",
-							.threshold.authmode = WIFI_AUTH_WPA2_PSK,
-							.pmf_cfg =
-							{
-									.capable = true,
-									.required = false
-							}
-					}
-			};
-			fwrite(&wifiConfig_default, sizeof(wifi_config_t), 1, f);
-			fclose(f);
-		}
-
-
-		mkdir(MOUNT_POINT"/config/blink", 0777);
-		f = fopen(MOUNT_POINT"/config/blink/def.cfg", "w");
-		if (f==0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT CREATE FILE "MOUNT_POINT"/config/blink/def.cfg");
-		}
-		else
-		{
-			struct stu_blinkConfig blinkConfig_default =
-			{
-					.ui_blinkPeriod		=	10000,
-					.ui_blinkDuration	=	500,
-					.ui_blinkBrightness	=	200,
-					.ui_blinkFrequency	=	10000,
-					.b_blinkEnabled		=	1,
-			};
-			blinkConfig_default.ui_blinkBrightness = 1000;
-			fwrite(&blinkConfig_default, sizeof(struct stu_blinkConfig), 1, f);
-			fclose(f);
-		}
-
-		mkdir(MOUNT_POINT"/config/tcpmes", 0777);
-		f = fopen(MOUNT_POINT"/config/tcpmes/def.cfg", "w");
-		if (f==0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT CREATE FILE "MOUNT_POINT"/config/tcpmes/def.cfg");
-		}
-		else
-		{
-		struct sockaddr_in tcpMesAddr =
-		{
-				.sin_family			=	AF_INET,
-				.sin_addr.s_addr	=	0,
-				.sin_port			=	37392
-
-		};
-		fwrite(&tcpMesAddr, sizeof(struct sockaddr_in), 1, f);
-		fclose(f);
-		}
-
-		mkdir(MOUNT_POINT"/config/tcpconf", 0777);
-		f = fopen(MOUNT_POINT"/config/tcpconf/def.cfg", "w");
-		if (f==0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT CREATE FILE "MOUNT_POINT"/config/tcpconf/def.cfg");
-		}
-		else
-		{
-		struct sockaddr_in tcpConfAddr =
-		{
-				.sin_family			=	AF_INET,
-				.sin_addr.s_addr	=	0,
-				.sin_port			=	37648
-
-		};
-		fwrite(&tcpConfAddr, sizeof(struct sockaddr_in), 1, f);
-		fclose(f);
-		}
-
-		mkdir(MOUNT_POINT"/config/trig", 0777);
-		f = fopen(MOUNT_POINT"/config/trig/def.cfg", "w");
-		if (f==0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT CREATE FILE "MOUNT_POINT"/config/trig/def.cfg");
-		}
-		else
-		{
-			struct sockaddr_in trigConfAddr =
-			{
-					.sin_family			=	AF_INET,
-					.sin_addr.s_addr	=	0,
-					.sin_port			=	37904
-
-			};
-			fwrite(&trigConfAddr, sizeof(struct sockaddr_in), 1, f);
-			fclose(f);
-		}
-
-		f = fopen(MOUNT_POINT"/config/batmon.def", "w");
-		if (f==0)
-		{
-			ESP_LOGW(TAG_STORAGE, "COULD NOT CREATE FILE "MOUNT_POINT"/config/batmon.def");
-		}
-		else
-		{
-		struct stu_batmonConfig batmonConfig =
-		{
-				.f_batVolHigh = 4.2,
-				.f_batVolLow = 1.0,
-				.i_batRawHigh = 500,
-				.i_batRawLow = 50,
-		};
-		fwrite(&batmonConfig, sizeof(struct stu_batmonConfig), 1, f);
-		fclose(f);
-		}
-
 		ESP_LOGD(TAG_REDUND, "FINISHED INIT");
 	}
 

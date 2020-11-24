@@ -479,18 +479,16 @@ void tconfigRun	(void* param)
 			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
 				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot load config while recording or waiting.\n");
 			else{
-				pc_configOut = malloc(64);
 				pc_value = fgetValuePointer(pc_configIn, "|user|\t\tInsert filename:\n");
 				xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
 				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
 					taskYIELD();
 				xQueueSend(q_pointer,&pc_value, portMAX_DELAY);
-				vTaskSuspend(NULL);
+				xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_STORAGE_FIN | BIT_CONFIG_FIN | BIT_RECEIVER_FIN, portMAX_DELAY );
 				xQueueReceive(q_pointer, &pc_configOut, portMAX_DELAY);
 				xSemaphoreGive(hs_pointerQueue);
 				freturnMessage(pc_configOut);
-				vTaskResume(ht_storageRun);
-				free(pc_configOut);
+				xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_STORAGE_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 			}
 			break;
 
@@ -498,80 +496,49 @@ void tconfigRun	(void* param)
 			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
 				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
 			else{
-				pc_value = fgetValuePointer(pc_configIn, "|user|\t\tInsert filename:\n");
-
-				if (fchangeInit(ui_cmdlet, pc_configIn) != 0){
-					sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tCould not find file:%s\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
-				else{
-					sprintf(pc_configOut, "|inad|%s|\t\tInit changed.\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
+				xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
+					taskYIELD();
+				xQueueReceive(q_pointer, &pc_configOut, portMAX_DELAY);
+				freturnMessage(pc_configOut);
+				xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_STORAGE_FIN | BIT_COMM_FIN | BIT_CONFIG_FIN, portMAX_DELAY );
+				xSemaphoreGive(hs_pointerQueue);
 			}
 			break;
 		case CMD_intc:
 			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
 				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
 			else{
-				pc_value = fgetValuePointer(pc_configIn, "|user|\t\tInsert filename:\n");
-
-				if (fchangeInit(ui_cmdlet, pc_configIn) != 0){
-					sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tCould not find file:%s\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
-				else{
-					sprintf(pc_configOut, "|intc|%s|\t\tInit changed.\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
+				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
+					taskYIELD();
+				freturnMessage("|inad|1|\tADC config saved to init.\n\4");
 			}
 			break;
 		case CMD_intm:
 			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
 				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
 			else{
-				pc_value = fgetValuePointer(pc_configIn, "|user|\t\tInsert filename:\n");
-
-				if (fchangeInit(ui_cmdlet, pc_configIn) != 0){
-					sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tCould not find file:%s\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
-				else{
-					sprintf(pc_configOut, "|intm|%s|\t\tInit changed.\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
+				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
+					taskYIELD();
+				freturnMessage("|inad|1|\tADC config saved to init.\n\4");
 			}
 			break;
 		case CMD_inbl:
 			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
 				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
 			else{
-				pc_value = fgetValuePointer(pc_configIn, "|user|\t\tInsert filename:\n");
-
-				if (fchangeInit(ui_cmdlet, pc_configIn) != 0){
-					sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tCould not find file:%s\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
-				else{
-					sprintf(pc_configOut, "|inbl|%s|\t\tInit changed.\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
+				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
+					taskYIELD();
+				freturnMessage("|inad|1|\tADC config saved to init.\n\4");
 			}
 			break;
 		case CMD_inwi:
 			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
 				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
 			else{
-				pc_value = fgetValuePointer(pc_configIn, "|user|\t\tInsert filename:\n");
-
-				if (fchangeInit(ui_cmdlet, pc_configIn) != 0){
-					sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tCould not find file:%s\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
-				else{
-					sprintf(pc_configOut, "|inwi|%s|\t\tInit changed.\n", pc_value);
-					freturnMessage(pc_configOut);
-				}
+				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
+					taskYIELD();
+				freturnMessage("|inad|1|\tADC config saved to init.\n\4");
 			}
 			break;
 
@@ -922,7 +889,6 @@ void freturnMessage	(const char* pc_response)
 	int i = 0;
 	xQueueSend(q_pconfigOut,&i, portMAX_DELAY);
 	xQueueSend(q_pconfigOut,&pc_response, portMAX_DELAY);
-	vTaskSuspend(NULL);
 }
 
 char* fgetValuePointer	(char* pc_value,
