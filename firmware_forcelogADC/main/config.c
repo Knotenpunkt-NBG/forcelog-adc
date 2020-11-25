@@ -297,8 +297,8 @@ void tconfigRun	(void* param)
 						sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tcould not find value in message(%s).\n", pc_value);
 					}
 					freturnMessage(pc_configOut);
+					xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_RECEIVER_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 					free(pc_configOut);
-					vTaskResume(ht_blinkRun);
 					xSemaphoreGive(hs_pointerQueue);
 				}
 			}
@@ -337,8 +337,8 @@ void tconfigRun	(void* param)
 						sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tCould not find value in message(%s).\n", pc_value);
 					}
 					freturnMessage(pc_configOut);
+					xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_RECEIVER_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 					free(pc_configOut);
-					vTaskResume(ht_blinkRun);
 					xSemaphoreGive(hs_pointerQueue);
 				}
 			}
@@ -376,8 +376,8 @@ void tconfigRun	(void* param)
 						sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tCould not find value in message(%s).\n", pc_value);
 					}
 					freturnMessage(pc_configOut);
+					xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_RECEIVER_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 					free(pc_configOut);
-					vTaskResume(ht_blinkRun);
 					xSemaphoreGive(hs_pointerQueue);
 				}
 			}
@@ -415,8 +415,8 @@ void tconfigRun	(void* param)
 						sprintf(pc_configOut, "|err|"STR(ERR_RECORDING)"|\t\tcould not find value in message(%s)|\n", pc_value);
 					}
 					freturnMessage(pc_configOut);
+					xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_RECEIVER_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 					free(pc_configOut);
-					vTaskResume(ht_blinkRun);
 					xSemaphoreGive(hs_pointerQueue);
 				}
 			}
@@ -426,17 +426,20 @@ void tconfigRun	(void* param)
 			while(xTaskNotify(ht_blinkRun,CMD_benb,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
 			freturnMessage("|benb|1|\t\tOK, blink enabled\n");
+			xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_RECEIVER_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 			break;
 		case CMD_bdis: //Blink DISable: disables blink
 			while(xTaskNotify(ht_blinkRun,CMD_bdis,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
 			freturnMessage("|bdis|0|\t\tOK, blink disabled|\n");
+			xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_RECEIVER_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 			break;
 		case CMD_blnk: //BLiNK: single shot blink without tcp message
 		{
 			while(xTaskNotify(ht_blinkRun,CMD_blnk,eSetValueWithoutOverwrite) != pdPASS)
 				taskYIELD();
 			freturnMessage("|blnk|1|\t\tOK, blinking\n");
+			xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_RECEIVER_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 		}
 		break;
 
@@ -454,6 +457,7 @@ void tconfigRun	(void* param)
 				vTaskSuspend(NULL);
 				sprintf(pc_configOut, "|mkfs|1|\t\tSD card has been formatted.|\n");
 				freturnMessage(pc_configOut);
+				xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_STORAGE_FIN | BIT_CONFIG_FIN | BIT_COMM_FIN, portMAX_DELAY );
 			}
 			break;
 //		case CMD_init:
@@ -493,6 +497,10 @@ void tconfigRun	(void* param)
 			break;
 
 		case CMD_inad:
+		case CMD_intc:
+		case CMD_intm:
+		case CMD_inbl:
+		case CMD_inwi:
 			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
 				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
 			else{
@@ -505,43 +513,7 @@ void tconfigRun	(void* param)
 				xSemaphoreGive(hs_pointerQueue);
 			}
 			break;
-		case CMD_intc:
-			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
-				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
-			else{
-				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
-					taskYIELD();
-				freturnMessage("|inad|1|\tADC config saved to init.\n\4");
-			}
-			break;
-		case CMD_intm:
-			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
-				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
-			else{
-				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
-					taskYIELD();
-				freturnMessage("|inad|1|\tADC config saved to init.\n\4");
-			}
-			break;
-		case CMD_inbl:
-			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
-				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
-			else{
-				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
-					taskYIELD();
-				freturnMessage("|inad|1|\tADC config saved to init.\n\4");
-			}
-			break;
-		case CMD_inwi:
-			if ((status == STATUS_RECORDING) || (status == STATUS_WAITING))
-				freturnMessage("|err|"STR(ERR_RECORDING)"|\t\tCannot set init while recording or waiting.\n");
-			else{
-				while(xTaskNotify(ht_storageRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
-					taskYIELD();
-				freturnMessage("|inad|1|\tADC config saved to init.\n\4");
-			}
-			break;
-
+		
 			//LOGGING
 		case CMD_loge: //Sets logging to error (highest)
 			fsetLogLevel(LOG_ERROR);
@@ -581,7 +553,7 @@ void tconfigRun	(void* param)
 					strcpy((char*)((wifi_config_t*)pv_config_mom)->sta.ssid, pc_value);
 					sprintf(pc_configOut, "|ssid|%s|\t\tSSID set to %s.\n", pc_value, pc_value);
 					freturnMessage(pc_configOut);
-					vTaskResume(ht_wifiRun);
+					
 					xSemaphoreGive(hs_pointerQueue);
 				}
 			}
