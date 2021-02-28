@@ -29,16 +29,13 @@ char*		fcreateInquireString	(void);
 char*		fgetValuePointer		(char* pc_value,
 									const char* pc_response);
 
+void		finitAll				(void);
 void*		fgetConfigFromTask		(TaskHandle_t ht_taskHandle,
 									uint32_t ui_cmdlet);
 void		freturnMessage			(const char* pc_response);
-void		fscanOwb				(void);
+
 uint64_t	fuLongFromRomCode		(OneWireBus_ROMCode stu_romCode);
 void		fromCodeFromULong		(uint64_t ul_romCode, OneWireBus_ROMCode stu_romCode);
 uint32_t	fgetNextString			(char* string);
-uint32_t	floadConfig				(uint32_t ui_cmdlet,
-									TaskHandle_t ht_taskHandle,
-									char* pc_value);
-uint32_t	fchangeInit				(uint32_t ui_cmdlet,
-									char* pc_value);
+
 #endif /* MAIN_CONFIG_H_ */

@@ -28,19 +28,22 @@
 #include "defines.h"
 
 EXTERN uint8_t gb_moduleID;
+struct stu_initConfig* gstu_config;
+EXTERN uint64_t ul_zeroTime;
 
 // Config structs
 struct stu_adcConfig{
-	bool b_sendTCP;
-	bool b_sendSD;
-	uint64_t ul_adcPeriod;
-	uint8_t uc_numDecimals;
+	uint64_t	ul_adcPeriod;
+	uint8_t		uc_txMode;
+	uint8_t		uc_numDecimals;
+	uint8_t		uc_unit;
 };
 struct stu_cellConfig{
-	char		ac_name[21];
+	uint32_t	ui_loadRating;
+	char		ac_name[17];
 	double 		d_calValue;
 	uint32_t	ui_tareValue;
-	uint64_t	ul_cellID;
+	uint32_t	ui_tareZero;
 };
 struct stu_batmonConfig
 {
@@ -67,62 +70,77 @@ struct stu_triggerConfig
 {
 	bool b_pinMode;
 	uint32_t ui_timeout;
-	struct sockaddr_in trigSocket;
 };
-struct stu_wifiConfig
+struct stu_apConfig
 {
-	char c_wifiType;
-	char ac_apPass[65];
-	wifi_config_t wifiConfig;
+	char		ac_hostName[64];
+	esp_netif_ip_info_t ipInfo;
+	char		ac_ssid[64];
+	char		ac_pass[64];
+	in_port_t	portConf;
+	in_port_t	portMes;
+	in_port_t	portBroad;
+	in_port_t	portTrig;
+	uint32_t	ipTrig;
 };
+struct stu_staConfig
+{
+	char		ac_ssid[64];
+	char		ac_pass[64];
+	in_port_t	portConf;
+	in_port_t	portMes;
+	in_port_t	portBroad;
+	in_port_t	portTrig;
+	uint32_t	ipTrig;
+	char		ac_hostName[64];
+	uint32_t	ui_wifiTimeout;
+};
+struct stu_tempConfig
+{
+	OneWireBus_ROMCode	romInt;
+	OneWireBus_ROMCode	romExt;
+	uint32_t			ui_perInt;
+	uint32_t			ui_perExt;
+};
+
 struct stu_initConfig
 {
-	struct stu_adcConfig adc;
-	struct stu_cellConfig cell;
-	struct stu_blinkConfig blink;
-	struct stu_triggerConfig trigger;
-	struct stu_wifiConfig wifi;
-	struct sockaddr_in tcpConf;
-	struct sockaddr_in tcpMes;
-	struct stu_batmonConfig batMon;
+	struct stu_adcConfig		adc;
+	struct stu_cellConfig		cell;
+	struct stu_blinkConfig		blink;
+	struct stu_triggerConfig	trigger;
+	struct stu_staConfig		staConfig;
+	struct stu_apConfig			apConfig;
+	struct stu_batmonConfig 	batMon;
+	struct stu_tempConfig		temp;
 };
 
-
-//Temperature internal
-OneWireBus * owb;
-OneWireBus_ROMCode device_rom_codes[MAX_DEVICES];
-DS18B20_Info * stu_temp_probe_int;
-OneWireBus_ROMCode stu_romCode_probe_int;
-int num_devices;
-
-
+typedef struct	{
+	char	c_type;
+	char*	pc_message;
+} stu_configMessage;
 //timing
-EXTERN uint64_t ul_zeroTime;
+
 
 
 //Event groups
-EventGroupHandle_t s_wifi_event_group;
+EventGroupHandle_t eg_wifi;
 EventGroupHandle_t eg_sync;
+EventGroupHandle_t eg_config;
+EventGroupHandle_t eg_status;
+
 
 //Queues
-QueueHandle_t q_pointer;
+QueueHandle_t q_send;
+QueueHandle_t q_recv;
 QueueHandle_t q_rgb_status;
 QueueHandle_t q_tcpMessages;
 QueueHandle_t q_uartMessages;
 QueueHandle_t q_pconfigIn;
 QueueHandle_t q_pconfigOut;
 
-QueueHandle_t q_value_mes_tcp;
-QueueHandle_t q_time_mes_tcp;
-QueueHandle_t q_time_blink_tcp;
-QueueHandle_t q_value_tempint_tcp;
-QueueHandle_t q_time_tempint_tcp;
-
-QueueHandle_t q_value_mes_sd;
-QueueHandle_t q_time_mes_sd;
-QueueHandle_t q_time_blink_sd;
-QueueHandle_t q_value_tempint_sd;
-QueueHandle_t q_time_tempint_sd;
+QueueHandle_t q_measurements;
+QueueHandle_t q_measurements_redund;
 
 
 //Semaphores
@@ -135,6 +153,9 @@ SemaphoreHandle_t hs_configCom;
 esp_timer_handle_t 	htim_periodicAdc;
 TimerHandle_t 		h_timerBlink;
 TimerHandle_t 		h_timerBatMon;
+TimerHandle_t		htim_tcpSend;
+TimerHandle_t		htim_oneWire;
+TimerHandle_t		htim_staTimeOut;
 
 
 //Tasks Handles
@@ -148,15 +169,17 @@ TaskHandle_t ht_wifiRun;
 TaskHandle_t ht_batmonRun;
 TaskHandle_t ht_serialRun;
 TaskHandle_t ht_tempIntRun;
+TaskHandle_t ht_tempExtRun;
 TaskHandle_t ht_configRun;
+TaskHandle_t ht_wifiBroadcast;
+
+//General Handles
+esp_netif_t* h_netif;
 
 //Functions
 EXTERN void	sendRgbLedStatus(int i);
 EXTERN void fsetLogLevel(int i);
 
-
-//Tasks
-EXTERN void t_blinkRun(void *arg);
 
 
 

@@ -10,28 +10,25 @@
 void fbatMonInit(void)
 {
 	adc1_config_width(ADC_WIDTH_BIT_12);
-	adc1_config_channel_atten(ADC1_CHANNEL_4, ADC_ATTEN_DB_11);
+	adc1_config_channel_atten(BATMON_CHANNEL, ADC_ATTEN_DB_11);
 	xTaskCreate(tbatmonRun,		"t_batmonRun",		2048, NULL, 10, &ht_batmonRun);
 }
 
 void tbatmonRun	(void* param)
 {
-	vTaskSuspend(NULL);
-	ESP_LOGD(TAG_BATMON, "STARTING tbatmonRun");
-	struct stu_batmonConfig batmonConfig_mom;
 	uint32_t ui_cmdlet = 0;
 	float f_batVol = 0.0;
 	int		i_batRaw = 0;
 	char *message = NULL;
-	while(ui_cmdlet != CMD_load)
+	while(ui_cmdlet != CMD_init)
 	{
 		xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
-		fconfigBatMon(ui_cmdlet, &batmonConfig_mom);
+		fconfigBatMon(ui_cmdlet);
 	}
+
 	vTaskDelay(5000 / portTICK_PERIOD_MS);
 	h_timerBatMon = xTimerCreate("timerBlink",BATMON_PERIOD / portTICK_PERIOD_MS,pdTRUE,NULL,callback_timerBatmon);
 
-	ESP_LOGD(TAG_BATMON, "STARTING BATMON");
 	while(1)
 	{
 		xTimerStart(h_timerBatMon, portMAX_DELAY);
@@ -42,18 +39,19 @@ void tbatmonRun	(void* param)
 			{
 				for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
 				{
-					f_batVol += fmap(adc1_get_raw(ADC1_CHANNEL_4),batmonConfig_mom.i_batRawLow, batmonConfig_mom.f_batVolLow, batmonConfig_mom.i_batRawHigh, batmonConfig_mom.f_batVolHigh);
-					i_batRaw += adc1_get_raw(ADC1_CHANNEL_4);
+					f_batVol += fmap(adc1_get_raw(BATMON_CHANNEL),gstu_config->batMon.i_batRawLow, gstu_config->batMon.f_batVolLow, gstu_config->batMon.i_batRawHigh, gstu_config->batMon.f_batVolHigh);
+					i_batRaw += adc1_get_raw(BATMON_CHANNEL);
 				}
 				f_batVol /= BATMON_NUM_SAMPLES;
 				i_batRaw /= BATMON_NUM_SAMPLES;
 				message = malloc(30+1);
-				ESP_LOGV(TAG_BATMON, "Battery voltage:%f	raw:%d", f_batVol,i_batRaw);
 				sprintf(message, "|bvol|%.*f|\t\tBattery voltage|\n",2, f_batVol);
 				xQueueSend(q_tcpMessages,&message, portMAX_DELAY);
+				while(xTaskNotify(ht_tcpConf, CMD_fire,eSetValueWithoutOverwrite) != pdPASS)
+					taskYIELD();
 			}
 		}while(ui_cmdlet == CMD_fire);
-		fconfigBatMon(ui_cmdlet, &batmonConfig_mom);
+		fconfigBatMon(ui_cmdlet);
 		xTimerStop(h_timerBatMon, portMAX_DELAY);
 	}
 }
@@ -64,39 +62,59 @@ void callback_timerBatmon	(void* arg)
 		vTaskDelay(1/ portTICK_PERIOD_MS);
 }
 
-void fconfigBatMon	(uint32_t ui_cmdlet,
-					struct stu_batmonConfig* batmonConfig_mom)
+void fconfigBatMon	(uint32_t ui_cmdlet)
 {
-	float f_temp = 0.0;
-	uint32_t ui_temp = 0;
 	switch(ui_cmdlet)
 	{
 	case CMD_bath:
-		xQueuePeek(q_pointer, &f_temp, portMAX_DELAY);
-		batmonConfig_mom->f_batVolHigh = f_temp;
-		xQueueReceive(q_pointer, &ui_temp, portMAX_DELAY);
-		ui_temp = adc1_get_raw(ADC1_CHANNEL_4);
-		batmonConfig_mom->i_batRawHigh = ui_temp;
-		xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
-		xQueueSend(q_pointer,&batmonConfig_mom, portMAX_DELAY);
-		while(xTaskNotify(ht_storageRun,CMD_bath,eSetValueWithoutOverwrite) != pdPASS)
-			vTaskDelay(1/ portTICK_PERIOD_MS);
+		for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
+		{
+			gstu_config->batMon.i_batRawHigh += adc1_get_raw(BATMON_CHANNEL);
+		}
+		gstu_config->batMon.i_batRawHigh /= BATMON_NUM_SAMPLES;
+		xEventGroupSync( eg_sync,
+				BIT_BATMON_SYNC,
+				BIT_BATMON_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_sync,
+				BIT_BATMON_SYNC,
+				BIT_BATMON_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
+
 	case CMD_batl:
-		xQueuePeek(q_pointer, &f_temp, portMAX_DELAY);
-		batmonConfig_mom->f_batVolLow = f_temp;
-		xQueueReceive(q_pointer, &ui_temp, portMAX_DELAY);
-		ui_temp = adc1_get_raw(ADC1_CHANNEL_4);
-		batmonConfig_mom->i_batRawLow = ui_temp;
-		xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
-		xQueueSend(q_pointer,&batmonConfig_mom, portMAX_DELAY);
-		while(xTaskNotify(ht_storageRun,CMD_batl,eSetValueWithoutOverwrite) != pdPASS)
-			vTaskDelay(1/ portTICK_PERIOD_MS);
+		for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
+		{
+			gstu_config->batMon.i_batRawLow += adc1_get_raw(BATMON_CHANNEL);
+		}
+		gstu_config->batMon.i_batRawLow /= BATMON_NUM_SAMPLES;
+		xEventGroupSync( eg_sync,
+				BIT_BATMON_SYNC,
+				BIT_BATMON_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_sync,
+				BIT_BATMON_SYNC,
+				BIT_BATMON_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+
 		break;
+
 	case CMD_init:
-	case CMD_defl:
-		xQueueSend(q_pointer,&batmonConfig_mom, portMAX_DELAY);
-		vTaskSuspend( NULL );
+		xEventGroupSync( eg_config,
+				BIT_BATMON_SYNC,
+				BIT_BATMON_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_sync,
+				BIT_BATMON_SYNC ,
+				BIT_CONFIG_SYNC
+					| BIT_ADC_SYNC
+					| BIT_TCPMES_SYNC
+					| BIT_TCPCONF_SYNC
+					| BIT_WIFI_SYNC
+					| BIT_BLINK_SYNC
+					| BIT_BATMON_SYNC
+					| BIT_STORAGE_SYNC,
+				portMAX_DELAY );
 		break;
 	default:
 		break;

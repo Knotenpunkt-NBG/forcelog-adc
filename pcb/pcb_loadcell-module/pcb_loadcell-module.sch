@@ -489,7 +489,6 @@ Wire Wire Line
 	6600 4950 6500 4950
 Wire Wire Line
 	6500 4850 6500 4950
-Connection ~ 6500 4950
 $Comp
 L modules:TP4056withprotect U1
 U 1 1 5EA1C7E8
@@ -666,9 +665,6 @@ Wire Wire Line
 	3000 4950 3300 4950
 Connection ~ 3300 4950
 Connection ~ 6000 4950
-Connection ~ 6300 4950
-Wire Wire Line
-	6300 4950 6500 4950
 Text Label 7900 4950 0    50   ~ 0
 VBOOST
 $Comp

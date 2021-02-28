@@ -10,76 +10,94 @@
 
 
 #define FIRMWARE_VERSION		"1.0"
+//TODO: implement versioning in config to automaticly rewrite the init config when firmware update has been flashed
+#define REWRITE_INIT			0 //writes the init config every time the adc boots. mainly for development purpose
 
 
 //COMPILER MACROS
 #define STR_(X) #X
 #define STR(X) STR_(X)
 
+
 //Eventgroup BITs
-#define BIT_CONFIG_FIN		BIT1
-#define BIT_COMM_FIN		BIT2
-#define BIT_STORAGE_FIN		BIT3
-#define BIT_RECEIVER_FIN	BIT4
+#define BIT_CONFIG_SYNC		BIT1
+#define BIT_COMM_SYNC		BIT2
+#define BIT_STORAGE_SYNC	BIT3
+
+#define BIT_WIFI_SYNC		BIT5
+#define BIT_ADC_SYNC		BIT6
+#define BIT_BLINK_SYNC		BIT7
+#define BIT_TCPCONF_SYNC	BIT8
+#define BIT_TCPMES_SYNC		BIT9
+#define BIT_TEMPINT_SYNC	BIT10
+#define BIT_TRIGGER_SYNC	BIT11
+#define BIT_BATMON_SYNC		BIT12
+
 
 //STORAGE
 #define FILENAME_MAX_SIZE	20
 
 
 //COMMUNICATION
-#define COM_CYCLES_TIMEOUT 50
+#define COM_CYCLES_TIMEOUT			50
+#define PERIOD_TCPMES_PACKET_MS		100
+#define COM_TCPMES_KEEPALIVE_PERIOD
+
 
 //Temperature internal
-#define OWB_GPIO			4
-#define MAX_DEVICES          (8)
-#define TEMP_INTERNAL_PERIOD        (1000)   // milliseconds
-#define BIT_TEMP_START		BIT1
-
+#define OWB_GPIO				4
+#define GPIO_OWB_SENSE			34
+#define MAX_DEVICES          	(8)
+#define TEMP_INTERNAL_PERIOD	60   // period of temperature measurements in seconds. must be higher then 2s
+#define MAX_TEMP				50.0	//Max temperature (°C)for the adc to operate in. if this is crossed the adc shuts down all functions
 
 
 //Battery monitor
-#define BATMON_PERIOD		10*1000
+#define BATMON_PERIOD		1*1000
 #define BAT_CUTOFF			3.3
 #define BIT_BATMON_FIRE		BIT1
 #define BATMON_NUM_SAMPLES	50
+#define BATMON_CHANNEL		ADC1_CHANNEL_7
 
 
 //ID SHIFT REGISTER
-#define PIN_MODULE_ID_SELECT	2
-#define PIN_MODULE_ID_CLK		14
-#define PIN_MODULE_ID_DOUT		34
+#define PIN_MODULE_ID_SELECT	0
+#define PIN_MODULE_ID_CLK		2
+#define PIN_MODULE_ID_DOUT		17
+
 
 //Trigger
 #define ACTIVE_HIGH		1
 #define ACTIVE_LOW		0
+#define DEFAULT_TRIGGER_PORT	16001
+
 
 //ADC MODULE USED
 #define ADC_MODULE_ID		MODULE_ID_HX711
-#define MODULE_ID_HX711		1
+#define MODULE_ID_HX711		0x01
+#define MOUDLE_NAME			"HX711"
 
-//GPIO Module
-#define GPIO_INPUT_PIN_SEL (1ULL<<PIN_MODULE_ID_DOUT)
-#define GPIO_OUTPUT_PIN_SEL ((1ULL<<LEDC_GPIO_BLINK) | (1ULL<<PIN_MODULE_ID_SELECT) | (1ULL<<PIN_MODULE_ID_CLK))
 
 // Blink LED
 #define LEDC_GPIO_BLINK			(27)
 #define LEDC_GPIO_INV_BLINK		0
 #define LEDC_CH_BLINK			LEDC_CHANNEL_3
 
+
 //Config of RGB Status LED
 #define LEDC_HS_TIMER			LEDC_TIMER_0
 #define LEDC_HS_MODE			LEDC_HIGH_SPEED_MODE
 
-#define LEDC_GPIO_RED			(26)
-#define LEDC_GPIO_INV_RED		1
+#define LEDC_GPIO_RED			(15)
+#define LEDC_GPIO_INV_RED		0
 #define LEDC_CH_RED				LEDC_CHANNEL_0
 
-#define LEDC_GPIO_GREEN			(25)
-#define LEDC_GPIO_INV_GREEN		1
+#define LEDC_GPIO_GREEN			(16)
+#define LEDC_GPIO_INV_GREEN		0
 #define LEDC_CH_GREEN			LEDC_CHANNEL_1
 
-#define LEDC_GPIO_BLUE			(33)
-#define LEDC_GPIO_INV_BLUE		1
+#define LEDC_GPIO_BLUE			(17)
+#define LEDC_GPIO_INV_BLUE		0
 #define LEDC_CH_BLUE			LEDC_CHANNEL_2
 
 #define LEDC_FREQ_STATUS		200
@@ -92,17 +110,37 @@
 //Wifi Config
 #define WIFI_CONNECTED_BIT		BIT0
 #define WIFI_FAIL_BIT			BIT1
-#define EXAMPLE_ESP_MAXIMUM_RETRY  5
-#define FLAG_STATION			0
-#define FLAG_AP					1
-#define NUM_WIFI_RECON			3
-#define TYPE_STA				0
-#define TYPE_AP					1
+#define WIFI_TIMEOUT_BIT		BIT2
+#define WIFI_IPASSIGNED_BIT		BIT3
+#define WIFI_STA_START_BIT		BIT4
+
+#define MIN_SIGNAL_DBM			-90
+#define MAX_NUM_AP_SCAN			10
 
 
-//ADC Config Events
+//ADC
 #define ADC_MIN_PERIOD			12500		//the minimal measurement period for the module ; has to be moved to the module itself
 #define ADC_CAL_PERIOD			100000		//the measurement period used for calibration ; has to be moved to module
+
+#define UNIT_RAW			0
+#define UNIT_N				1
+#define UNIT_KG				2
+#define UNIT_G				3
+#define UNIT_T				4
+#define UNIT_LB				10
+#define UNIT_OZ				11
+#define UNIT_LBF			30
+#define UNIT_NB				50
+
+#define TYPE_ADC			1
+#define TYPE_BLINK			2
+#define TYPE_TEMP_INT		3
+#define TYPE_TEMP_EXT		4
+
+#define TXMODE_TCP_PLUS_SDBACK	1
+#define TXMODE_TCP				2
+#define TXMODE_SD				3
+
 
 //TCP
 #define TICKS_RECON_MES			10			//defines how many ticks to wait until measurement socket tries a keepalive
@@ -120,6 +158,7 @@
 #define CMD_strt	('s' << 8 * 3) + ('t' << 8 * 2) + ('r' << 8 * 1) + ('t' << 8 * 0)
 #define CMD_fire	('f' << 8 * 3) + ('i' << 8 * 2) + ('r' << 8 * 1) + ('e' << 8 * 0)
 #define CMD_trig	('t' << 8 * 3) + ('r' << 8 * 2) + ('i' << 8 * 1) + ('g' << 8 * 0)
+#define CMD_send	('s' << 8 * 3) + ('e' << 8 * 2) + ('n' << 8 * 1) + ('d' << 8 * 0)
 
 
 	//CMDlets ADC
@@ -161,37 +200,68 @@
 #define CMD_bdis	('b' << 8 * 3) + ('d' << 8 * 2) + ('i' << 8 * 1) + ('s' << 8 * 0)
 #define CMD_blnk	('b' << 8 * 3) + ('l' << 8 * 2) + ('n' << 8 * 1) + ('k' << 8 * 0)
 
+
 	//CMDlets connection
 #define CMD_conn	('c' << 8 * 3) + ('o' << 8 * 2) + ('n' << 8 * 1) + ('n' << 8 * 0)
+#define CMD_come	('c' << 8 * 3) + ('o' << 8 * 2) + ('m' << 8 * 1) + ('e' << 8 * 0)
+#define CMD_iptr	('i' << 8 * 3) + ('p' << 8 * 2) + ('t' << 8 * 1) + ('r' << 8 * 0)
+
+
+#define CMD_hspc	('h' << 8 * 3) + ('s' << 8 * 2) + ('p' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_hspm	('h' << 8 * 3) + ('s' << 8 * 2) + ('p' << 8 * 1) + ('m' << 8 * 0)
+#define CMD_hspt	('h' << 8 * 3) + ('s' << 8 * 2) + ('t' << 8 * 1) + ('r' << 8 * 0)
+#define CMD_hspb	('h' << 8 * 3) + ('s' << 8 * 2) + ('b' << 8 * 1) + ('r' << 8 * 0)
+
+
+#define CMD_stpc	('s' << 8 * 3) + ('t' << 8 * 2) + ('p' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_stpm	('s' << 8 * 3) + ('t' << 8 * 2) + ('p' << 8 * 1) + ('m' << 8 * 0)
+#define CMD_stpt	('s' << 8 * 3) + ('t' << 8 * 2) + ('t' << 8 * 1) + ('r' << 8 * 0)
+#define CMD_stpb	('s' << 8 * 3) + ('t' << 8 * 2) + ('b' << 8 * 1) + ('r' << 8 * 0)
+#define CMD_stto	('s' << 8 * 3) + ('t' << 8 * 2) + ('t' << 8 * 1) + ('o' << 8 * 0)
+
+
+
+	//CMDlets wifi
 #define CMD_ssid	('s' << 8 * 3) + ('s' << 8 * 2) + ('i' << 8 * 1) + ('d' << 8 * 0)
 #define CMD_pass	('p' << 8 * 3) + ('a' << 8 * 2) + ('s' << 8 * 1) + ('s' << 8 * 0)
-#define CMD_ipco	('i' << 8 * 3) + ('p' << 8 * 2) + ('c' << 8 * 1) + ('o' << 8 * 0)
-#define CMD_ipme	('i' << 8 * 3) + ('p' << 8 * 2) + ('m' << 8 * 1) + ('e' << 8 * 0)
-#define CMD_iptr	('i' << 8 * 3) + ('p' << 8 * 2) + ('t' << 8 * 1) + ('r' << 8 * 0)
-#define CMD_poco	('p' << 8 * 3) + ('o' << 8 * 2) + ('c' << 8 * 1) + ('o' << 8 * 0)
-#define CMD_pome	('p' << 8 * 3) + ('o' << 8 * 2) + ('m' << 8 * 1) + ('e' << 8 * 0)
-#define CMD_potr	('p' << 8 * 3) + ('o' << 8 * 2) + ('t' << 8 * 1) + ('r' << 8 * 0)
+#define CMD_wity	('w' << 8 * 3) + ('i' << 8 * 2) + ('t' << 8 * 1) + ('y' << 8 * 0)
+#define CMD_appa	('a' << 8 * 3) + ('p' << 8 * 2) + ('p' << 8 * 1) + ('a' << 8 * 0)
+#define CMD_apss	('a' << 8 * 3) + ('p' << 8 * 2) + ('s' << 8 * 1) + ('s' << 8 * 0)
+#define CMD_cowi	('c' << 8 * 3) + ('o' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
+#define CMD_cost	('c' << 8 * 3) + ('o' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
+#define CMD_coap	('c' << 8 * 3) + ('o' << 8 * 2) + ('a' << 8 * 1) + ('p' << 8 * 0)
+#define CMD_scwi	('s' << 8 * 3) + ('c' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
+
 
 	//CMDlets storage
 #define CMD_mkfs	('m' << 8 * 3) + ('k' << 8 * 2) + ('f' << 8 * 1) + ('s' << 8 * 0)
+#define CMD_wrin	('w' << 8 * 3) + ('r' << 8 * 2) + ('i' << 8 * 1) + ('n' << 8 * 0)
+
+#define CMD_list	('l' << 8 * 3) + ('i' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
+#define CMD_lswi	('l' << 8 * 3) + ('s' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
+#define CMD_lsad	('l' << 8 * 3) + ('s' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
+#define CMD_lsbl	('l' << 8 * 3) + ('s' << 8 * 2) + ('b' << 8 * 1) + ('l' << 8 * 0)
+#define CMD_lslc	('l' << 8 * 3) + ('s' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
 
 #define CMD_init	('i' << 8 * 3) + ('n' << 8 * 2) + ('i' << 8 * 1) + ('t' << 8 * 0)
-#define CMD_load	('l' << 8 * 3) + ('o' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
 #define CMD_ldad	('l' << 8 * 3) + ('d' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
 #define CMD_ldtc	('l' << 8 * 3) + ('d' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
 #define CMD_ldtm	('l' << 8 * 3) + ('d' << 8 * 2) + ('t' << 8 * 1) + ('m' << 8 * 0)
 #define CMD_ldbl	('l' << 8 * 3) + ('d' << 8 * 2) + ('b' << 8 * 1) + ('l' << 8 * 0)
 #define CMD_ldlc	('l' << 8 * 3) + ('d' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
 #define CMD_ldwi	('l' << 8 * 3) + ('d' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
+#define CMD_ldst	('l' << 8 * 3) + ('d' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
+#define CMD_ldss	('l' << 8 * 3) + ('d' << 8 * 2) + ('s' << 8 * 1) + ('s' << 8 * 0)
 #define CMD_defl	('d' << 8 * 3) + ('e' << 8 * 2) + ('f' << 8 * 1) + ('l' << 8 * 0)
 
-#define CMD_save	('s' << 8 * 3) + ('a' << 8 * 2) + ('v' << 8 * 1) + ('e' << 8 * 0)
 #define CMD_svad	('s' << 8 * 3) + ('v' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
 #define CMD_svtc	('s' << 8 * 3) + ('v' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
 #define CMD_svtm	('s' << 8 * 3) + ('v' << 8 * 2) + ('t' << 8 * 1) + ('m' << 8 * 0)
 #define CMD_svbl	('s' << 8 * 3) + ('v' << 8 * 2) + ('b' << 8 * 1) + ('l' << 8 * 0)
 #define CMD_svlc	('s' << 8 * 3) + ('v' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
 #define CMD_svwi	('s' << 8 * 3) + ('v' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
+#define CMD_svti	('s' << 8 * 3) + ('v' << 8 * 2) + ('t' << 8 * 1) + ('i' << 8 * 0)
+#define CMD_svst	('s' << 8 * 3) + ('v' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
 #define CMD_defs	('d' << 8 * 3) + ('e' << 8 * 2) + ('f' << 8 * 1) + ('s' << 8 * 0)
 
 #define CMD_inad	('i' << 8 * 3) + ('n' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
@@ -201,9 +271,18 @@
 #define CMD_intr	('i' << 8 * 3) + ('n' << 8 * 2) + ('t' << 8 * 1) + ('r' << 8 * 0)
 #define CMD_inwi	('i' << 8 * 3) + ('n' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
 
+#define CMD_rmst	('r' << 8 * 3) + ('m' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
+#define CMD_rmlc	('r' << 8 * 3) + ('m' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_rmbl	('r' << 8 * 3) + ('m' << 8 * 2) + ('b' << 8 * 1) + ('l' << 8 * 0)
+#define CMD_rmad	('r' << 8 * 3) + ('m' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
+
+#define CMD_cllc	('c' << 8 * 3) + ('l' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
+
+
 	//CMDlets One Wire Bus
 #define CMD_scow	('s' << 8 * 3) + ('c' << 8 * 2) + ('o' << 8 * 1) + ('w' << 8 * 0)
 #define CMD_stpi	('s' << 8 * 3) + ('t' << 8 * 2) + ('p' << 8 * 1) + ('i' << 8 * 0)
+
 
 	//CMDlets Battery monitor
 #define CMD_bath	('b' << 8 * 3) + ('a' << 8 * 2) + ('t' << 8 * 1) + ('h' << 8 * 0)
@@ -211,18 +290,20 @@
 
 
 //STATI OF THE ADC
-#define STATUS_IDLE			1
-#define STATUS_PEEKING		2
-#define STATUS_RECORDING	3
-#define STATUS_WAITING		4
+#define STATUS_IDLE				BIT0
+#define STATUS_PEEKING			BIT1
+#define STATUS_RECORDING		BIT2
+#define STATUS_WAITING			BIT3
+#define STATUS_TCPCONF_CONN		BIT4
+#define STATUS_TCPMES_CONN		BIT5
+#define STATUS_WIFI_CONN		BIT6
+#define STATUS_HOTSPOT			BIT7
+#define STATUS_STATION			BIT8
+#define STATUS_SCANNING			BIT9
 
+#define BITS_STATI			STATUS_IDLE | STATUS_PEEKING | STATUS_RECORDING | STATUS_WAITING
+#define BITS_COMM			STATUS_WIFI_CONN | STATUS_TCPMES_CONN | STATUS_TCPCONF_CONN
 
-//NOTIFY MESSAGES
-#define CMD_MEAS_READY			6
-#define CMD_BLINK_READY			7
-#define CMD_TEMPINT_READY		8
-#define CMD_SAVE_BATMON			9
-#define CMD_BATMON_READY		10
 
 
 //ADC defines
@@ -247,7 +328,6 @@
 				"\tssid - Sets SSID of WiFi network\n"\
 				"\tpass - Sets password of WiFi network\n"\
 				"\tsvip - Sets server IP (format xxx.xxx.xxx.xxx)\n"
-
 #define INQUIRE_MESSAGE		"|moid|%02X|\t\tModule ID:\n"\
 							"|fwve|%s|\t\tFirmware version:\n"\
 							"|user|ADC\n"\
@@ -268,14 +348,13 @@
 							"|iptr|%s|\t\tIP of trigger:\n"\
 							"|potr|%d|\t\tPort of trigger:\n"\
 
-#define MEASUREMENT_MESSAGE	"|moid|%02X:\t\tModule ID:\n"\
-							"|fwve|%s:\t\tFirmware version:\n"\
-							"|mper|%lu:\t\tMeasurement Period:\n"\
-							"|calv|%f:\t\tCalibration Value:\n"\
-							"|tare|%lu:\t\tTare Value:\n"\
-							"|bper|%d:\t\tBlink period:\n"\
-							"|bdur|%d:\t\tBlink duration\n"\
-
+#define MEASUREMENT_MESSAGE	"|moid|"STR(ADC_MODULE_ID)"|\t\tModule ID\n\4"\
+							"|fwve|"FIRMWARE_VERSION"|\t\tFirmware version\n\4"\
+							"|mper|%llu|\t\tMeasurement Period\n\4"\
+							"|calv|%f|\t\tCalibration Value\n\4"\
+							"|tare|%u|\t\tTare Value\n\4"\
+							"|bper|%d|\t\tBlink period\n\4"\
+							"|bdur|%u|\t\tBlink duration\n\4"\
 
 #define GREETING_MESSAGE	"|user|send man for manual\n"
 #define MESS_INVALID		"|inv|Message could not be received correctly\n"

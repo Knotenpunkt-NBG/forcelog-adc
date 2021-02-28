@@ -28,7 +28,7 @@ F8 "DTR" I R 5300 2450 50
 F9 "VA" I R 5300 3200 50 
 $EndSheet
 $Comp
-L modules:BuckConverter U3
+L pcb_loadcell-dev-rescue:BuckConverter-modules U3
 U 1 1 5EA1C730
 P 5150 4500
 AR Path="/5EA1C730" Ref="U3"  Part="1" 
@@ -41,7 +41,7 @@ F 3 "https://www.banggood.com/DC-DC-7-28V-to-5V-3A-Step-Down-Power-Supply-Module
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR014
+L pcb_loadcell-dev-rescue:GND-power #PWR014
 U 1 1 5EA1C778
 P 4750 4700
 AR Path="/5EA1C778" Ref="#PWR014"  Part="1" 
@@ -54,7 +54,7 @@ F 3 "" H 4750 4700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR017
+L pcb_loadcell-dev-rescue:GND-power #PWR017
 U 1 1 5EA1C77E
 P 5600 4700
 AR Path="/5EA1C77E" Ref="#PWR017"  Part="1" 
@@ -67,7 +67,7 @@ F 3 "" H 5600 4700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR020
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR020
 U 1 1 5EA1C784
 P 6000 4600
 AR Path="/5EA1C784" Ref="#PWR020"  Part="1" 
@@ -80,7 +80,7 @@ F 3 "" H 6000 4600 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L jumper:Jumper_2_Open JP2
+L pcb_loadcell-dev-rescue:Jumper_2_Open-jumper JP2
 U 1 1 5EA1C809
 P 5800 4600
 AR Path="/5EA1C809" Ref="JP2"  Part="1" 
@@ -93,7 +93,7 @@ F 3 "https://www.reichelt.de/rnd-stiftleiste-2-pol-rm-2-54-mm-rnd-205-00623-p208
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR025
+L pcb_loadcell-dev-rescue:GND-power #PWR025
 U 1 1 5EA41F87
 P 3850 3200
 AR Path="/5EA41F87" Ref="#PWR025"  Part="1" 
@@ -106,7 +106,7 @@ F 3 "" H 3850 3200 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:+3.3V #PWR024
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR024
 U 1 1 5EA43CD5
 P 3850 2950
 AR Path="/5EA43CD5" Ref="#PWR024"  Part="1" 
@@ -119,7 +119,7 @@ F 3 "" H 3850 2950 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L modules:FT232breakout U1
+L pcb_loadcell-dev-rescue:FT232breakout-modules U1
 U 1 1 5E8539C0
 P 6800 2200
 F 0 "U1" H 6775 3215 50  0000 C CNN
@@ -143,7 +143,7 @@ NoConn ~ 7200 1450
 Wire Wire Line
 	4600 4600 4750 4600
 $Comp
-L power:GND #PWR0115
+L pcb_loadcell-dev-rescue:GND-power #PWR0115
 U 1 1 5E85E4DB
 P 7200 1900
 AR Path="/5E85E4DB" Ref="#PWR0115"  Part="1" 
@@ -156,7 +156,7 @@ F 3 "" H 7200 1900 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L power:GND #PWR0116
+L pcb_loadcell-dev-rescue:GND-power #PWR0116
 U 1 1 5E85F1BD
 P 7200 2050
 AR Path="/5E85F1BD" Ref="#PWR0116"  Part="1" 
@@ -177,7 +177,7 @@ Wire Wire Line
 Wire Wire Line
 	5300 2450 6350 2450
 $Comp
-L conn:CONN_01X02 P1
+L pcb_loadcell-dev-rescue:CONN_01X02-conn P1
 U 1 1 5E912866
 P 8950 1550
 F 0 "P1" H 9028 1591 50  0000 L CNN
@@ -188,7 +188,7 @@ F 3 "https://www.reichelt.de/loetbare-schraubklemme-2-pol-rm-5-mm-90-rnd-205-000
 	1    0    0    1   
 $EndComp
 $Comp
-L power:GND #PWR0101
+L pcb_loadcell-dev-rescue:GND-power #PWR0101
 U 1 1 5E912C83
 P 8750 1500
 AR Path="/5E912C83" Ref="#PWR0101"  Part="1" 
@@ -201,7 +201,7 @@ F 3 "" H 8750 1500 50  0000 C CNN
 	0    1    -1   0   
 $EndComp
 $Comp
-L device:JUMPER3 JP1
+L pcb_loadcell-dev-rescue:JUMPER3-device JP1
 U 1 1 5E91338C
 P 8050 1600
 F 0 "JP1" H 8050 1839 50  0000 C CNN
@@ -216,7 +216,7 @@ Wire Wire Line
 Wire Wire Line
 	8750 1600 8300 1600
 $Comp
-L modules:BoostConverter U2
+L pcb_loadcell-dev-rescue:BoostConverter-modules U2
 U 1 1 5E7B0ED9
 P 2900 5250
 F 0 "U2" H 2925 5415 50  0000 C CNN
@@ -227,7 +227,7 @@ F 3 "https://www.banggood.com/DC-2V-24V-To-5V-28V-2A-Step-Up-Boost-Converter-Pow
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:C C2
+L pcb_loadcell-dev-rescue:C-device C2
 U 1 1 5E7B2B87
 P 2050 5500
 F 0 "C2" H 2165 5546 50  0000 L CNN
@@ -238,7 +238,7 @@ F 3 "https://www.reichelt.de/vielschicht-kerko-100nf-50v-125-c-kem-x7r1206b100n-
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:CP C1
+L pcb_loadcell-dev-rescue:CP-device C1
 U 1 1 5E7B35C0
 P 1650 5500
 F 0 "C1" H 1768 5546 50  0000 L CNN
@@ -255,7 +255,7 @@ Connection ~ 2050 5350
 Wire Wire Line
 	2050 5350 2500 5350
 $Comp
-L power:VCC #PWR010
+L pcb_loadcell-dev-rescue:VCC-power #PWR010
 U 1 1 5E7B7531
 P 8050 1700
 F 0 "#PWR010" H 8050 1550 50  0001 C CNN
@@ -266,7 +266,7 @@ F 3 "" H 8050 1700 50  0001 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L power:GND #PWR03
+L pcb_loadcell-dev-rescue:GND-power #PWR03
 U 1 1 5E7B9887
 P 2050 5650
 F 0 "#PWR03" H 2050 5400 50  0001 C CNN
@@ -277,7 +277,7 @@ F 3 "" H 2050 5650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR02
+L pcb_loadcell-dev-rescue:GND-power #PWR02
 U 1 1 5E7B9C60
 P 1650 5650
 F 0 "#PWR02" H 1650 5400 50  0001 C CNN
@@ -288,7 +288,7 @@ F 3 "" H 1650 5650 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR04
+L pcb_loadcell-dev-rescue:GND-power #PWR04
 U 1 1 5E7BA6A2
 P 2500 5450
 F 0 "#PWR04" H 2500 5200 50  0001 C CNN
@@ -299,7 +299,7 @@ F 3 "" H 2500 5450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L jumper:Jumper_2_Open JP4
+L pcb_loadcell-dev-rescue:Jumper_2_Open-jumper JP4
 U 1 1 5E7BB823
 P 3550 5350
 AR Path="/5E7BB823" Ref="JP4"  Part="1" 
@@ -312,7 +312,7 @@ F 3 "https://www.reichelt.de/rnd-stiftleiste-2-pol-rm-2-54-mm-rnd-205-00623-p208
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR06
+L pcb_loadcell-dev-rescue:GND-power #PWR06
 U 1 1 5E7C0621
 P 3350 5450
 F 0 "#PWR06" H 3350 5200 50  0001 C CNN
@@ -323,7 +323,7 @@ F 3 "" H 3350 5450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L regul:7805 U4
+L pcb_loadcell-dev-rescue:7805-regul U4
 U 1 1 5E7C555B
 P 5250 5650
 F 0 "U4" H 5250 5965 50  0000 C CNN
@@ -334,7 +334,7 @@ F 3 "https://www.reichelt.de/spannungsregler-fest-5-v-dpak-mc-7805-cdtg-p189143.
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:C C3
+L pcb_loadcell-dev-rescue:C-device C3
 U 1 1 5E7C59A0
 P 4800 5750
 F 0 "C3" H 4915 5796 50  0000 L CNN
@@ -345,7 +345,7 @@ F 3 "https://www.reichelt.de/vielschicht-kerko-330nf-50v-125-c-kem-x7r1206-330n-
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:C C4
+L pcb_loadcell-dev-rescue:C-device C4
 U 1 1 5E7C6515
 P 5700 5750
 F 0 "C4" H 5815 5796 50  0000 L CNN
@@ -361,7 +361,7 @@ Wire Wire Line
 Wire Wire Line
 	5250 5900 5700 5900
 $Comp
-L power:GND #PWR07
+L pcb_loadcell-dev-rescue:GND-power #PWR07
 U 1 1 5E7C75B3
 P 5250 5900
 AR Path="/5E7C75B3" Ref="#PWR07"  Part="1" 
@@ -378,7 +378,7 @@ Wire Wire Line
 Wire Wire Line
 	4850 5600 4800 5600
 $Comp
-L power:+5VA #PWR09
+L pcb_loadcell-dev-rescue:+5VA-power #PWR09
 U 1 1 5E7C920B
 P 5700 5600
 F 0 "#PWR09" H 5700 5450 50  0001 C CNN
@@ -398,7 +398,7 @@ Connection ~ 4600 5350
 Wire Wire Line
 	4600 5350 4800 5350
 $Comp
-L power:VCC #PWR01
+L pcb_loadcell-dev-rescue:VCC-power #PWR01
 U 1 1 5E7CD0AF
 P 1650 5350
 F 0 "#PWR01" H 1650 5200 50  0001 C CNN
@@ -414,7 +414,7 @@ Wire Wire Line
 Text GLabel 4250 5350 1    50   Input ~ 0
 Vboost
 $Comp
-L power:+5VA #PWR08
+L pcb_loadcell-dev-rescue:+5VA-power #PWR08
 U 1 1 5EA50A7F
 P 5300 3200
 F 0 "#PWR08" H 5300 3050 50  0001 C CNN
@@ -425,7 +425,7 @@ F 3 "" H 5300 3200 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L conn:CONN_01X01 P6
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P6
 U 1 1 5EA9ABFE
 P 7450 3850
 F 0 "P6" V 7276 3928 50  0000 L CNN
@@ -437,7 +437,7 @@ F 3 "" H 7450 3850 50  0000 C CNN
 $EndComp
 NoConn ~ 7450 3650
 $Comp
-L conn:CONN_01X01 P7
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P7
 U 1 1 5EA9DAC5
 P 7450 4200
 F 0 "P7" V 7276 4278 50  0000 L CNN
@@ -449,7 +449,7 @@ F 3 "" H 7450 4200 50  0000 C CNN
 $EndComp
 NoConn ~ 7450 4000
 $Comp
-L conn:CONN_01X01 P9
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P9
 U 1 1 5EA9E246
 P 7450 4550
 F 0 "P9" V 7276 4628 50  0000 L CNN
@@ -461,7 +461,7 @@ F 3 "" H 7450 4550 50  0000 C CNN
 $EndComp
 NoConn ~ 7450 4350
 $Comp
-L conn:CONN_01X01 P15
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P15
 U 1 1 5EA9E9C7
 P 7450 4900
 F 0 "P15" V 7276 4978 50  0000 L CNN
@@ -473,7 +473,7 @@ F 3 "" H 7450 4900 50  0000 C CNN
 $EndComp
 NoConn ~ 7450 4700
 $Comp
-L conn:CONN_01X05 P14
+L pcb_loadcell-dev-rescue:CONN_01X05-conn P14
 U 1 1 5EADCC66
 P 2700 1050
 F 0 "P14" V 2663 762 50  0000 R CNN
@@ -484,7 +484,7 @@ F 3 "https://www.reichelt.de/loetbare-schraubklemme-5-pol-rm-5-mm-90-rnd-205-000
 	0    1    -1   0   
 $EndComp
 $Comp
-L conn:CONN_01X05 P16
+L pcb_loadcell-dev-rescue:CONN_01X05-conn P16
 U 1 1 5EADF92A
 P 2700 2200
 F 0 "P16" V 2571 1912 50  0000 R CNN
@@ -495,7 +495,7 @@ F 3 "https://www.reichelt.de/rnd-buchsenleiste-5-pol-rm-2-54-mm-rnd-205-00645-p2
 	0    -1   1    0   
 $EndComp
 $Comp
-L conn:CONN_01X01 P18
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P18
 U 1 1 5EAE090B
 P 3100 1400
 F 0 "P18" H 3178 1441 50  0000 L CNN
@@ -506,7 +506,7 @@ F 3 "" H 3100 1400 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L conn:CONN_01X01 P17
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P17
 U 1 1 5EAE225F
 P 3000 1550
 F 0 "P17" H 3078 1591 50  0000 L CNN
@@ -517,7 +517,7 @@ F 3 "" H 3000 1550 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR0102
+L pcb_loadcell-dev-rescue:GND-power #PWR0102
 U 1 1 5EAE3834
 P 2500 1250
 AR Path="/5EAE3834" Ref="#PWR0102"  Part="1" 
@@ -530,7 +530,7 @@ F 3 "" H 2500 1250 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR0103
+L pcb_loadcell-dev-rescue:GND-power #PWR0103
 U 1 1 5EAE42AE
 P 2500 2000
 AR Path="/5EAE42AE" Ref="#PWR0103"  Part="1" 
@@ -543,7 +543,7 @@ F 3 "" H 2500 2000 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L conn:CONN_01X01 P13
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P13
 U 1 1 5EAE44E3
 P 2500 1500
 F 0 "P13" H 2650 1450 50  0000 C CNN
@@ -554,7 +554,7 @@ F 3 "" H 2500 1500 50  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L conn:CONN_01X01 P12
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P12
 U 1 1 5EAE62F7
 P 2400 1700
 F 0 "P12" H 2550 1650 50  0000 C CNN
@@ -585,7 +585,7 @@ Connection ~ 2900 1400
 Wire Wire Line
 	2900 1400 2900 2000
 $Comp
-L power:VCC #PWR0104
+L pcb_loadcell-dev-rescue:VCC-power #PWR0104
 U 1 1 5EAF1C71
 P 3850 2700
 F 0 "#PWR0104" H 3850 2550 50  0001 C CNN

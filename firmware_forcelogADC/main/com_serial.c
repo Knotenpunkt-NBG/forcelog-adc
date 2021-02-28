@@ -24,11 +24,8 @@ void fserialInit	(void)
 	xTaskCreate(tserialRun,	"serial_config",	4096, NULL, 8, &ht_serialRun);
 }
 
-//TODO: timeout causes guru meditation error
 void tserialRun	(void* param)
 {
-	vTaskSuspend(NULL);
-	ESP_LOGD(TAG_UART, "STARTING SERIAL");
 	char* pc_configOut = NULL;
 	char* pc_configIn = malloc(64);
 	int i_flag = 0;
@@ -50,7 +47,8 @@ void tserialRun	(void* param)
 			{
 				xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
 				printf("%s", pc_configOut);
-				xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_STORAGE_FIN | BIT_COMM_FIN | BIT_CONFIG_FIN, portMAX_DELAY );
+				xEventGroupSync( eg_config, BIT_COMM_SYNC, BIT_COMM_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
+				pc_configOut = 0;
 			}
 			else //config requested more info
 			{
@@ -75,9 +73,8 @@ void tserialRun	(void* param)
 							xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
 						}
 						printf("%s", pc_configOut);
+						xEventGroupSync( eg_config, BIT_COMM_SYNC, BIT_COMM_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
 						pc_configOut = 0;
-						xEventGroupSync( eg_sync, BIT_CONFIG_FIN, BIT_STORAGE_FIN | BIT_COMM_FIN | BIT_CONFIG_FIN, portMAX_DELAY );
-
 					}
 					//timeout
 					else if (i_result == 0)
@@ -95,6 +92,7 @@ void tserialRun	(void* param)
 				}
 			}
 			xSemaphoreGive(hs_configCom);
+			ESP_LOGD(TAG_UART, "SEMAPHORE GIVEN");
 		}
 		else
 		{

@@ -249,11 +249,6 @@ F 4 "https://www.reichelt.de/elko-smd-geringster-low-esr-10-f-25v-pxa-10-25-p897
 	1    1650 5500
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	1650 5350 2050 5350
-Connection ~ 2050 5350
-Wire Wire Line
-	2050 5350 2500 5350
 $Comp
 L pcb_loadcell-dev-rescue:VCC-power #PWR010
 U 1 1 5E7B7531
@@ -355,11 +350,6 @@ F 3 "https://www.reichelt.de/vielschicht-kerko-100nf-50v-125-c-kem-x7r1206b100n-
 	1    5700 5750
 	1    0    0    -1  
 $EndComp
-Connection ~ 5250 5900
-Wire Wire Line
-	5250 5900 4800 5900
-Wire Wire Line
-	5250 5900 5700 5900
 $Comp
 L pcb_loadcell-dev-rescue:GND-power #PWR07
 U 1 1 5E7C75B3
@@ -388,10 +378,8 @@ F 3 "" H 5700 5600 50  0001 C CNN
 	1    5700 5600
 	1    0    0    -1  
 $EndComp
-Connection ~ 5700 5600
 Wire Wire Line
 	4800 5350 4800 5600
-Connection ~ 4800 5600
 Wire Wire Line
 	4600 4600 4600 5350
 Connection ~ 4600 5350
@@ -408,7 +396,6 @@ F 3 "" H 1650 5350 50  0001 C CNN
 	1    1650 5350
 	1    0    0    -1  
 $EndComp
-Connection ~ 1650 5350
 Wire Wire Line
 	3750 5350 4600 5350
 Text GLabel 4250 5350 1    50   Input ~ 0
@@ -564,26 +551,6 @@ F 3 "" H 2400 1700 50  0000 C CNN
 	1    2400 1700
 	-1   0    0    1   
 $EndComp
-Wire Wire Line
-	2600 1250 2600 1700
-Connection ~ 2600 1700
-Wire Wire Line
-	2600 1700 2600 2000
-Wire Wire Line
-	2700 2000 2700 1500
-Connection ~ 2700 1500
-Wire Wire Line
-	2700 1500 2700 1250
-Wire Wire Line
-	2800 1250 2800 1550
-Connection ~ 2800 1550
-Wire Wire Line
-	2800 1550 2800 2000
-Wire Wire Line
-	2900 1250 2900 1400
-Connection ~ 2900 1400
-Wire Wire Line
-	2900 1400 2900 2000
 $Comp
 L pcb_loadcell-dev-rescue:VCC-power #PWR0104
 U 1 1 5EAF1C71
@@ -595,4 +562,16 @@ F 3 "" H 3850 2700 50  0001 C CNN
 	1    3850 2700
 	0    -1   -1   0   
 $EndComp
+Wire Wire Line
+	1650 5350 2500 5350
+Wire Wire Line
+	4800 5900 5700 5900
+Wire Wire Line
+	2600 1250 2600 2000
+Wire Wire Line
+	2700 1250 2700 2000
+Wire Wire Line
+	2800 1250 2800 2000
+Wire Wire Line
+	2900 1250 2900 2000
 $EndSCHEMATC

@@ -1,0 +1,5 @@
+(fp_lib_table
+  (lib (name modules)(type KiCad)(uri /home/lor/projects/Database/kicad_user/modules/modules.pretty)(options "")(descr ""))
+  (lib (name shields_rf)(type KiCad)(uri /home/lor/projects/Database/kicad_user/modules/shields_rf.pretty)(options "")(descr ""))
+  (lib (name optocoupler)(type KiCad)(uri /home/lor/projects/Database/kicad_user/modules/optocoupler.pretty)(options "")(descr ""))
+)

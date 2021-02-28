@@ -27,13 +27,15 @@
 
 
 
-void callback_timerBlink(void* param);
+void cb_timerBlink	(void* param);
 
-void fblinkInit (void);
+void fblinkInit 	(void);
 
-void fblinkConfig(uint32_t CMDlet, struct stu_blinkConfig* blinkConfig_mom, ledc_timer_config_t* ledcTimerConfig_mom, ledc_channel_config_t* ledcChannelConfig_mom);
+void fblinkConfig	(uint32_t CMDlet,
+					ledc_timer_config_t* ledcTimergstu_config,
+					ledc_channel_config_t* ledcChannelgstu_config);
 
-
+void t_blinkRun		(void *arg);
 
 
 #endif /* MAIN_BLINK_H_ */

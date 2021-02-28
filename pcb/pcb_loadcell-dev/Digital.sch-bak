@@ -14,7 +14,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L pspice:R R6
+L pcb_loadcell-dev-rescue:R-pspice R6
 U 1 1 5E6E8C96
 P 4850 3750
 F 0 "R6" H 4782 3704 50  0000 R CNN
@@ -25,7 +25,7 @@ F 3 "https://www.reichelt.de/smd-widerstand-1206-1-0-kohm-250-mw-1-rnd-1206-1-1-
 	-1   0    0    1   
 $EndComp
 $Comp
-L power:GND #PWR057
+L pcb_loadcell-dev-rescue:GND-power #PWR057
 U 1 1 5E6E8CA2
 P 4850 4400
 F 0 "#PWR057" H 4850 4150 50  0001 C CNN
@@ -36,7 +36,7 @@ F 3 "" H 4850 4400 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L rf-modules:ESP32-WROOM-32U U6
+L pcb_loadcell-dev-rescue:ESP32-WROOM-32U-rf-modules U6
 U 1 1 5E6E8CC4
 P 2250 3700
 F 0 "U6" H 1900 5100 50  0000 C CNN
@@ -47,7 +47,7 @@ F 3 "https://www.espressif.com/sites/default/files/documentation/esp32-wroom-32d
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR041
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR041
 U 1 1 5E6E8CCC
 P 2250 2300
 F 0 "#PWR041" H 2250 2150 50  0001 C CNN
@@ -58,7 +58,7 @@ F 3 "" H 2250 2300 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR042
+L pcb_loadcell-dev-rescue:GND-power #PWR042
 U 1 1 5E6E8CD2
 P 2250 5100
 F 0 "#PWR042" H 2250 4850 50  0001 C CNN
@@ -73,7 +73,7 @@ Wire Wire Line
 Wire Wire Line
 	4200 4000 4500 4000
 $Comp
-L device:C C10
+L pcb_loadcell-dev-rescue:C-device C10
 U 1 1 5E6E8CDD
 P 4500 4150
 F 0 "C10" H 4615 4196 50  0000 L CNN
@@ -87,7 +87,7 @@ Connection ~ 4500 4000
 Wire Wire Line
 	4500 4000 4850 4000
 $Comp
-L power:GND #PWR056
+L pcb_loadcell-dev-rescue:GND-power #PWR056
 U 1 1 5E6E8CE5
 P 4500 4300
 F 0 "#PWR056" H 4500 4050 50  0001 C CNN
@@ -100,9 +100,11 @@ $EndComp
 Text Label 2850 4400 0    50   ~ 0
 PING
 $Comp
-L conn:CONN_01X01 P8
+L pcb_loadcell-dev-rescue:CONN_01X01-conn P8
 U 1 1 5E6E8CED
 P 4200 4700
+AR Path="/5E6E8CED" Ref="P8"  Part="1" 
+AR Path="/5E6C650B/5E6E8CED" Ref="P8"  Part="1" 
 F 0 "P8" H 4278 4741 50  0000 L CNN
 F 1 "TP_ADC" H 4278 4650 50  0000 L CNN
 F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 4200 4700 50  0001 C CNN
@@ -119,7 +121,7 @@ NoConn ~ 1650 4200
 NoConn ~ 1650 2700
 NoConn ~ 1650 2800
 $Comp
-L pspice:R R4
+L pcb_loadcell-dev-rescue:R-pspice R4
 U 1 1 5E6E8D0F
 P 3400 2700
 F 0 "R4" H 3332 2654 50  0000 R CNN
@@ -130,7 +132,7 @@ F 3 "https://www.reichelt.de/smd-widerstand-1206-10-kohm-250-mw-1-rnd-1206-1-10k
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR049
+L pcb_loadcell-dev-rescue:GND-power #PWR049
 U 1 1 5E6E8D15
 P 3650 2700
 F 0 "#PWR049" H 3650 2450 50  0001 C CNN
@@ -141,7 +143,7 @@ F 3 "" H 3650 2700 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L power:GND #PWR051
+L pcb_loadcell-dev-rescue:GND-power #PWR051
 U 1 1 5E6E8D21
 P 3650 3400
 F 0 "#PWR051" H 3650 3150 50  0001 C CNN
@@ -160,7 +162,7 @@ GREEN
 Text Label 2850 4600 0    50   ~ 0
 BLUE
 $Comp
-L pspice:R R3
+L pcb_loadcell-dev-rescue:R-pspice R3
 U 1 1 5E6E8D2B
 P 3400 3400
 F 0 "R3" H 3332 3354 50  0000 R CNN
@@ -172,7 +174,7 @@ F 4 "OPT" H 3400 3400 50  0000 C CNN "Field4"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L jumper:Jumper_2_Open JP6
+L pcb_loadcell-dev-rescue:Jumper_2_Open-jumper JP6
 U 1 1 5E6E8D31
 P 4850 3300
 F 0 "JP6" H 4850 3535 50  0000 C CNN
@@ -191,7 +193,7 @@ HMISO
 Text Label 2850 3200 0    50   ~ 0
 HMOSI
 $Comp
-L modules:W25Q128 U?
+L pcb_loadcell-dev-rescue:W25Q128-modules U?
 U 1 1 5E74523E
 P 7250 5200
 AR Path="/5E74523E" Ref="U?"  Part="1" 
@@ -212,7 +214,7 @@ HCLK
 Text Label 6900 5450 2    50   ~ 0
 HMOSI
 $Comp
-L device:C C?
+L pcb_loadcell-dev-rescue:C-device C?
 U 1 1 5E745248
 P 7900 5200
 AR Path="/5E745248" Ref="C?"  Part="1" 
@@ -225,7 +227,7 @@ F 3 "https://www.reichelt.de/vielschicht-kerko-100nf-50v-125-c-kem-x7r1206b100n-
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L pcb_loadcell-dev-rescue:GND-power #PWR?
 U 1 1 5E74524E
 P 7900 5350
 AR Path="/5E74524E" Ref="#PWR?"  Part="1" 
@@ -238,7 +240,7 @@ F 3 "" H 7900 5350 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR?
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR?
 U 1 1 5E745254
 P 7900 5050
 AR Path="/5E745254" Ref="#PWR?"  Part="1" 
@@ -251,7 +253,7 @@ F 3 "" H 7900 5050 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR?
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR?
 U 1 1 5E74525A
 P 7600 5100
 AR Path="/5E74525A" Ref="#PWR?"  Part="1" 
@@ -264,7 +266,7 @@ F 3 "" H 7600 5100 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L pcb_loadcell-dev-rescue:GND-power #PWR?
 U 1 1 5E745260
 P 7600 5300
 AR Path="/5E745260" Ref="#PWR?"  Part="1" 
@@ -277,7 +279,7 @@ F 3 "" H 7600 5300 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L pspice:R R17
+L pcb_loadcell-dev-rescue:R-pspice R17
 U 1 1 5E7B19D8
 P 5700 2750
 F 0 "R17" H 5632 2704 50  0000 R CNN
@@ -288,7 +290,7 @@ F 3 "https://www.reichelt.de/smd-widerstand-1206-22-ohm-250-mw-1-rnd-1206-1-22-p
 	0    -1   -1   0   
 $EndComp
 $Comp
-L power:+3.3V #PWR071
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR071
 U 1 1 5E7B19DE
 P 6200 1700
 F 0 "#PWR071" H 6200 1550 50  0001 C CNN
@@ -299,7 +301,7 @@ F 3 "" H 6200 1700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L pspice:R R15
+L pcb_loadcell-dev-rescue:R-pspice R15
 U 1 1 5E7B19E4
 P 5700 2050
 F 0 "R15" V 5800 2150 50  0000 R CNN
@@ -310,7 +312,7 @@ F 3 "https://www.reichelt.de/smd-widerstand-1206-120-ohm-250-mw-1-rnd-1206-1-120
 	0    -1   -1   0   
 $EndComp
 $Comp
-L pspice:R R16
+L pcb_loadcell-dev-rescue:R-pspice R16
 U 1 1 5E7B19EA
 P 5700 2400
 F 0 "R16" H 5632 2354 50  0000 R CNN
@@ -327,7 +329,7 @@ GREEN
 Text Label 5450 2750 2    50   ~ 0
 BLUE
 $Comp
-L conn:CONN_01X04 P11
+L pcb_loadcell-dev-rescue:CONN_01X04-conn P11
 U 1 1 5E7B19F3
 P 6350 2300
 F 0 "P11" H 6428 2341 50  0000 L CNN
@@ -338,7 +340,7 @@ F 3 "https://www.reichelt.de/loetbare-schraubklemme-4-pol-rm-5-mm-90-rnd-205-000
 	1    0    0    1   
 $EndComp
 $Comp
-L conn:CONN_01X02 P10
+L pcb_loadcell-dev-rescue:CONN_01X02-conn P10
 U 1 1 5E7B19F9
 P 6250 1000
 F 0 "P10" H 6250 1150 50  0000 C CNN
@@ -351,7 +353,7 @@ $EndComp
 Text Label 5350 950  2    50   ~ 0
 PING
 $Comp
-L pspice:R R14
+L pcb_loadcell-dev-rescue:R-pspice R14
 U 1 1 5E7B1A00
 P 5600 950
 F 0 "R14" V 5395 950 50  0000 C CNN
@@ -362,7 +364,7 @@ F 3 "" H 5600 950 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:GND #PWR070
+L pcb_loadcell-dev-rescue:GND-power #PWR070
 U 1 1 5E7B1A06
 P 6050 1050
 F 0 "#PWR070" H 6050 800 50  0001 C CNN
@@ -373,7 +375,7 @@ F 3 "" H 6050 1050 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR072
+L pcb_loadcell-dev-rescue:GND-power #PWR072
 U 1 1 5E7B1A0C
 P 6700 1700
 F 0 "#PWR072" H 6700 1450 50  0001 C CNN
@@ -384,7 +386,7 @@ F 3 "" H 6700 1700 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L jumper:Jumper_3_Bridged12 JP8
+L pcb_loadcell-dev-rescue:Jumper_3_Bridged12-jumper JP8
 U 1 1 5E7B1A12
 P 6450 1700
 F 0 "JP8" H 6450 1813 50  0000 C CNN
@@ -415,7 +417,7 @@ Wire Wire Line
 Wire Wire Line
 	5850 950  6050 950 
 $Comp
-L maxim:DS18B20 U8
+L pcb_loadcell-dev-rescue:DS18B20-maxim U8
 U 1 1 5E8239E4
 P 3650 1150
 F 0 "U8" H 3878 1196 50  0000 L CNN
@@ -426,7 +428,7 @@ F 3 "https://www.reichelt.de/digital-thermometer-1-wire-0-5-c-to-92-ds-18b20-p58
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR047
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR047
 U 1 1 5E82607D
 P 3350 1050
 F 0 "#PWR047" H 3350 900 50  0001 C CNN
@@ -437,7 +439,7 @@ F 3 "" H 3350 1050 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR048
+L pcb_loadcell-dev-rescue:GND-power #PWR048
 U 1 1 5E826F4B
 P 3350 1250
 F 0 "#PWR048" H 3350 1000 50  0001 C CNN
@@ -448,7 +450,7 @@ F 3 "" H 3350 1250 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:C C8
+L pcb_loadcell-dev-rescue:C-device C8
 U 1 1 5E829631
 P 2750 1150
 F 0 "C8" H 2865 1196 50  0000 L CNN
@@ -459,7 +461,7 @@ F 3 "https://www.reichelt.de/vielschicht-kerko-100nf-50v-125-c-kem-x7r1206b100n-
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR044
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR044
 U 1 1 5E82C310
 P 2750 1000
 F 0 "#PWR044" H 2750 850 50  0001 C CNN
@@ -470,7 +472,7 @@ F 3 "" H 2750 1000 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR045
+L pcb_loadcell-dev-rescue:GND-power #PWR045
 U 1 1 5E82C571
 P 2750 1300
 F 0 "#PWR045" H 2750 1050 50  0001 C CNN
@@ -487,7 +489,7 @@ DQ
 Wire Wire Line
 	3150 2700 2850 2700
 $Comp
-L power:+3.3V #PWR046
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR046
 U 1 1 5E6E8D08
 P 3450 2000
 F 0 "#PWR046" H 3450 1850 50  0001 C CNN
@@ -500,7 +502,7 @@ $EndComp
 Wire Wire Line
 	2850 2500 3450 2500
 $Comp
-L pspice:R R5
+L pcb_loadcell-dev-rescue:R-pspice R5
 U 1 1 5E6E8CFF
 P 3450 2250
 F 0 "R5" H 3382 2204 50  0000 R CNN
@@ -517,7 +519,7 @@ Text HLabel 850  2300 1    50   Input ~ 0
 Text HLabel 1150 2300 1    50   Input ~ 0
 GND
 $Comp
-L power:GND #PWR037
+L pcb_loadcell-dev-rescue:GND-power #PWR037
 U 1 1 5E89F4DE
 P 1150 2300
 F 0 "#PWR037" H 1150 2050 50  0001 C CNN
@@ -528,7 +530,7 @@ F 3 "" H 1150 2300 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR035
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR035
 U 1 1 5E89FACF
 P 850 2300
 F 0 "#PWR035" H 850 2150 50  0001 C CNN
@@ -539,9 +541,11 @@ F 3 "" H 850 2300 50  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L 74xx_IEEE:74165 U5
+L pcb_loadcell-dev-rescue:74165-74xx_IEEE U5
 U 1 1 5E8C394F
 P 4300 6450
+AR Path="/5E8C394F" Ref="U5"  Part="1" 
+AR Path="/5E6C650B/5E8C394F" Ref="U5"  Part="1" 
 F 0 "U5" H 4300 7216 50  0000 C CNN
 F 1 "74HC165" H 4300 7125 50  0000 C CNN
 F 2 "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" H 4300 6450 50  0001 C CNN
@@ -558,7 +562,7 @@ QH
 Text Label 2850 4700 0    50   ~ 0
 QH
 $Comp
-L pspice:R R2
+L pcb_loadcell-dev-rescue:R-pspice R2
 U 1 1 5E92BEE5
 P 3400 3100
 F 0 "R2" H 3332 3054 50  0000 R CNN
@@ -570,7 +574,7 @@ F 4 "OPT" H 3400 3100 50  0000 C CNN "Field4"
 	0    -1   -1   0   
 $EndComp
 $Comp
-L power:GND #PWR050
+L pcb_loadcell-dev-rescue:GND-power #PWR050
 U 1 1 5E92C73D
 P 3650 3100
 F 0 "#PWR050" H 3650 2850 50  0001 C CNN
@@ -585,7 +589,7 @@ Wire Wire Line
 Wire Wire Line
 	5150 7250 4850 7250
 $Comp
-L power:+3.3V #PWR?
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR?
 U 1 1 5E93DF36
 P 4500 5900
 AR Path="/5E93DF36" Ref="#PWR?"  Part="1" 
@@ -598,7 +602,7 @@ F 3 "" H 4500 5900 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L pcb_loadcell-dev-rescue:GND-power #PWR?
 U 1 1 5E93E493
 P 4300 5900
 AR Path="/5E93E493" Ref="#PWR?"  Part="1" 
@@ -611,7 +615,7 @@ F 3 "" H 4300 5900 50  0000 C CNN
 	-1   0    0    1   
 $EndComp
 $Comp
-L power:GND #PWR?
+L pcb_loadcell-dev-rescue:GND-power #PWR?
 U 1 1 5E93F176
 P 5550 7250
 AR Path="/5E93F176" Ref="#PWR?"  Part="1" 
@@ -624,7 +628,7 @@ F 3 "" H 5550 7250 50  0000 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L jumper:SolderJumper_3_Open JP3
+L pcb_loadcell-dev-rescue:SolderJumper_3_Open-jumper JP3
 U 1 1 5EA53B87
 P 5350 7250
 F 0 "JP3" H 5350 7455 50  0000 C CNN
@@ -635,7 +639,7 @@ F 3 "https://www.reichelt.de/rnd-stiftleiste-3-pol-rm-2-54-mm-rnd-205-00624-p208
 	1    0    0    -1  
 $EndComp
 $Comp
-L device:C C?
+L pcb_loadcell-dev-rescue:C-device C?
 U 1 1 5EA81C54
 P 4950 6300
 AR Path="/5EA81C54" Ref="C?"  Part="1" 
@@ -648,7 +652,7 @@ F 3 "https://www.reichelt.de/vielschicht-kerko-100nf-50v-125-c-kem-x7r1206b100n-
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L pcb_loadcell-dev-rescue:GND-power #PWR?
 U 1 1 5EA81C5A
 P 4950 6450
 AR Path="/5EA81C5A" Ref="#PWR?"  Part="1" 
@@ -661,7 +665,7 @@ F 3 "" H 4950 6450 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR?
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR?
 U 1 1 5EA81C60
 P 4950 6150
 AR Path="/5EA81C60" Ref="#PWR?"  Part="1" 
@@ -684,7 +688,7 @@ TXD
 Text HLabel 3150 2500 1    50   Input ~ 0
 DTR
 $Comp
-L device:POT_Screw_TRIM RV1
+L pcb_loadcell-dev-rescue:POT_Screw_TRIM-device RV1
 U 1 1 5E897898
 P 5000 4250
 F 0 "RV1" V 4954 4078 50  0000 R CNN
@@ -702,7 +706,7 @@ Wire Wire Line
 	5000 4000 4850 4000
 Connection ~ 4850 4000
 $Comp
-L conn:CONN_01X08 P4
+L pcb_loadcell-dev-rescue:CONN_01X08-conn P4
 U 1 1 5E8F134B
 P 3350 6900
 F 0 "P4" H 3267 7465 50  0000 C CNN
@@ -731,7 +735,7 @@ Wire Wire Line
 Wire Wire Line
 	3550 7300 3550 7250
 $Comp
-L conn:CONN_01X08 P3
+L pcb_loadcell-dev-rescue:CONN_01X08-conn P3
 U 1 1 5E8F7ED1
 P 850 4550
 F 0 "P3" H 767 5115 50  0000 C CNN
@@ -742,7 +746,7 @@ F 3 "" H 850 4550 50  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L conn:CONN_01X08 P2
+L pcb_loadcell-dev-rescue:CONN_01X08-conn P2
 U 1 1 5E8F8EDC
 P 850 3400
 F 0 "P2" H 767 3965 50  0000 C CNN
@@ -753,7 +757,7 @@ F 3 "" H 850 3400 50  0000 C CNN
 	-1   0    0    -1  
 $EndComp
 $Comp
-L power:+3.3V #PWR?
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR?
 U 1 1 5E8FABCA
 P 1050 3050
 AR Path="/5E8FABCA" Ref="#PWR?"  Part="1" 
@@ -766,7 +770,7 @@ F 3 "" H 1050 3050 50  0000 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:GND #PWR?
+L pcb_loadcell-dev-rescue:GND-power #PWR?
 U 1 1 5E8FC4DA
 P 1050 4900
 AR Path="/5E8FC4DA" Ref="#PWR?"  Part="1" 
@@ -841,7 +845,7 @@ DQ
 Text Label 3100 2700 2    50   ~ 0
 SH
 $Comp
-L pspice:R R1
+L pcb_loadcell-dev-rescue:R-pspice R1
 U 1 1 5E9728C8
 P 1850 6000
 F 0 "R1" H 1782 5954 50  0000 R CNN
@@ -852,7 +856,7 @@ F 3 "https://www.reichelt.de/smd-widerstand-1206-470-ohm-250-mw-1-rnd-1206-1-470
 	0    -1   -1   0   
 $EndComp
 $Comp
-L device:C C?
+L pcb_loadcell-dev-rescue:C-device C?
 U 1 1 5E976388
 P 2250 6000
 AR Path="/5E976388" Ref="C?"  Part="1" 
@@ -865,7 +869,7 @@ F 3 "https://www.reichelt.de/vielschicht-kerko-100nf-50v-125-c-kem-x7r1206b100n-
 	0    1    1    0   
 $EndComp
 $Comp
-L pspice:R R10
+L pcb_loadcell-dev-rescue:R-pspice R10
 U 1 1 5E977855
 P 2400 6250
 F 0 "R10" H 2332 6204 50  0000 R CNN
@@ -876,7 +880,7 @@ F 3 "https://www.reichelt.de/smd-widerstand-1206-10-kohm-250-mw-1-rnd-1206-1-10k
 	-1   0    0    1   
 $EndComp
 $Comp
-L device:D_Schottky D1
+L pcb_loadcell-dev-rescue:D_Schottky-device D1
 U 1 1 5E9787EE
 P 2700 6150
 F 0 "D1" V 2746 6071 50  0000 R CNN
@@ -890,7 +894,7 @@ Wire Wire Line
 	2400 6000 2700 6000
 Connection ~ 2400 6000
 $Comp
-L power:+3.3V #PWR?
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR?
 U 1 1 5E985883
 P 2600 6500
 AR Path="/5E985883" Ref="#PWR?"  Part="1" 
@@ -934,7 +938,7 @@ Connection ~ 4200 4500
 Wire Wire Line
 	2850 4500 4200 4500
 $Comp
-L power:GND #PWR012
+L pcb_loadcell-dev-rescue:GND-power #PWR012
 U 1 1 5EA37B05
 P 8250 2150
 F 0 "#PWR012" H 8250 1900 50  0001 C CNN
@@ -945,7 +949,7 @@ F 3 "" H 8250 2150 50  0000 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L power:+3.3V #PWR013
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR013
 U 1 1 5EA39D2F
 P 8250 2250
 F 0 "#PWR013" H 8250 2100 50  0001 C CNN
@@ -960,7 +964,7 @@ Vboost
 Text HLabel 8250 2450 0    50   Input ~ 0
 VA
 $Comp
-L conn:CONN_01X14 P5
+L pcb_loadcell-dev-rescue:CONN_01X14-conn P5
 U 1 1 5EA59972
 P 8450 2800
 F 0 "P5" H 8528 2886 50  0000 L CNN
@@ -975,7 +979,7 @@ I35
 Text Label 8250 2550 2    50   ~ 0
 I35
 $Comp
-L pspice:R R?
+L pcb_loadcell-dev-rescue:R-pspice R?
 U 1 1 5E8691CD
 P 3400 2900
 F 0 "R?" H 3332 2854 50  0000 R CNN
@@ -988,7 +992,7 @@ $EndComp
 Wire Wire Line
 	3150 2900 2850 2900
 $Comp
-L power:+3.3V #PWR?
+L pcb_loadcell-dev-rescue:+3.3V-power #PWR?
 U 1 1 5E8730F9
 P 3650 2900
 F 0 "#PWR?" H 3650 2750 50  0001 C CNN

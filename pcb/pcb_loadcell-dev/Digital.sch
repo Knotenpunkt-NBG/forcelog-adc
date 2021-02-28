@@ -70,8 +70,6 @@ F 3 "" H 2250 5100 50  0000 C CNN
 $EndComp
 Wire Wire Line
 	4200 4500 4200 4000
-Wire Wire Line
-	4200 4000 4500 4000
 $Comp
 L pcb_loadcell-dev-rescue:C-device C10
 U 1 1 5E6E8CDD
@@ -83,9 +81,6 @@ F 3 "https://www.reichelt.de/vielschicht-kerko-100nf-50v-125-c-kem-x7r1206b100n-
 	1    4500 4150
 	1    0    0    -1  
 $EndComp
-Connection ~ 4500 4000
-Wire Wire Line
-	4500 4000 4850 4000
 $Comp
 L pcb_loadcell-dev-rescue:GND-power #PWR056
 U 1 1 5E6E8CE5
@@ -702,9 +697,6 @@ Wire Wire Line
 	4850 4250 4850 4400
 Wire Wire Line
 	5000 4100 5000 4000
-Wire Wire Line
-	5000 4000 4850 4000
-Connection ~ 4850 4000
 $Comp
 L pcb_loadcell-dev-rescue:CONN_01X08-conn P4
 U 1 1 5E8F134B
@@ -782,48 +774,6 @@ F 3 "" H 1050 4900 50  0000 C CNN
 	1    1050 4900
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	1050 4900 1050 4800
-Connection ~ 1050 4900
-Connection ~ 1050 4300
-Wire Wire Line
-	1050 4300 1050 4200
-Connection ~ 1050 4400
-Wire Wire Line
-	1050 4400 1050 4300
-Connection ~ 1050 4500
-Wire Wire Line
-	1050 4500 1050 4400
-Connection ~ 1050 4600
-Wire Wire Line
-	1050 4600 1050 4500
-Connection ~ 1050 4700
-Wire Wire Line
-	1050 4700 1050 4600
-Connection ~ 1050 4800
-Wire Wire Line
-	1050 4800 1050 4700
-Wire Wire Line
-	1050 3050 1050 3150
-Connection ~ 1050 3050
-Connection ~ 1050 3150
-Wire Wire Line
-	1050 3150 1050 3250
-Connection ~ 1050 3250
-Wire Wire Line
-	1050 3250 1050 3350
-Connection ~ 1050 3350
-Wire Wire Line
-	1050 3350 1050 3450
-Connection ~ 1050 3450
-Wire Wire Line
-	1050 3450 1050 3550
-Connection ~ 1050 3550
-Wire Wire Line
-	1050 3550 1050 3650
-Connection ~ 1050 3650
-Wire Wire Line
-	1050 3650 1050 3750
 Text Label 8250 2750 2    50   ~ 0
 IO_16
 Text Label 8250 2850 2    50   ~ 0
@@ -890,9 +840,6 @@ F 3 "https://www.reichelt.de/schottkydiode-30-v-0-2-a-sod-323f-bat-54j-nxp-p2194
 	1    2700 6150
 	0    -1   -1   0   
 $EndComp
-Wire Wire Line
-	2400 6000 2700 6000
-Connection ~ 2400 6000
 $Comp
 L pcb_loadcell-dev-rescue:+3.3V-power #PWR?
 U 1 1 5E985883
@@ -907,15 +854,7 @@ F 3 "" H 2600 6500 50  0000 C CNN
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	2400 6500 2600 6500
-Wire Wire Line
 	2700 6500 2700 6300
-Connection ~ 2600 6500
-Wire Wire Line
-	2600 6500 2700 6500
-Wire Wire Line
-	3750 6000 2700 6000
-Connection ~ 2700 6000
 Text Label 3750 6150 2    50   ~ 0
 SH
 Text Label 2850 3500 0    50   ~ 0
@@ -934,7 +873,6 @@ Text Label 2850 4000 0    50   ~ 0
 IO_22|SCL
 Text Label 2850 4100 0    50   ~ 0
 IO_23|VMOSI
-Connection ~ 4200 4500
 Wire Wire Line
 	2850 4500 4200 4500
 $Comp
@@ -1002,4 +940,14 @@ F 3 "" H 3650 2900 50  0000 C CNN
 	1    3650 2900
 	0    1    1    0   
 $EndComp
+Wire Wire Line
+	4200 4000 5000 4000
+Wire Wire Line
+	2400 6000 3750 6000
+Wire Wire Line
+	2400 6500 2700 6500
+Wire Wire Line
+	1050 4200 1050 4900
+Wire Wire Line
+	1050 3050 1050 3750
 $EndSCHEMATC

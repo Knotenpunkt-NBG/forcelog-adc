@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name batman)(type Legacy)(uri /home/lor/projects/Database/kicad_user/library/batman.lib)(options "")(descr ""))
+  (lib (name regulators)(type Legacy)(uri /home/lor/projects/Database/kicad_user/library/regulators.lib)(options "")(descr ""))
+  (lib (name modules)(type Legacy)(uri /home/lor/projects/Database/kicad_user/library/modules.lib)(options "")(descr ""))
+)

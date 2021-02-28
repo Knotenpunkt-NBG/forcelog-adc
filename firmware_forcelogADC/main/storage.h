@@ -29,6 +29,8 @@
 #include "driver/sdmmc_host.h"
 #include "driver/sdspi_host.h"
 #include "sdmmc_cmd.h"
+#include "owb.h"
+#include "dirent.h"
 
 
 #include "defines.h"
@@ -41,17 +43,19 @@
 #define PIN_NUM_MISO 12
 #define PIN_NUM_MOSI 13
 #define PIN_NUM_CLK  14
-#define PIN_NUM_CS   15
+#define PIN_NUM_CS   0
 #define allocation_unit_size	(16 * 1024)
 #define max_files	2
 
-void fstorageInit(void);
-void tstorageRun(void* param);
-void fsdConfig(uint32_t ui_cmdlet);
-esp_err_t fFormatSD();
+void			fstorageInit	(void);
+void			tstorageRun		(void* param);
+void			fsdConfig		(uint32_t ui_cmdlet);
+esp_err_t		fFormatSD		();
+uint32_t		fwriteInit		(void);
+char*			ffileList		(char* pc_fileName);
+char*			floadInit		();
 
-sdmmc_card_t* card;
-
+sdmmc_card_t*	card;
 BYTE pdrv;
 FATFS* fs;
 size_t alloc_unit_size;

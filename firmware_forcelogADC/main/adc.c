@@ -36,48 +36,38 @@ void fADCInit (void)
 
 void tadcRun(void* param)
 {
-	struct stu_adcConfig adcConfig_mom;
-	struct stu_cellConfig cellConfig_mom;
 	uint32_t ui_cmdlet = 0;
-	double d_momValue = 0.0;
-	uint64_t time_since_boot = 0;
+	struct stu_mesCell dataPoint =
+	{
+			.b_type = TYPE_ADC,
+			.d_measurement = 0.0,
+			.ul_time = 0
+	};
 	while(1)
 	{
 		while(ui_cmdlet != CMD_wait)
 		{
 			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
-			fadcConfig(ui_cmdlet, &adcConfig_mom, &cellConfig_mom);
+			fadcConfig(ui_cmdlet);
 		}
-
+		xEventGroupSync( eg_sync, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
 		while((ui_cmdlet != CMD_trig) && (ui_cmdlet != CMD_stop))
 		{
-			vTaskResume(ht_configRun);
 			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
 		}
 		if (ui_cmdlet == CMD_trig)
-			esp_timer_start_periodic(htim_periodicAdc, adcConfig_mom.ul_adcPeriod);
+			esp_timer_start_periodic(htim_periodicAdc, gstu_config->adc.ul_adcPeriod);
 
 		while (ui_cmdlet != CMD_stop)
 		{
-			time_since_boot = esp_timer_get_time();
-			d_momValue = ((double) freadAdc() - cellConfig_mom.ui_tareValue);
-			d_momValue *= cellConfig_mom.d_calValue;
-			if(adcConfig_mom.b_sendTCP)
-			{
-				xQueueSend(q_time_mes_tcp, &time_since_boot,  0);
-				xQueueSend(q_value_mes_tcp, &d_momValue,  0);
-				while(xTaskNotify(ht_tcpMes,CMD_MEAS_READY,eSetValueWithoutOverwrite) != pdPASS)
-					vTaskDelay(1/ portTICK_PERIOD_MS);
-
-			}
-			if(adcConfig_mom.b_sendSD)
-			{
-				//TODO: make queues for sd
-			}
+			dataPoint.ul_time = esp_timer_get_time();
+			dataPoint.d_measurement = ((double) freadAdc() - gstu_config->cell.ui_tareValue);
+			dataPoint.d_measurement *= gstu_config->cell.d_calValue;
+			xQueueSendFromISR(q_measurements, &dataPoint,  0);
 			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
 			if((ui_cmdlet != CMD_fire) && (ui_cmdlet != CMD_stop))
 			{
-				fadcConfig(ui_cmdlet, &adcConfig_mom, &cellConfig_mom);
+				fadcConfig(ui_cmdlet);
 			}
 		}
 		esp_timer_stop(htim_periodicAdc);
@@ -110,6 +100,8 @@ uint32_t freadAdc ()
 	return count;
 }
 
+
+
 uint32_t ftareADC()
 {
 	uint32_t ui_tareValue = 0;
@@ -122,6 +114,7 @@ uint32_t ftareADC()
 	ui_tareValue /= ADC_TARE_CYCLES;
 	return ui_tareValue;
 }
+
 
 double fcalADC	(double d_calWheight,
 				uint32_t ui_tareValue)
@@ -162,13 +155,10 @@ int fsetADCSpeed	(uint64_t ui_adcPeriod)
 
 void fadcTimerCallback	(void* arg)
 {
-	while(xTaskNotify(ht_adcRun,CMD_fire,eSetValueWithoutOverwrite) != pdPASS)
-		vTaskDelay(1/ portTICK_PERIOD_MS);
+	while(xTaskNotify(ht_adcRun,CMD_fire,eSetValueWithoutOverwrite) != pdPASS);
 }
 
-void fadcConfig	(uint32_t CMDlet,
-				struct stu_adcConfig *adcConfig_mom,
-				struct stu_cellConfig *cellConfig_mom)
+void fadcConfig	(uint32_t CMDlet)
 {
 	double* pd_calWeight = 0;
 
@@ -177,44 +167,229 @@ void fadcConfig	(uint32_t CMDlet,
 	case 0:
 		break;
 	case CMD_setc:
-		adcConfig_mom->b_sendTCP = true;
-		break;
 	case CMD_sesd:
-		adcConfig_mom->b_sendSD = true;
-		break;
 	case CMD_retc:
-		adcConfig_mom->b_sendTCP = false;
-		break;
 	case CMD_resd:
-		adcConfig_mom->b_sendSD = false;
+	case CMD_ldad:
+		xEventGroupSync( eg_sync, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
+		xEventGroupSync( eg_config, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
+		break;
+
+	case CMD_ldlc:
+		ESP_LOGD(TAG_ADC, "LOADING");
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_STORAGE_SYNC,
+				portMAX_DELAY );
+		ESP_LOGD(TAG_ADC, "SYNCING");
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_STORAGE_SYNC,
+				portMAX_DELAY );
+		ESP_LOGD(TAG_ADC, "FINISHED LOADING");
+		break;
+	case CMD_init:
+		xEventGroupSync( eg_config,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC ,
+				BIT_CONFIG_SYNC
+					| BIT_ADC_SYNC
+					| BIT_TCPMES_SYNC
+					| BIT_TCPCONF_SYNC
+					| BIT_WIFI_SYNC
+					| BIT_BLINK_SYNC
+					| BIT_BATMON_SYNC
+					| BIT_STORAGE_SYNC,
+				portMAX_DELAY );
 		break;
 	case CMD_tare:
-		cellConfig_mom->ui_tareValue = ftareADC();
+		gstu_config->cell.ui_tareValue = ftareADC();
+		xEventGroupSync( eg_sync, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
+		xEventGroupSync( eg_config, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
 		break;
 	case CMD_cali:
-		xQueueReceive(q_pointer, &pd_calWeight, portMAX_DELAY);
+		xQueueReceive(q_send, &pd_calWeight, portMAX_DELAY);
 		fsetADCSpeed(ADC_CAL_PERIOD);
-		cellConfig_mom->d_calValue = fcalADC(*pd_calWeight, cellConfig_mom->ui_tareValue);
+		gstu_config->cell.d_calValue = fcalADC(*pd_calWeight, gstu_config->cell.ui_tareValue);
 		free(pd_calWeight);
-		fsetADCSpeed(adcConfig_mom->ul_adcPeriod);
-		xQueueSend(q_pointer, &cellConfig_mom, portMAX_DELAY);
+		fsetADCSpeed(gstu_config->adc.ul_adcPeriod);
+
+//		while(xTaskNotify(ht_adcRun,CMD_svlc,eSetValueWithoutOverwrite) != pdPASS)
+//			vTaskDelay(1/ portTICK_PERIOD_MS);
+//		xEventGroupSync( eg_sync, NULL, BIT_STORAGE_SYNC, portMAX_DELAY );
+
+		xEventGroupSync( eg_sync, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
 		break;
-	case CMD_vcal:
+
 	case CMD_mper:
-	case CMD_svad:
-	case CMD_defl:
-	case CMD_ldad:
-		xQueueSend(q_pointer,&adcConfig_mom, portMAX_DELAY);
-		vTaskSuspend( NULL );
+		xEventGroupSync( eg_sync, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
+		xEventGroupSync( eg_config, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
+		if (esp_timer_stop(htim_periodicAdc) == ESP_OK)
+			esp_timer_start_periodic(htim_periodicAdc, gstu_config->adc.ul_adcPeriod);
 		break;
-	case CMD_ldlc:
-	case CMD_svlc:
-		xQueueSend(q_pointer,&cellConfig_mom, portMAX_DELAY);
-		vTaskSuspend( NULL );
-		break;
+
 	default:
 		ESP_LOGW(TAG_ADC, "WRONG CMDLET");
 		break;
 	}
 }
 
+//FUNCTIONS FOR ADC SIMULATION
+
+void fsimADCInit(void)
+{
+	//Creates Periodic Timer for Reading ADC
+	const esp_timer_create_args_t stu_adcTimerArgs = {
+			.callback = &fadcTimerCallback,
+			.name = "ADCTimer"
+	};
+	esp_timer_create(&stu_adcTimerArgs, &htim_periodicAdc);
+	xTaskCreate(tsimADCRun, "tsimdADCRun", 2048, NULL, 10, &ht_adcRun);
+}
+
+uint32_t fsimReadADC(void)
+{
+	uint64_t ul_time = esp_timer_get_time();
+	ul_time %= 5000000;
+	ul_time /= 5;
+	return (uint32_t) ul_time;
+}
+
+void tsimADCRun (void* param)
+{
+	uint32_t ui_cmdlet = 0;
+	struct stu_mesCell dataPoint =
+	{
+			.b_type = TYPE_ADC,
+			.d_measurement = 0,
+			.ul_time = 0
+	};
+	while(1)
+	{
+		while(ui_cmdlet != CMD_wait)
+		{
+			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
+			fsimADCConfig(ui_cmdlet);
+		}
+		xEventGroupSync( eg_sync, BIT_ADC_SYNC, BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
+		while((ui_cmdlet != CMD_trig) && (ui_cmdlet != CMD_stop))
+		{
+			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
+		}
+		if (ui_cmdlet == CMD_trig)
+			esp_timer_start_periodic(htim_periodicAdc, gstu_config->adc.ul_adcPeriod);
+
+		while (ui_cmdlet != CMD_stop)
+		{
+			dataPoint.ul_time = esp_timer_get_time();
+			dataPoint.d_measurement = sin(((double)fsimReadADC()/1000000)*3.14*2) * gstu_config->cell.d_calValue - gstu_config->cell.ui_tareValue;
+			xQueueSendFromISR(q_measurements, &dataPoint,  0);
+			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
+			if((ui_cmdlet != CMD_fire) && (ui_cmdlet != CMD_stop))
+			{
+				fsimADCConfig(ui_cmdlet);
+			}
+		}
+		esp_timer_stop(htim_periodicAdc);
+	}
+
+}
+
+void fsimADCConfig	(uint32_t CMDlet)
+{
+	double* pd_calWeight = 0;
+
+	switch (CMDlet)
+	{
+	case 0:
+		break;
+	case CMD_setc:
+	case CMD_sesd:
+	case CMD_retc:
+	case CMD_resd:
+	case CMD_ldad:
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		break;
+
+	case CMD_ldlc:
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_STORAGE_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_STORAGE_SYNC,
+				portMAX_DELAY );
+		break;
+
+	case CMD_init:
+		xEventGroupSync( eg_config,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC ,
+				BIT_CONFIG_SYNC
+					| BIT_ADC_SYNC
+					| BIT_TCPMES_SYNC
+					| BIT_TCPCONF_SYNC
+					| BIT_WIFI_SYNC
+					| BIT_BLINK_SYNC
+					| BIT_BATMON_SYNC
+					| BIT_STORAGE_SYNC,
+				portMAX_DELAY );
+		break;
+	case CMD_tare:
+		gstu_config->cell.ui_tareValue += 1;
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_config,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		break;
+	case CMD_cali:
+		xQueueReceive(q_send, &pd_calWeight, portMAX_DELAY);
+		gstu_config->cell.d_calValue = *pd_calWeight;
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		free(pd_calWeight);
+
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		break;
+
+	case CMD_mper:
+		xEventGroupSync( eg_sync,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		xEventGroupSync( eg_config,
+				BIT_ADC_SYNC,
+				BIT_ADC_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		if (esp_timer_stop(htim_periodicAdc) == ESP_OK)
+			esp_timer_start_periodic(htim_periodicAdc, gstu_config->adc.ul_adcPeriod);
+		break;
+
+	default:
+		ESP_LOGW(TAG_ADC, "WRONG CMDLET");
+		break;
+	}
+}

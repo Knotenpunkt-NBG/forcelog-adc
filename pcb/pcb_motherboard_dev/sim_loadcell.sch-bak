@@ -1,0 +1,372 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 3 9
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Device:R_Potentiometer RV1
+U 1 1 604FF0B8
+P 4300 5000
+F 0 "RV1" H 4230 5046 50  0000 R CNN
+F 1 "20" H 4230 4955 50  0000 R CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_3386P_Vertical" H 4300 5000 50  0001 C CNN
+F 3 "~" H 4300 5000 50  0001 C CNN
+F 4 "" H 4300 5000 50  0001 C CNN "LCSC"
+F 5 "3386P-1-200TLF-ND" H 4300 5000 50  0001 C CNN "Digikey"
+	1    4300 5000
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R42
+U 1 1 604FF44B
+P 4300 4650
+F 0 "R42" H 4370 4696 50  0000 L CNN
+F 1 "1k" H 4370 4605 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 4230 4650 50  0001 C CNN
+F 3 "~" H 4300 4650 50  0001 C CNN
+F 4 "C131398" H 4300 4650 50  0001 C CNN "LCSC"
+F 5 "311-1.00KFRCT-ND" H 4300 4650 50  0001 C CNN "Digikey"
+	1    4300 4650
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R43
+U 1 1 604FF9AA
+P 4300 5400
+F 0 "R43" H 4370 5446 50  0000 L CNN
+F 1 "1k" H 4370 5355 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 4230 5400 50  0001 C CNN
+F 3 "~" H 4300 5400 50  0001 C CNN
+F 4 "C131398" H 4300 5400 50  0001 C CNN "LCSC"
+F 5 "311-1.00KFRCT-ND" H 4300 5400 50  0001 C CNN "Digikey"
+	1    4300 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R45
+U 1 1 604FFBD9
+P 4800 5400
+F 0 "R45" H 4870 5446 50  0000 L CNN
+F 1 "1k" H 4870 5355 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 4730 5400 50  0001 C CNN
+F 3 "~" H 4800 5400 50  0001 C CNN
+F 4 "C131398" H 4800 5400 50  0001 C CNN "LCSC"
+F 5 "311-1.00KFRCT-ND" H 4800 5400 50  0001 C CNN "Digikey"
+	1    4800 5400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R44
+U 1 1 604FFDEF
+P 4800 4650
+F 0 "R44" H 4870 4696 50  0000 L CNN
+F 1 "1k" H 4870 4605 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 4730 4650 50  0001 C CNN
+F 3 "~" H 4800 4650 50  0001 C CNN
+F 4 "C131398" H 4800 4650 50  0001 C CNN "LCSC"
+F 5 "311-1.00KFRCT-ND" H 4800 4650 50  0001 C CNN "Digikey"
+	1    4800 4650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4800 4800 4800 5000
+Wire Wire Line
+	4800 5000 5000 5000
+Connection ~ 4800 5000
+Wire Wire Line
+	4800 5000 4800 5250
+Wire Wire Line
+	4150 5000 3950 5000
+Wire Wire Line
+	4300 5150 4300 5250
+Wire Wire Line
+	4300 4850 4300 4800
+Wire Wire Line
+	4300 4500 4800 4500
+$Comp
+L Device:R_Potentiometer RV2
+U 1 1 6050AA9B
+P 6450 3750
+F 0 "RV2" H 6380 3796 50  0000 R CNN
+F 1 "10" H 6380 3705 50  0000 R CNN
+F 2 "Potentiometer_THT:Potentiometer_Bourns_3386P_Vertical" H 6450 3750 50  0001 C CNN
+F 3 "~" H 6450 3750 50  0001 C CNN
+F 4 "C116299" H 6450 3750 50  0001 C CNN "LCSC"
+F 5 "N/A" H 6450 3750 50  0001 C CNN "Digikey"
+	1    6450 3750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R46
+U 1 1 6050AB0D
+P 6450 3400
+F 0 "R46" H 6520 3446 50  0000 L CNN
+F 1 "350" H 6520 3355 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 6380 3400 50  0001 C CNN
+F 3 "~" H 6450 3400 50  0001 C CNN
+F 4 "C163378" H 6450 3400 50  0001 C CNN "LCSC"
+F 5 "311-360FRCT-ND" H 6450 3400 50  0001 C CNN "Digikey"
+	1    6450 3400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R47
+U 1 1 6050AB17
+P 6450 4150
+F 0 "R47" H 6520 4196 50  0000 L CNN
+F 1 "350" H 6520 4105 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 6380 4150 50  0001 C CNN
+F 3 "~" H 6450 4150 50  0001 C CNN
+F 4 "C163378" H 6450 4150 50  0001 C CNN "LCSC"
+F 5 "311-360FRCT-ND" H 6450 4150 50  0001 C CNN "Digikey"
+	1    6450 4150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R50
+U 1 1 6050AB21
+P 7150 4150
+F 0 "R50" H 7220 4196 50  0000 L CNN
+F 1 "350" H 7220 4105 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 7080 4150 50  0001 C CNN
+F 3 "~" H 7150 4150 50  0001 C CNN
+F 4 "C163378" H 7150 4150 50  0001 C CNN "LCSC"
+F 5 "311-360FRCT-ND" H 7150 4150 50  0001 C CNN "Digikey"
+	1    7150 4150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R49
+U 1 1 6050AB2B
+P 7150 3400
+F 0 "R49" H 7220 3446 50  0000 L CNN
+F 1 "350" H 7220 3355 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 7080 3400 50  0001 C CNN
+F 3 "~" H 7150 3400 50  0001 C CNN
+F 4 "C163378" H 7150 3400 50  0001 C CNN "LCSC"
+F 5 "311-360FRCT-ND" H 7150 3400 50  0001 C CNN "Digikey"
+	1    7150 3400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7150 3550 7150 3750
+Wire Wire Line
+	7150 3750 7350 3750
+Connection ~ 7150 3750
+Wire Wire Line
+	7150 3750 7150 4000
+Wire Wire Line
+	6450 3900 6450 4000
+Wire Wire Line
+	6450 3600 6450 3550
+Wire Wire Line
+	6450 3250 7150 3250
+$Comp
+L Device:R R48
+U 1 1 60510BCC
+P 6750 3750
+F 0 "R48" H 6820 3796 50  0000 L CNN
+F 1 "15" H 6820 3705 50  0000 L CNN
+F 2 "Resistor_SMD:R_1206_3216Metric_Pad1.30x1.75mm_HandSolder" V 6680 3750 50  0001 C CNN
+F 3 "~" H 6750 3750 50  0001 C CNN
+F 4 "C137386" H 6750 3750 50  0001 C CNN "LCSC"
+F 5 "311-15.0FRCT-ND" H 6750 3750 50  0001 C CNN "Digikey"
+	1    6750 3750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6750 3600 6450 3600
+Connection ~ 6450 3600
+Wire Wire Line
+	6750 3900 6450 3900
+Connection ~ 6450 3900
+Wire Wire Line
+	6300 3750 6100 3750
+$Comp
+L Connector_Generic:Conn_02x04_Odd_Even J4
+U 1 1 6062BD59
+P 5900 4900
+F 0 "J4" H 5950 5217 50  0000 C CNN
+F 1 "Conn_02x04_Odd_Even" H 5950 5126 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Horizontal" H 5900 4900 50  0001 C CNN
+F 3 "~" H 5900 4900 50  0001 C CNN
+F 4 "C358706" H 5900 4900 50  0001 C CNN "LCSC"
+F 5 "2057-PH2RA-08-UA-ND" H 5900 4900 50  0001 C CNN "Digikey"
+	1    5900 4900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6450 4300 7150 4300
+Wire Wire Line
+	4300 5550 4800 5550
+Text Label 4500 4500 0    50   ~ 0
+E+
+Text Label 4500 5550 0    50   ~ 0
+E-
+Text Label 3950 5000 2    50   ~ 0
+A+
+Text Label 5000 5000 0    50   ~ 0
+A-
+Text Label 6100 3750 2    50   ~ 0
+B+
+Text Label 7350 3750 0    50   ~ 0
+B-
+Text Label 6200 5000 0    50   ~ 0
+B-
+Text Label 6200 4900 0    50   ~ 0
+B+
+Text Label 5700 4800 2    50   ~ 0
+E+
+Text Label 6200 4800 0    50   ~ 0
+E+
+Text Label 6800 3250 0    50   ~ 0
+E+
+Text Label 6200 5100 0    50   ~ 0
+E-
+Text Label 5700 5100 2    50   ~ 0
+E-
+Text Label 6850 4300 2    50   ~ 0
+E-
+Text Label 5700 5000 2    50   ~ 0
+A-
+Text Label 5700 4900 2    50   ~ 0
+A+
+$Comp
+L Connector:TestPoint TP?
+U 1 1 605A812A
+P 7350 5200
+AR Path="/5FD1FA19/605A812A" Ref="TP?"  Part="1" 
+AR Path="/60594298/605A812A" Ref="TP?"  Part="1" 
+AR Path="/604FEE2B/605A812A" Ref="TP14"  Part="1" 
+F 0 "TP14" H 7408 5318 50  0000 L CNN
+F 1 "E+" H 7408 5227 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 7550 5200 50  0001 C CNN
+F 3 "~" H 7550 5200 50  0001 C CNN
+	1    7350 5200
+	1    0    0    -1  
+$EndComp
+Text Label 7350 5200 3    50   ~ 0
+E+
+$Comp
+L Connector:TestPoint TP?
+U 1 1 605A8E8F
+P 7650 5200
+AR Path="/5FD1FA19/605A8E8F" Ref="TP?"  Part="1" 
+AR Path="/60594298/605A8E8F" Ref="TP?"  Part="1" 
+AR Path="/604FEE2B/605A8E8F" Ref="TP16"  Part="1" 
+F 0 "TP16" H 7708 5318 50  0000 L CNN
+F 1 "S+" H 7708 5227 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 7850 5200 50  0001 C CNN
+F 3 "~" H 7850 5200 50  0001 C CNN
+	1    7650 5200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:TestPoint TP?
+U 1 1 605A9337
+P 7950 5200
+AR Path="/5FD1FA19/605A9337" Ref="TP?"  Part="1" 
+AR Path="/60594298/605A9337" Ref="TP?"  Part="1" 
+AR Path="/604FEE2B/605A9337" Ref="TP18"  Part="1" 
+F 0 "TP18" H 8008 5318 50  0000 L CNN
+F 1 "S-" H 8008 5227 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 8150 5200 50  0001 C CNN
+F 3 "~" H 8150 5200 50  0001 C CNN
+	1    7950 5200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:TestPoint TP?
+U 1 1 605A991E
+P 8250 5200
+AR Path="/5FD1FA19/605A991E" Ref="TP?"  Part="1" 
+AR Path="/60594298/605A991E" Ref="TP?"  Part="1" 
+AR Path="/604FEE2B/605A991E" Ref="TP20"  Part="1" 
+F 0 "TP20" H 8308 5318 50  0000 L CNN
+F 1 "E-" H 8308 5227 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 8450 5200 50  0001 C CNN
+F 3 "~" H 8450 5200 50  0001 C CNN
+	1    8250 5200
+	1    0    0    -1  
+$EndComp
+Text Label 8250 5200 3    50   ~ 0
+E-
+Text Label 7650 5200 3    50   ~ 0
+A+
+Text Label 7950 5200 3    50   ~ 0
+A-
+$Comp
+L Connector:TestPoint TP?
+U 1 1 605B0C50
+P 7350 5550
+AR Path="/5FD1FA19/605B0C50" Ref="TP?"  Part="1" 
+AR Path="/60594298/605B0C50" Ref="TP?"  Part="1" 
+AR Path="/604FEE2B/605B0C50" Ref="TP15"  Part="1" 
+F 0 "TP15" H 7408 5668 50  0000 L CNN
+F 1 "E+" H 7408 5577 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 7550 5550 50  0001 C CNN
+F 3 "~" H 7550 5550 50  0001 C CNN
+	1    7350 5550
+	1    0    0    -1  
+$EndComp
+Text Label 7350 5550 3    50   ~ 0
+E+
+$Comp
+L Connector:TestPoint TP?
+U 1 1 605B0D31
+P 7650 5550
+AR Path="/5FD1FA19/605B0D31" Ref="TP?"  Part="1" 
+AR Path="/60594298/605B0D31" Ref="TP?"  Part="1" 
+AR Path="/604FEE2B/605B0D31" Ref="TP17"  Part="1" 
+F 0 "TP17" H 7708 5668 50  0000 L CNN
+F 1 "S+" H 7708 5577 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 7850 5550 50  0001 C CNN
+F 3 "~" H 7850 5550 50  0001 C CNN
+	1    7650 5550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:TestPoint TP?
+U 1 1 605B0D3B
+P 7950 5550
+AR Path="/5FD1FA19/605B0D3B" Ref="TP?"  Part="1" 
+AR Path="/60594298/605B0D3B" Ref="TP?"  Part="1" 
+AR Path="/604FEE2B/605B0D3B" Ref="TP19"  Part="1" 
+F 0 "TP19" H 8008 5668 50  0000 L CNN
+F 1 "S-" H 8008 5577 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 8150 5550 50  0001 C CNN
+F 3 "~" H 8150 5550 50  0001 C CNN
+	1    7950 5550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:TestPoint TP?
+U 1 1 605B0D45
+P 8250 5550
+AR Path="/5FD1FA19/605B0D45" Ref="TP?"  Part="1" 
+AR Path="/60594298/605B0D45" Ref="TP?"  Part="1" 
+AR Path="/604FEE2B/605B0D45" Ref="TP21"  Part="1" 
+F 0 "TP21" H 8308 5668 50  0000 L CNN
+F 1 "E-" H 8308 5577 50  0000 L CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical" H 8450 5550 50  0001 C CNN
+F 3 "~" H 8450 5550 50  0001 C CNN
+	1    8250 5550
+	1    0    0    -1  
+$EndComp
+Text Label 8250 5550 3    50   ~ 0
+E-
+Text Label 7650 5550 3    50   ~ 0
+B+
+Text Label 7950 5550 3    50   ~ 0
+B-
+$EndSCHEMATC

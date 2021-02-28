@@ -80,9 +80,9 @@ void status_led	(void *param)	//TODO: defining different stati
 				}
 				break;
 			case LEDC_STATUS_WAITING_SERIAL:
-				ledc_set_duty(ledc_channel[LEDC_CH_RED].speed_mode, ledc_channel[LEDC_CH_RED].channel, 0);
+				ledc_set_duty(ledc_channel[LEDC_CH_RED].speed_mode, ledc_channel[LEDC_CH_RED].channel, 1000);
 				ledc_set_duty(ledc_channel[LEDC_CH_GREEN].speed_mode, ledc_channel[LEDC_CH_GREEN].channel, 1000);
-				ledc_set_duty(ledc_channel[LEDC_CH_BLUE].speed_mode, ledc_channel[LEDC_CH_BLUE].channel, 0);
+				ledc_set_duty(ledc_channel[LEDC_CH_BLUE].speed_mode, ledc_channel[LEDC_CH_BLUE].channel, 1000);
 				for (int i = 0; i< 3; i++)
 				{
 					ledc_update_duty(ledc_channel[i].speed_mode, ledc_channel[i].channel);
