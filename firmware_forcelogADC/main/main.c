@@ -5,6 +5,7 @@ void app_main()
 	esp_log_level_set("*", ESP_LOG_ERROR);
 	fsetLogLevel(LOG_DEBUG);
 
+
 	h_netif = 0;
 	ht_wifiBroadcast = 0;
 	//Creating Semaphores
@@ -77,7 +78,6 @@ void app_main()
 
 	vTaskDelete(NULL);
 }
-
 
 
 uint8_t fcheckModuleId ()

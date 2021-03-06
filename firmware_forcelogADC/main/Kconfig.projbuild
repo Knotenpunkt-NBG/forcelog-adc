@@ -1,0 +1,15 @@
+menu "Test Configuration"        
+
+    choice ADC_MODULE
+        prompt "ADC MODULE"
+        default ADC_MODULE_SIMULATION
+        help
+            ADC MODULE IN USE
+
+        config ADC_MODULE_SIMULATION
+            bool "simulation"
+        config ADC_MODULE_HX711A
+            bool "hx711-a"
+    endchoice
+    
+endmenu
