@@ -1,3 +1,4 @@
+
 menu "Test Configuration"        
 
     choice ADC_MODULE
@@ -13,3 +14,8 @@ menu "Test Configuration"
     endchoice
     
 endmenu
+
+config ADC_PATH
+    string
+    default "./adc_modules/simulation" if ADC_MODULE_SIMULATION
+    default "./adc_modules/hx711-a" if ADC_MODULE_HX711A

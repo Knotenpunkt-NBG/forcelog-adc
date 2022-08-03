@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name modules)(type KiCad)(uri /home/lor/projects/Database/kicad_user/modules/modules.pretty)(options "")(descr ""))
+  (lib (name transistor)(type KiCad)(uri /home/lor/projects/Database/kicad_user/modules/transistor.pretty)(options "")(descr ""))
+)

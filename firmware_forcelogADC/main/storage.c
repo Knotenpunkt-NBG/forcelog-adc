@@ -15,10 +15,7 @@ char* base_path = MOUNT_POINT;
 
 void fstorageInit(void)
 {
-	gstu_config = calloc(1, sizeof(struct stu_initConfig));
-	gstu_config->staConfig.portBroad = 16000;
-	gstu_config->staConfig.portConf = 4243;
-	gstu_config->staConfig.portMes = 4242;
+//	gstu_config = calloc(1, sizeof(struct stu_initConfig));
 
 	ESP_LOGI(TAG_REDUND, "Initializing SD card");
 
@@ -177,6 +174,7 @@ void tstorageRun (void* param)
 		while(ui_cmdlet != CMD_wait)
 		{
 			xTaskNotifyWait(false, ULONG_MAX, &ui_cmdlet, portMAX_DELAY);
+			ESP_LOGD(TAG_CONF, "CMDLET RECEIVED");
 			fsdConfig(ui_cmdlet);
 		}
 		xEventGroupSync( eg_sync, BIT_STORAGE_SYNC, BIT_STORAGE_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
@@ -192,11 +190,8 @@ void tstorageRun (void* param)
 		}
 
 
-		struct stu_mesCell input1;
-		struct stu_mesCell output;
-		input1.b_type = 1;
-		input1.d_measurement = 250.5;
-		input1.ul_time = 12500;
+		stu_mesCell input1;
+		stu_mesCell output;
 		// Use POSIX and C standard library functions to work with files.
 		// First create a file.
 		ESP_LOGI(TAG_REDUND, "Opening file");
@@ -213,8 +208,7 @@ void tstorageRun (void* param)
 		//fprintf(f, "Hello %s!\n", card->cid.name);
 		//fprintf(f, "HELLO WORLD!");
 
-		fwrite (&input1, sizeof(struct stu_mesCell), 1, f);
-		printf("DATA WRITE: TYPE:%d, TIME:%llu, VALUE:%f\n", input1.b_type, input1.ul_time, input1.d_measurement);
+		fwrite (&input1, sizeof(stu_mesCell), 1, f);
 
 		fclose(f);
 		ESP_LOGI(TAG_REDUND, "File written");
@@ -251,8 +245,7 @@ void tstorageRun (void* param)
 		//		ESP_LOGI(TAG_REDUND, "Read from file: '%s'", line);
 
 
-		fread(&output, sizeof(struct stu_mesCell), 1, f);
-		printf("DATA READ: TYPE:%d, TIME:%llu, VALUE:%f\n", output.b_type, output.ul_time, output.d_measurement);
+		fread(&output, sizeof(stu_mesCell), 1, f);
 		//		int readSize = freadBytes((char*) astu_entries[1], sizeof(astu_entries[1]));
 		fclose(f);
 
@@ -266,8 +259,10 @@ void tstorageRun (void* param)
 
 void fsdConfig(uint32_t ui_cmdlet)
 {
-	void* pv_gstu_config = NULL;
-	struct stu_initConfig*		p_initConfig		=	NULL;
+	uint32_t ui_offset = 0;
+	char* pc_configIn = 0;
+	char* pc_configOut = 0;
+	char* pc_value = 0;
 	char* pc_response = NULL;
 	char* ac_fileAddress = malloc(280);
 	char* pc_fileName = NULL;
@@ -276,12 +271,49 @@ void fsdConfig(uint32_t ui_cmdlet)
 	{
 		//FORMATTING
 	case CMD_mkfs:
-		fFormatSD();
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|ack|0|\t\tDo you really want to format (y/n)?\n");
+		fsendResponse(1, 0, pc_configOut);
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		if (*pc_configIn == 'y')
+		{
+			pc_configOut = malloc(64);
+			sprintf(pc_configOut, "|ack|0|\t\tStarting format. This might take some time.\n");
+			fsendResponse(0, 0, pc_configOut);
+			pc_configOut = malloc(64);
+			if (fFormatSD() == ESP_OK)
+			{
+				sprintf(pc_configOut, "|ack|0|\t\tFinished format.\n");
+			}
+			else
+			{
+				sprintf(pc_configOut, "|ack|0|\t\tFormat failes.\n");
+			}
+			fsendResponse(0, 1, pc_configOut);
+		}
+		else if (*pc_configIn == 'n')
+		{
+			pc_configOut = malloc(64);
+			sprintf(pc_configOut, "|ack|0|\t\tAborted formatting.\n");
+			fsendResponse(0, 1, pc_configOut);
+		}
+		else
+		{
+			pc_configOut = malloc(64);
+			sprintf(pc_configOut, "|ack|0|\t\tWrong input. Formatting canceled.\n");
+			fsendResponse(0, 1, pc_configOut);
+		}
 		xEventGroupSync(eg_sync,
 				BIT_STORAGE_SYNC ,
 				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
 				portMAX_DELAY );
 		break;
+
 	case CMD_wrin:
 		fwriteInit();
 		xEventGroupSync(eg_sync,
@@ -292,12 +324,52 @@ void fsdConfig(uint32_t ui_cmdlet)
 
 	//TODO: implement check for max string size
 		//LISTING
-			//LIST STATION CONFIGS
-	case CMD_lswi:
+	case CMD_list:
+		pc_configOut = malloc(1400);
+		ui_offset = sprintf(pc_configOut, "\1\2lsst\3:\n");
 		pc_fileName = malloc(128);
 		sprintf(pc_fileName, "accesspoints");
-		pc_response = ffileList(pc_fileName);
-		xQueueSend(q_send, &pc_response, portMAX_DELAY);
+		ffileList(pc_fileName, pc_configOut + ui_offset);
+		fsendResponse(0, 0, pc_configOut);
+
+		pc_configOut = malloc(1400);
+		ui_offset = sprintf(pc_configOut, "\1\2lsad\3:\n");
+		pc_fileName = malloc(128);
+		sprintf(pc_fileName, "adcconfigs");
+		ffileList(pc_fileName, pc_configOut + ui_offset);
+		fsendResponse(0, 0, pc_configOut);
+
+		pc_configOut = malloc(1400);
+		ui_offset = sprintf(pc_configOut, "\1\2lsbl\3:\n");
+		pc_fileName = malloc(128);
+		sprintf(pc_fileName, "blinkconfigs");
+		ffileList(pc_fileName, pc_configOut + ui_offset);
+		fsendResponse(0, 0, pc_configOut);
+
+		pc_configOut = malloc(1400);
+		ui_offset = sprintf(pc_configOut, "\1\2lslc\3:\n");
+		pc_fileName = malloc(128);
+		sprintf(pc_fileName, "loadcells");
+		ffileList(pc_fileName, pc_configOut + ui_offset);
+		fsendResponse(0, 1, pc_configOut);
+
+		xEventGroupSync(eg_sync,
+				BIT_STORAGE_SYNC ,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		break;
+			//LIST STATION CONFIGS
+	case CMD_lsst:
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(1400);
+		ui_offset = sprintf(pc_configOut, "\1\2lsst\3:\n");
+
+		pc_fileName = malloc(128);
+		sprintf(pc_fileName, "accesspoints");
+		ffileList(pc_fileName, pc_configOut + ui_offset);
+		fsendResponse(0, 1, pc_configOut);
 		xEventGroupSync(eg_sync,
 				BIT_STORAGE_SYNC ,
 				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
@@ -305,21 +377,34 @@ void fsdConfig(uint32_t ui_cmdlet)
 		break;
 			//LIST ADC CONFIGS
 	case CMD_lsad:
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(1400);
+		ui_offset = sprintf(pc_configOut, "\1\2lsad\3:\n");
+
 		pc_fileName = malloc(128);
 		sprintf(pc_fileName, "adcconfigs");
-		pc_response = ffileList(pc_fileName);
-		xQueueSend(q_send, &pc_response, portMAX_DELAY);
+		ffileList(pc_fileName, pc_configOut + ui_offset);
+		fsendResponse(0, 1, pc_configOut);
 		xEventGroupSync(eg_sync,
 				BIT_STORAGE_SYNC ,
 				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
 				portMAX_DELAY );
 		break;
+
 			//LIST BLINK CONFIGS
 	case CMD_lsbl:
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(1400);
+		ui_offset = sprintf(pc_configOut, "\1\2lsbl\3:\n");
+
 		pc_fileName = malloc(128);
 		sprintf(pc_fileName, "blinkconfigs");
-		pc_response = ffileList(pc_fileName);
-		xQueueSend(q_send, &pc_response, portMAX_DELAY);
+		ffileList(pc_fileName, pc_configOut + ui_offset);
+		fsendResponse(0, 1, pc_configOut);
 		xEventGroupSync(eg_sync,
 				BIT_STORAGE_SYNC ,
 				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
@@ -327,10 +412,16 @@ void fsdConfig(uint32_t ui_cmdlet)
 		break;
 			//LIST LOADCELLS
 	case CMD_lslc:
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(1400);
+		ui_offset = sprintf(pc_configOut, "\1\2lslc\3:\n");
+
 		pc_fileName = malloc(128);
 		sprintf(pc_fileName, "loadcells");
-		pc_response = ffileList(pc_fileName);
-		xQueueSend(q_send, &pc_response, portMAX_DELAY);
+		ffileList(pc_fileName, pc_configOut + ui_offset);
+		fsendResponse(0, 1, pc_configOut);
 		xEventGroupSync(eg_sync,
 				BIT_STORAGE_SYNC ,
 				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
@@ -342,29 +433,18 @@ void fsdConfig(uint32_t ui_cmdlet)
 	case CMD_bath:
 	case CMD_batl:
 		//SAVING BATMON CONFIG
-		f = fopen(MOUNT_POINT"/config/def.ini", "r");
-		if (f != 0)
+		f = fopen(MOUNT_POINT"/general/batmon", "w");
+		if (f == 0) //could not find init file
 		{
-			p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-			fread(p_initConfig,
-					sizeof(struct stu_initConfig),
-					1,
-					f);
-			fclose(f);
-
-			p_initConfig->batMon = gstu_config->batMon;
-
-			f = fopen(MOUNT_POINT"/config/def.ini", "w");
-			fwrite(p_initConfig,
-					sizeof(struct stu_initConfig),
-					1,
-					f);
-			fclose(f);
-			free(p_initConfig);
+			ESP_LOGW(TAG_STORAGE, MOUNT_POINT"/general/batmon not found");
 		}
 		else
 		{
-			sprintf(pc_response, "|bath|0|\t\tERROR COULD NOT OPEN FILE|\n");
+			fwrite(pstu_batMonConfig,
+					sizeof(struct stu_batmonConfig),
+					1,
+					f);
+			fclose(f);
 		}
 		xEventGroupSync( eg_sync,
 				BIT_STORAGE_SYNC,
@@ -383,131 +463,138 @@ void fsdConfig(uint32_t ui_cmdlet)
 		break;
 
 	case CMD_ldad:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/adcconfigs/%s", pc_fileName);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			sprintf(ac_fileAddress, MOUNT_POINT"/adcconfigs/%s", pc_value);
+			f = fopen(ac_fileAddress, "r");
+			if (f == 0)
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT OPEN FILE:%s ERROR:%s\n",ac_fileAddress, strerror(i_errnum));
+			}
+			else
+			{
+				pc_configOut = malloc(64);
+				struct stu_adcConfig config;
+				fread(&config, sizeof(config), 1, f);
+				portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+				portENTER_CRITICAL(&mux);
+				*pstu_adcConfig = config;
+				portEXIT_CRITICAL(&mux);
+				fclose(f);
+				sprintf(pc_configOut, "|ldad|%s|\t\tConfig loaded.\n\4",ac_fileAddress);
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			struct stu_adcConfig config;
-			fread(&config, sizeof(config), 1, f);
-			portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
-			portENTER_CRITICAL(&mux);
-			gstu_config->adc = config;
-			portEXIT_CRITICAL(&mux);
-			fclose(f);
-
-			sprintf(pc_response, "|ldtc|%s|\t\tConfig loaded.\n\4",ac_fileAddress);
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
 	case CMD_ldbl:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/blinkconfigs/%s", pc_fileName);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			sprintf(ac_fileAddress, MOUNT_POINT"/blinkconfigs/%s", pc_value);
+			f = fopen(ac_fileAddress, "r");
+			if (f == 0)
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT OPEN FILE:%s ERROR:%s\n",ac_fileAddress, strerror(i_errnum));
+			}
+			else
+			{
+				pc_configOut = malloc(64);
+				struct stu_blinkConfig config;
+				fread(&config, sizeof(config), 1, f);
+				portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+				portENTER_CRITICAL(&mux);
+				*pstu_blinkConfig = config;
+				portEXIT_CRITICAL(&mux);
+				fclose(f);
+				sprintf(pc_configOut, "|ldbl|%s|\t\tConfig loaded.\n\4",pc_value);
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			struct stu_blinkConfig config;
-			fread(&config, sizeof(config), 1, f);
-			portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
-			portENTER_CRITICAL(&mux);
-			gstu_config->blink = config;
-			portEXIT_CRITICAL(&mux);
-			fclose(f);
-
-			sprintf(pc_response, "|ldbl|%s|\t\tConfig loaded\n\4",ac_fileAddress);
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
 	case CMD_ldlc:
-		pc_fileName = malloc(64);
-		owb_string_from_rom_code(gstu_config->temp.romExt,pc_fileName,OWB_ROM_CODE_STRING_LENGTH);
-		sprintf(ac_fileAddress, MOUNT_POINT"/loadcells/%s", pc_fileName);
-		free(pc_fileName);
+		xQueueReceive(q_send, &pc_value, portMAX_DELAY);
+		ESP_LOGD(TAG_STORAGE, "LOADING LOACELL %s", pc_value);
+		uint32_t ui32_return = 0;
+		sprintf (ac_fileAddress, MOUNT_POINT"/loadcells/%s", pc_value);
 		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
+		if (f != 0)
 		{
-			ESP_LOGD(TAG_STORAGE, "CELL %s not found", ac_fileAddress);
-		}
-		else
-		{
-			struct stu_cellConfig config;
-			fread(&config,
-					sizeof(struct stu_cellConfig),
-					1,
-					f);
-			portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
-			portENTER_CRITICAL(&mux);
-			gstu_config->cell = config;
-			portEXIT_CRITICAL(&mux);
-			fclose(f);
-			ESP_LOGD(TAG_STORAGE, "CELL %s opened", ac_fileAddress);
-		}
-		break;
-
-	case CMD_ldwi:
-		pc_response = malloc(128);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/config/wifi/%s", pc_fileName);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
-		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
-		}
-		else
-		{
-			while(xTaskNotify(ht_wifiRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
-				taskYIELD();
-			xQueueReceive(q_send, &pv_gstu_config, portMAX_DELAY);
-			fread((wifi_config_t*)pv_gstu_config, sizeof(wifi_config_t), 1, f);
-			fclose(f);
-			sprintf(pc_response, "|ldwi|%s|\t\tConfig loaded\n", ac_fileAddress);
-			xEventGroupSync( eg_sync, BIT_STORAGE_SYNC , BIT_STORAGE_SYNC | BIT_WIFI_SYNC, portMAX_DELAY );
-		}
-		xEventGroupSync( eg_config, BIT_STORAGE_SYNC , BIT_STORAGE_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
-		xQueueSend(q_send, &pc_response, portMAX_DELAY);
-		break;
-
-	case CMD_ldst:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/accesspoints/%s", pc_fileName);
-		f = fopen(ac_fileAddress, "r");
-		if (f == 0)
-		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
-		}
-		else
-		{
-			struct stu_staConfig config;
+			pc_configOut = malloc(64);
+			struct stu_sensorConfig config;
 			fread(&config, sizeof(config), 1, f);
 			portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 			portENTER_CRITICAL(&mux);
-			gstu_config->staConfig = config;
+			*pstu_sensorConfig = config;
 			portEXIT_CRITICAL(&mux);
 			fclose(f);
-
-			sprintf(pc_response, "|ldst|%s|\t\tConfig loaded\n\4",ac_fileAddress);
+			ui32_return = 1;
 		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xQueueSend(q_recv, &ui32_return, portMAX_DELAY);
 		break;
 
-	case CMD_ldss:
+	case CMD_ldst:
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
+		{
+			sprintf(ac_fileAddress, MOUNT_POINT"/accesspoints/%s", pc_value);
+			f = fopen(ac_fileAddress, "r");
+			if (f == 0)
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT OPEN FILE:%s ERROR:%s\n",ac_fileAddress, strerror(i_errnum));
+			}
+			else
+			{
+				struct stu_staConfig config;
+				fread(&config, sizeof(config), 1, f);
+				portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+				portENTER_CRITICAL(&mux);
+				*pstu_staConfigMom = config;
+				portEXIT_CRITICAL(&mux);
+				fclose(f);
+				sprintf(pc_configOut, "|ldst|%s|\t\tConfig loaded.\n\4",pc_value);
+			}
+			fsendResponse(0, 1, pc_configOut);
+		}
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
+		break;
+
+	case CMD_ldss: //searching for stationconfig by ssid and loading if found
+		ESP_LOGD(TAG_STORAGE, "SEARCHING FOR MATCHING AP");
 		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
 		uint32_t ui_flag = 0;
 		DIR* dr = opendir(MOUNT_POINT"/accesspoints");
@@ -517,12 +604,12 @@ void fsdConfig(uint32_t ui_cmdlet)
 		{
 			sprintf(ac_fileAddress, MOUNT_POINT"/accesspoints/%s", de->d_name);
 			f = fopen(ac_fileAddress, "r");
-			fread(&config, sizeof(config), 1, f);
+			fread(&config, sizeof(struct stu_staConfig), 1, f);
 			if (!strcmp(pc_fileName, (config.ac_ssid)))
 			{
 				portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 				portENTER_CRITICAL(&mux);
-				gstu_config->staConfig = config;
+				*pstu_staConfigMom = config;
 				portEXIT_CRITICAL(&mux);
 				fclose(f);
 				ui_flag = 1;
@@ -534,290 +621,294 @@ void fsdConfig(uint32_t ui_cmdlet)
 			fclose(f);
 		}
 		 closedir(dr);
+
 		 xQueueSend(q_recv, &ui_flag, portMAX_DELAY);
+		 vTaskDelay(100);
+		 ESP_LOGD(TAG_STORAGE, "FINISHED SEARCH");
 		break;
 
 
 		//SAVING
 	case CMD_svad:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/adcconfigs/%s", pc_fileName);
-		f = fopen(ac_fileAddress, "w");
-		if (f == 0)
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			sprintf(ac_fileAddress, MOUNT_POINT"/adcconfigs/%s", pc_value);
+			f = fopen(ac_fileAddress, "w");
+			if (f == 0)
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			}
+			else
+			{
+				pc_configOut = malloc(64);
+				fwrite(pstu_adcConfig, sizeof(struct stu_adcConfig), 1, f);
+				fclose(f);
+				sprintf(pc_configOut, "|svad|%s|\t\tConfig saved.\n",ac_fileAddress);
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			fwrite(&(gstu_config->adc), sizeof(gstu_config->adc), 1, f);
-			fclose(f);
-			sprintf(pc_response, "|svad|%s|\t\tConfig saved.\n",ac_fileAddress);
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
 	case CMD_svbl:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/blinkconfigs/%s", pc_fileName);
-		f = fopen(ac_fileAddress, "w");
-		if (f == 0)
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			sprintf(ac_fileAddress, MOUNT_POINT"/blinkconfigs/%s", pc_value);
+			f = fopen(ac_fileAddress, "w");
+			if (f == 0)
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			}
+			else
+			{
+				pc_configOut = malloc(64);
+				fwrite(pstu_blinkConfig, sizeof(struct stu_blinkConfig), 1, f);
+				fclose(f);
+				sprintf(pc_configOut, "|svbl|%s|\t\tConfig saved.\n",ac_fileAddress);
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			fwrite(&(gstu_config->blink), sizeof(gstu_config->blink), 1, f);
-			fclose(f);
-			sprintf(pc_response, "|svbl|%s|\t\tConfig saved.\n",ac_fileAddress);
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
-	case CMD_svti:
-		//SAVING TEMPERATURE
-		f = fopen(MOUNT_POINT"/general/temperature", "w");
-		if (f == 0) //could not find init file
-		{
-			ESP_LOGW(TAG_STORAGE, MOUNT_POINT"/general/temperature not found");
-		}
-		else
-		{
-			fwrite(&gstu_config->temp,
-					sizeof(struct stu_tempConfig),
-					1,
-					f);
-			fclose(f);
-		}
+	case CMD_svti://SAVING TEMPERATURE
+//		xQueueReceive(q_pconfigIn,
+//				&pc_configIn,
+//				portMAX_DELAY);
+			sprintf(ac_fileAddress, MOUNT_POINT"/general/temperature");
+			f = fopen(ac_fileAddress, "w");
+			if (f == 0)
+			{
+//				pc_configOut = malloc(128);
+//				int i_errnum = errno;
+//				sprintf(pc_configOut, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			}
+			else
+			{
+//				pc_configOut = malloc(64);
+				fwrite(pstu_tempConfig,
+						sizeof(struct stu_tempConfig),
+						1,
+						f);
+				fclose(f);
+//				sprintf(pc_configOut, "|svti|%s|\t\tConfig saved.\n",ac_fileAddress);
+			}
+//			fsendResponse(0, 1, pc_configOut);
+//		xEventGroupSync( eg_sync,
+//				BIT_STORAGE_SYNC,
+//				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+//				portMAX_DELAY );
 		break;
 
-	case CMD_svst:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/accesspoints/%s", pc_fileName);
-		f = fopen(ac_fileAddress, "w");
-		if (f == 0)
+	case CMD_svst://SAVING STATION CONFIG
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			sprintf(ac_fileAddress, MOUNT_POINT"/accesspoints/%s", pc_value);
+			f = fopen(ac_fileAddress, "w");
+			if (f == 0)
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			}
+			else
+			{
+				pc_configOut = malloc(64);
+				fwrite(pstu_staConfigMom, sizeof(struct stu_staConfig), 1, f);
+				fclose(f);
+				sprintf(pc_configOut, "|svst|%s|\t\tConfig saved.\n",ac_fileAddress);
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			fwrite(&(gstu_config->staConfig), sizeof(gstu_config->staConfig), 1, f);
-			fclose(f);
-			sprintf(pc_response, "STA CONFIG SAVED:%s",ac_fileAddress);
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
 	case CMD_svlc:
-		pc_response = malloc(64);
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
 
-		sprintf(ac_fileAddress,
-				MOUNT_POINT"/loadcells/%s",
-				gstu_config->cell.ac_name);
-		f = fopen(ac_fileAddress, "w");
-
-		if (f == 0)
-		{
-			//TODO: catch for if file could not be created
-			sprintf(pc_response,
-					"|svlc|1|\t\tLoadcell %s could not be saved.\n\4",
-					pc_fileName);
-		}
-		else
-		{
-			fwrite(&gstu_config->cell, sizeof(struct stu_cellConfig), 1, f);
-			fclose(f);
-			sprintf(pc_response,
-					"|svlc|1|\t\tLoadcell %s has been saved.\n\4",
-					gstu_config->cell.ac_name);
-			ESP_LOGD(TAG_STORAGE, "CELL %s saved", ac_fileAddress);
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
+		while(xTaskNotify(ht_tempIntRun,CMD_svlc,eSetValueWithoutOverwrite) != pdPASS)
+			vTaskDelay(1/ portTICK_PERIOD_MS);
+		xQueueReceive(q_recv,
+				&pc_value,
+				portMAX_DELAY);
+		xSemaphoreGive(hs_pointerQueue);
+			sprintf(ac_fileAddress,
+					MOUNT_POINT"/loadcells/%s",
+					pc_value);
+		free(pc_value);
+				f = fopen(ac_fileAddress, "w");
+				if (f == 0)
+				{
+					pc_configOut = malloc(128);
+					int i_errnum = errno;
+					sprintf(pc_configOut, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+				}
+				else
+				{
+					pc_configOut = malloc(64);
+					fwrite(pstu_sensorConfig, sizeof(struct stu_sensorConfig), 1, f);
+					fclose(f);
+					sprintf(pc_configOut, "|svlc|%s|\t\tConfig saved.\n",ac_fileAddress);
+				}
+				fsendResponse(0, 1, pc_configOut);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
-
-	case CMD_svwi:
-		pc_response = malloc(128);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/config/wifi/%s", pc_fileName);
-		f = fopen(ac_fileAddress, "w");
-		if (f == 0)
-		{
-			int i_errnum = errno;
-			xQueueSend(q_send, &i_errnum, portMAX_DELAY);
-			sprintf(pc_response, "COULD NOT OPEN FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
-		}
-		else
-		{
-			while(xTaskNotify(ht_wifiRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
-				taskYIELD();
-			xQueueReceive(q_send, &pv_gstu_config, portMAX_DELAY);
-			fwrite((wifi_config_t*)pv_gstu_config, sizeof(wifi_config_t), 1, f);
-			fclose(f);
-			sprintf(pc_response, "|svwi|%s|\t\tConfig saved.\n", ac_fileAddress);
-			xEventGroupSync( eg_sync, BIT_STORAGE_SYNC , BIT_STORAGE_SYNC | BIT_WIFI_SYNC, portMAX_DELAY );
-		}
-		xEventGroupSync( eg_config, BIT_STORAGE_SYNC , BIT_STORAGE_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
-		xQueueSend(q_send, &pc_response, portMAX_DELAY);
-		break;
-
-	case CMD_inad:
-		pc_response = malloc(128);
-		p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-		f = fopen(MOUNT_POINT"/config/def.ini", "r+");
-		if(f == 0)
-		{
-			sprintf(pc_response, "|inad|0|\t\tCould not find ini file.\n");
-			xEventGroupSync( eg_sync, BIT_STORAGE_SYNC | BIT_ADC_SYNC, BIT_STORAGE_SYNC | BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
-		}
-		else
-		{
-			while(xTaskNotify(ht_adcRun,ui_cmdlet,eSetValueWithoutOverwrite) != pdPASS)
-				taskYIELD();
-			xQueueReceive(q_send, &pv_gstu_config, portMAX_DELAY);
-			fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-			p_initConfig->adc = *(struct stu_adcConfig*)pv_gstu_config;
-			xEventGroupSync( eg_sync, BIT_STORAGE_SYNC, BIT_STORAGE_SYNC | BIT_ADC_SYNC, portMAX_DELAY );
-			fwrite(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-			fclose(f);
-			free(p_initConfig);
-			sprintf(pc_response, "|inad|0|\t\tADC config written to ini.\n");
-			xEventGroupSync( eg_sync, BIT_STORAGE_SYNC , BIT_STORAGE_SYNC | BIT_ADC_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
-		}
-		xQueueSend(q_send, &pc_response, portMAX_DELAY);
-		break;
-	case CMD_intc:
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-		f = fopen(MOUNT_POINT"/config/init", "r");
-		fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-//		strcpy(p_initConfig->tcpConf,pc_fileName);
-		f = fopen(MOUNT_POINT"/config/init", "w");
-		fwrite(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-		free(p_initConfig);
-		break;
-	case CMD_intm:
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-		f = fopen(MOUNT_POINT"/config/init", "r");
-		fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-//		strcpy(p_initConfig->tcpMes,pc_fileName);
-		f = fopen(MOUNT_POINT"/config/init", "w");
-		fwrite(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-		free(p_initConfig);
-		break;
-	case CMD_inbl:
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-		f = fopen(MOUNT_POINT"/config/init", "r");
-		fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-//		strcpy(p_initConfig->blink,pc_fileName);
-		f = fopen(MOUNT_POINT"/config/init", "w");
-		fwrite(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-		free(p_initConfig);
-		break;
-	case CMD_intr:
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-		f = fopen(MOUNT_POINT"/config/init", "r");
-		fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-//		strcpy(p_initConfig->trigger,pc_fileName);
-		f = fopen(MOUNT_POINT"/config/init", "w");
-		fwrite(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-		free(p_initConfig);
-		break;
-	case CMD_inwi:
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		p_initConfig	=	malloc(sizeof(struct stu_initConfig));
-		f = fopen(MOUNT_POINT"/config/init", "r");
-		fread(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-//		strcpy(p_initConfig->wifi,pc_fileName);
-		f = fopen(MOUNT_POINT"/config/init", "w");
-		fwrite(p_initConfig, sizeof(struct stu_initConfig), 1, f);
-		fclose(f);
-		free(p_initConfig);
-		break;
-
 
 		//REMOVING
-	case CMD_rmst:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/accesspoints/%s", pc_fileName);
-		if (!remove(ac_fileAddress))
+	case CMD_rmst://ReMove STation: deletes station config file from storage
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			sprintf(pc_response, "FILE DELETED:%s ",ac_fileAddress);
+			sprintf(ac_fileAddress, MOUNT_POINT"/accesspoints/%s", pc_value);
+			if (!remove(ac_fileAddress))
+			{
+				pc_configOut = malloc(128);
+				sprintf(pc_configOut, "FILE DELETED:%s ",ac_fileAddress);
+			}
+			else
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT DELETE FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT DELETE FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
-	case CMD_rmlc:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/loadcells/%s", pc_fileName);
-		if (!remove(ac_fileAddress))
+	case CMD_rmlc://ReMove LoadCell: deletes loadcell config file from storage
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			sprintf(pc_response, "FILE DELETED:%s \n",ac_fileAddress);
+			sprintf(ac_fileAddress, MOUNT_POINT"/loadcells/%s", pc_value);
+			if (!remove(ac_fileAddress))
+			{
+				pc_configOut = malloc(128);
+				sprintf(pc_configOut, "FILE DELETED:%s ",ac_fileAddress);
+			}
+			else
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT DELETE FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT DELETE FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
 	case CMD_rmbl:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/blinkconfigs/%s", pc_fileName);
-		if (!remove(ac_fileAddress))
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			sprintf(pc_response, "FILE DELETED:%s ",ac_fileAddress);
+			sprintf(ac_fileAddress, MOUNT_POINT"/blinkconfigs/%s", pc_value);
+			if (!remove(ac_fileAddress))
+			{
+				pc_configOut = malloc(128);
+				sprintf(pc_configOut, "FILE DELETED:%s ",ac_fileAddress);
+			}
+			else
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT DELETE FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT DELETE FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
 	case CMD_rmad:
-		pc_response = malloc(64);
-		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
-		sprintf(ac_fileAddress, MOUNT_POINT"/adcconfigs/%s", pc_fileName);
-		if (!remove(ac_fileAddress))
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|user|\t\tInsert filename:\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
 		{
-			sprintf(pc_response, "FILE DELETED:%s ",ac_fileAddress);
+			sprintf(ac_fileAddress, MOUNT_POINT"/adcconfigs/%s", pc_value);
+			if (!remove(ac_fileAddress))
+			{
+				pc_configOut = malloc(128);
+				sprintf(pc_configOut, "FILE DELETED:%s ",ac_fileAddress);
+			}
+			else
+			{
+				pc_configOut = malloc(128);
+				int i_errnum = errno;
+				sprintf(pc_configOut, "COULD NOT DELETE FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
+			}
+			fsendResponse(0, 1, pc_configOut);
 		}
-		else
-		{
-			int i_errnum = errno;
-			sprintf(pc_response, "COULD NOT DELETE FILE:%s ERROR:%s",ac_fileAddress, strerror(i_errnum));
-		}
-		xQueueSend(q_recv, &pc_response, portMAX_DELAY);
+		xEventGroupSync( eg_sync,
+				BIT_STORAGE_SYNC,
+				BIT_STORAGE_SYNC | BIT_CONFIG_SYNC,
+				portMAX_DELAY );
 		break;
 
-	case CMD_cllc: //CLearLoadCell: removes loadcell from storage and clears its non volatile storage inside ther ds18b20 eeprom
+	case CMD_cllc: //CLearLoadCell: removes loadcell from storage and clears its non volatile storage inside the ds18b20 eeprom
 		xQueueReceive(q_send, &pc_fileName, portMAX_DELAY);
 		sprintf(ac_fileAddress,
 				MOUNT_POINT"/loadcells/%s.cfg",
@@ -854,17 +945,16 @@ void fsdConfig(uint32_t ui_cmdlet)
 
 esp_err_t fFormatSD()
 {
+	char* pc_configOut = 0;
 	const size_t workbuf_size = 4096;
 	void* workbuf = NULL;
 	char drv[3] = {(char)('0' + pdrv), ':', 0};
 	esp_err_t err = ESP_OK;
 
-	ESP_LOGD(TAG_REDUND, "FORMATTING CARD THIS MIGHT AKE A WHILE");
 	// Try to mount partition
 	FRESULT res = f_mount(fs, drv, 1);
 	if (res == FR_OK)
 	{
-		ESP_LOGW(TAG, "partitioning card");
 		workbuf = ff_memalloc(workbuf_size);
 		if (workbuf == NULL) {
 			err = ESP_ERR_NO_MEM;
@@ -876,7 +966,9 @@ esp_err_t fFormatSD()
 			ESP_LOGD(TAG_REDUND, "f_fdisk failed (%d)", res);
 		}
 
-		ESP_LOGW(TAG, "formatting card, allocation unit size=%d", alloc_unit_size);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|ack|0|\t\tMaking Filesystem.\n");
+		fsendResponse(0, 0, pc_configOut);
 		res = f_mkfs(drv, FM_FAT32, alloc_unit_size, workbuf, workbuf_size);
 		if (res != FR_OK) {
 			err = ESP_FAIL;
@@ -884,16 +976,21 @@ esp_err_t fFormatSD()
 		}
 		free(workbuf);
 		workbuf = NULL;
-		ESP_LOGW(TAG_REDUND, "mounting again");
+
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|ack|0|\t\tMounting Filesystem.\n");
+		fsendResponse(0, 0, pc_configOut);
 		res = f_mount(fs, drv, 0);
 		if (res != FR_OK) {
 			err = ESP_FAIL;
 			ESP_LOGD(TAG, "f_mount failed after formatting (%d)", res);
 		}
-		ESP_LOGD(TAG_REDUND, "FINISHED FORMATTING");
 	}
 	if (res == FR_OK)
 	{
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|ack|0|\t\tWriting Init.\n");
+		fsendResponse(0, 0, pc_configOut);
 		fwriteInit();
 	}
 
@@ -949,7 +1046,7 @@ uint32_t fwriteInit(void)
 			"%x%x%x%x%x%x",
 			mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 	sprintf(accesspoint.ac_ssid,
-			"FLADC_"MOUDLE_NAME"_%X-%X-%X-%X-%X-%X",
+			"FLADC_"MODULE_NAME"_%X-%X-%X-%X-%X-%X",
 			mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 	IP4_ADDR(&accesspoint.ipInfo.ip, 10, 0, 0, 1);
 	IP4_ADDR(&accesspoint.ipInfo.gw, 10, 0, 0, 0);
@@ -973,13 +1070,15 @@ uint32_t fwriteInit(void)
 	fclose(f);
 
 	f = fopen(MOUNT_POINT"/loadcells/default", "w");
-	struct stu_cellConfig cellConfig = {
+	struct stu_sensorConfig cellConfig = {
 			.ac_name[0]		= '\0',
-			.ui_loadRating	= 0,
 			.d_calValue		= 1.0,
-			.ui_tareValue	= 0};
+			.i_tareValue	= 0,
+			.i_tareZero		= 0,
+			.i8_perOverload = 20,
+			.ui8_maxLoad	= 209};
 	fwrite(&cellConfig,
-			sizeof(struct stu_cellConfig),
+			sizeof(struct stu_sensorConfig),
 			1,
 			f);
 	fclose(f);
@@ -996,43 +1095,55 @@ uint32_t fwriteInit(void)
 			f);
 	fclose(f);
 
+	f = fopen(MOUNT_POINT"/accesspoints/default", "w");
+	struct stu_staConfig staConfig = {
+			.ac_ssid		= "",
+			.ac_pass		= "",
+			.portConf	= 4243,
+			.portMes	= 4242,
+			.portBroad	= 4241,
+			.ipTrig		= 0};
+	fwrite(&staConfig,
+			sizeof(struct stu_staConfig),
+			1,
+			f);
+	fclose(f);
+
 	f = fopen(MOUNT_POINT"/blinkconfigs/default", "w");
 	struct stu_blinkConfig blinkConfig = {
 			.ui_blinkPeriod		= 10000,
 			.ui_blinkDuration	= 100,
 			.ui_blinkBrightness	= 200,
-			.ui_blinkFrequency	= 50000,
-			.b_blinkEnabled		= 1};
+			.ui_blinkFrequency	= 50000};
 	fwrite(&blinkConfig,
 			sizeof(struct stu_blinkConfig),
 			1,
 			f);
 	fclose(f);
-
 	return status;
 }
 
 
-char* ffileList(char* pc_fileName)
+uint32_t		ffileList		(char* pc_fileName,
+								char* pc_configOut)
 {
 	char* pc_fileAddress = malloc(128);
 	sprintf(pc_fileAddress, MOUNT_POINT"/%s", pc_fileName);
-	char* pc_fileList = malloc(512);
 	DIR* dr = opendir(pc_fileAddress);
 	free(pc_fileAddress);
 	struct dirent* de = 0;
-	uint32_t ui_offset = sprintf(pc_fileList, "\1\2%s\3:\n", pc_fileName);
+	uint32_t ui_offset = 0;
 	uint32_t ui_fileNumber = 1;
 	while ((de = readdir(dr)) != NULL)
 	{
-		ui_offset += sprintf(pc_fileList + ui_offset, "\t%d:\2%s\3\n", ui_fileNumber, de->d_name);
+		ui_offset += sprintf(pc_configOut + ui_offset, "\t%d:\2%s\3\n", ui_fileNumber, de->d_name);
 		ui_fileNumber++;
 	}
-	sprintf(pc_fileList + ui_offset, "\n\4");
+	sprintf(pc_configOut + ui_offset, "\n\4");
 	 closedir(dr);
 	 free(pc_fileName);
 
-	return pc_fileList;
+	return 1;
 }
 
 
@@ -1040,7 +1151,6 @@ char* floadInit()
 {
 	char* pc_response = malloc(64);
 	FILE* f = 0;
-	struct stu_initConfig* stu_initConfig_mom = calloc(1, sizeof(struct stu_initConfig));
 	portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
 	f = fopen(MOUNT_POINT"/general/batmon", "r");
@@ -1050,13 +1160,14 @@ char* floadInit()
 	}
 	else
 	{
-		fread((void*)&stu_initConfig_mom->batMon,
+		struct stu_batmonConfig config;
+		fread(&config,
 				sizeof(struct stu_batmonConfig),
 				1,
 				f);
 		fclose(f);
 		portENTER_CRITICAL(&mux);
-		gstu_config->batMon = stu_initConfig_mom->batMon;
+		*pstu_batMonConfig = config;
 		portEXIT_CRITICAL(&mux);
 	}
 	f = fopen(MOUNT_POINT"/general/trigger", "r");
@@ -1066,13 +1177,14 @@ char* floadInit()
 	}
 	else
 	{
-		fread((void*)&stu_initConfig_mom->trigger,
+		struct stu_triggerConfig config;
+		fread(&config,
 				sizeof(struct stu_triggerConfig),
 				1,
 				f);
 		fclose(f);
 		portENTER_CRITICAL(&mux);
-		gstu_config->trigger = stu_initConfig_mom->trigger;
+		*pstu_triggerConfig = config;
 		portEXIT_CRITICAL(&mux);
 	}
 	f = fopen(MOUNT_POINT"/general/accesspoint", "r");
@@ -1082,13 +1194,14 @@ char* floadInit()
 	}
 	else
 	{
-		fread((void*)&stu_initConfig_mom->apConfig,
+		struct stu_apConfig config;
+		fread(&config,
 				sizeof(struct stu_apConfig),
 				1,
 				f);
 		fclose(f);
 		portENTER_CRITICAL(&mux);
-		gstu_config->apConfig = stu_initConfig_mom->apConfig;
+		*pstu_hotspotConfig = config;
 		portEXIT_CRITICAL(&mux);
 	}
 	f = fopen(MOUNT_POINT"/general/temperature", "r");
@@ -1098,13 +1211,14 @@ char* floadInit()
 	}
 	else
 	{
-		fread((void*)&stu_initConfig_mom->temp,
+		struct stu_tempConfig config;
+		fread(&config,
 				sizeof(struct stu_tempConfig),
 				1,
 				f);
 		fclose(f);
 		portENTER_CRITICAL(&mux);
-		gstu_config->temp = stu_initConfig_mom->temp;
+		*pstu_tempConfig = config;
 		portEXIT_CRITICAL(&mux);
 	}
 	f = fopen(MOUNT_POINT"/loadcells/default", "r");
@@ -1114,13 +1228,14 @@ char* floadInit()
 	}
 	else
 	{
-		fread((void*)&stu_initConfig_mom->cell,
-				sizeof(struct stu_cellConfig),
+		struct stu_sensorConfig config;
+		fread(&config,
+				sizeof(struct stu_sensorConfig),
 				1,
 				f);
 		fclose(f);
 		portENTER_CRITICAL(&mux);
-		gstu_config->cell = stu_initConfig_mom->cell;
+		*pstu_sensorConfig = config;
 		portEXIT_CRITICAL(&mux);
 	}
 	f = fopen(MOUNT_POINT"/adcconfigs/default", "r");
@@ -1130,13 +1245,14 @@ char* floadInit()
 	}
 	else
 	{
-		fread((void*)&stu_initConfig_mom->adc,
+		struct stu_adcConfig config;
+		fread(&config,
 				sizeof(struct stu_adcConfig),
 				1,
 				f);
 		fclose(f);
 		portENTER_CRITICAL(&mux);
-		gstu_config->adc = stu_initConfig_mom->adc;
+		*pstu_adcConfig = config;
 		portEXIT_CRITICAL(&mux);
 	}
 	f = fopen(MOUNT_POINT"/blinkconfigs/default", "r");
@@ -1146,18 +1262,36 @@ char* floadInit()
 	}
 	else
 	{
-		fread((void*)&stu_initConfig_mom->blink,
+		struct stu_blinkConfig config;
+		fread(&config,
 				sizeof(struct stu_blinkConfig),
 				1,
 				f);
 		fclose(f);
 		portENTER_CRITICAL(&mux);
-		gstu_config->blink = stu_initConfig_mom->blink;
+		*pstu_blinkConfig = config;
 		portEXIT_CRITICAL(&mux);
 	}
 
-	free(stu_initConfig_mom);
-	ESP_LOGD(TAG_STORAGE, "LOADING FINISHED");
+	f = fopen(MOUNT_POINT"/accesspoints/default", "r");
+	if (f == 0) //could not find init file
+	{
+		ESP_LOGW(TAG_STORAGE, MOUNT_POINT"/accesspoints/default not found");
+	}
+	else
+	{
+		ESP_LOGW(TAG_STORAGE, MOUNT_POINT"/accesspoints/default loaded");
+		struct stu_staConfig config;
+		fread(&config,
+				sizeof(struct stu_staConfig),
+				1,
+				f);
+		fclose(f);
+		portENTER_CRITICAL(&mux);
+		*pstu_staConfigMom = config;
+		portEXIT_CRITICAL(&mux);
+	}
+
 
 	return pc_response;
 }

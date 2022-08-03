@@ -19,23 +19,20 @@
 #include "freertos/semphr.h"
 
 #include "globals.h"
-#include "defines.h"
 #include "trigger.h"
+#include "aux.h"
 
 
 void		tconfigRun				(void* param);
+
 void		fconfigInit				(void);
+
 char*		fcreateInquireString	(void);
-char*		fgetValuePointer		(char* pc_value,
-									const char* pc_response);
 
 void		finitAll				(void);
+
 void*		fgetConfigFromTask		(TaskHandle_t ht_taskHandle,
 									uint32_t ui_cmdlet);
-void		freturnMessage			(const char* pc_response);
 
-uint64_t	fuLongFromRomCode		(OneWireBus_ROMCode stu_romCode);
-void		fromCodeFromULong		(uint64_t ul_romCode, OneWireBus_ROMCode stu_romCode);
-uint32_t	fgetNextString			(char* string);
 
 #endif /* MAIN_CONFIG_H_ */

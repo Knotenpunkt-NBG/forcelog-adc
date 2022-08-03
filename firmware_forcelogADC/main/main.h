@@ -45,7 +45,9 @@
 #include "temp_int.h"
 #include "storage.h"
 
-#include "../components/adc_modules/simulation/adc_routines.h"
+
+//#include "testlib.h"
+
 
 uint8_t fcheckModuleId ();
 

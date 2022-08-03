@@ -8,15 +8,37 @@
 #ifndef MAIN_DEFINES_H_
 #define MAIN_DEFINES_H_
 
+#ifndef EXTERN
+#define EXTERN extern
+#endif
+
+#include "adc_defines.h"
 
 #define FIRMWARE_VERSION		"1.0"
-//TODO: implement versioning in config to automaticly rewrite the init config when firmware update has been flashed
+//TODO: implement versions in config to automaticly rewrite the init config when firmware update has been flashed
 #define REWRITE_INIT			0 //writes the init config every time the adc boots. mainly for development purpose
 
 
 //COMPILER MACROS
 #define STR_(X) #X
 #define STR(X) STR_(X)
+
+
+//STATI FOR EVENT GROUP eg_status
+#define STATUS_IDLE				BIT0
+#define STATUS_PEEKING			BIT1
+#define STATUS_RECORDING		BIT2
+#define STATUS_WAITING			BIT3
+#define STATUS_TCPCONF_CONN		BIT4
+#define STATUS_TCPMES_CONN		BIT5
+#define STATUS_WIFI_CONN		BIT6
+#define STATUS_HOTSPOT			BIT7
+#define STATUS_STATION			BIT8
+#define STATUS_SCANNING			BIT9
+#define STATUS_BLINK_ENABLE		BIT10
+
+#define BITS_STATI			STATUS_IDLE | STATUS_PEEKING | STATUS_RECORDING | STATUS_WAITING
+#define BITS_COMM			STATUS_WIFI_CONN | STATUS_TCPMES_CONN | STATUS_TCPCONF_CONN
 
 
 //Eventgroup BITs
@@ -46,17 +68,16 @@
 
 //Temperature internal
 #define OWB_GPIO				4
-#define GPIO_OWB_SENSE			34
+#define GPIO_OWB_SENSE			34		//GPIO for the OneWire Sense input. Enables automatic detection of new sensor
 #define MAX_DEVICES          	(8)
-#define TEMP_INTERNAL_PERIOD	60   // period of temperature measurements in seconds. must be higher then 2s
+#define TEMP_INTERNAL_PERIOD	30		// period of temperature measurements in seconds. must be higher then 2s
 #define MAX_TEMP				50.0	//Max temperature (°C)for the adc to operate in. if this is crossed the adc shuts down all functions
 
 
 //Battery monitor
 #define BATMON_PERIOD		1*1000
-#define BAT_CUTOFF			3.3
-#define BIT_BATMON_FIRE		BIT1
-#define BATMON_NUM_SAMPLES	50
+#define BAT_CUTOFF			3.3			//Low Voltage battery protection. This is a soft cutoff that disables most functions. Additional protection is implemented in hardware.
+#define BATMON_NUM_SAMPLES	50			//Number of measurements to be averaged for one battery measurement.
 #define BATMON_CHANNEL		ADC1_CHANNEL_7
 
 
@@ -70,12 +91,6 @@
 #define ACTIVE_HIGH		1
 #define ACTIVE_LOW		0
 #define DEFAULT_TRIGGER_PORT	16001
-
-
-//ADC MODULE USED
-#define ADC_MODULE_ID		MODULE_ID_HX711
-#define MODULE_ID_HX711		0x01
-#define MOUDLE_NAME			"HX711"
 
 
 // Blink LED
@@ -107,6 +122,7 @@
 #define LEDC_STATUS_WAITING_SERVER	0x0002
 #define LEDC_STATUS_WAITING_WEIGHT	0x0003
 
+
 //Wifi Config
 #define WIFI_CONNECTED_BIT		BIT0
 #define WIFI_FAIL_BIT			BIT1
@@ -119,8 +135,7 @@
 
 
 //ADC
-#define ADC_MIN_PERIOD			12500		//the minimal measurement period for the module ; has to be moved to the module itself
-#define ADC_CAL_PERIOD			100000		//the measurement period used for calibration ; has to be moved to module
+
 
 #define UNIT_RAW			0
 #define UNIT_N				1
@@ -166,10 +181,8 @@
 #define CMD_vcal	('v' << 8 * 3) + ('c' << 8 * 2) + ('a' << 8 * 1) + ('l' << 8 * 0)
 #define CMD_mper	('m' << 8 * 3) + ('p' << 8 * 2) + ('e' << 8 * 1) + ('r' << 8 * 0)
 #define CMD_tare	('t' << 8 * 3) + ('a' << 8 * 2) + ('r' << 8 * 1) + ('e' << 8 * 0)
-#define CMD_fire	('f' << 8 * 3) + ('i' << 8 * 2) + ('r' << 8 * 1) + ('e' << 8 * 0)
+#define CMD_trzr	('t' << 8 * 3) + ('r' << 8 * 2) + ('z' << 8 * 1) + ('r' << 8 * 0)
 #define CMD_sesd	('s' << 8 * 3) + ('e' << 8 * 2) + ('s' << 8 * 1) + ('d' << 8 * 0)
-#define CMD_setc	('s' << 8 * 3) + ('e' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
-#define CMD_retc	('r' << 8 * 3) + ('e' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
 #define CMD_resd	('r' << 8 * 3) + ('e' << 8 * 2) + ('s' << 8 * 1) + ('d' << 8 * 0)
 
 
@@ -224,10 +237,9 @@
 	//CMDlets wifi
 #define CMD_ssid	('s' << 8 * 3) + ('s' << 8 * 2) + ('i' << 8 * 1) + ('d' << 8 * 0)
 #define CMD_pass	('p' << 8 * 3) + ('a' << 8 * 2) + ('s' << 8 * 1) + ('s' << 8 * 0)
-#define CMD_wity	('w' << 8 * 3) + ('i' << 8 * 2) + ('t' << 8 * 1) + ('y' << 8 * 0)
 #define CMD_appa	('a' << 8 * 3) + ('p' << 8 * 2) + ('p' << 8 * 1) + ('a' << 8 * 0)
 #define CMD_apss	('a' << 8 * 3) + ('p' << 8 * 2) + ('s' << 8 * 1) + ('s' << 8 * 0)
-#define CMD_cowi	('c' << 8 * 3) + ('o' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
+#define CMD_cowi	('c' << 8 * 3) + ('o' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0) //connects to the last entered WiFi Config in Station Mode
 #define CMD_cost	('c' << 8 * 3) + ('o' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
 #define CMD_coap	('c' << 8 * 3) + ('o' << 8 * 2) + ('a' << 8 * 1) + ('p' << 8 * 0)
 #define CMD_scwi	('s' << 8 * 3) + ('c' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
@@ -238,7 +250,8 @@
 #define CMD_wrin	('w' << 8 * 3) + ('r' << 8 * 2) + ('i' << 8 * 1) + ('n' << 8 * 0)
 
 #define CMD_list	('l' << 8 * 3) + ('i' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
-#define CMD_lswi	('l' << 8 * 3) + ('s' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
+#define CMD_lsst	('l' << 8 * 3) + ('s' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
+//#define CMD_lswi	('l' << 8 * 3) + ('s' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
 #define CMD_lsad	('l' << 8 * 3) + ('s' << 8 * 2) + ('a' << 8 * 1) + ('d' << 8 * 0)
 #define CMD_lsbl	('l' << 8 * 3) + ('s' << 8 * 2) + ('b' << 8 * 1) + ('l' << 8 * 0)
 #define CMD_lslc	('l' << 8 * 3) + ('s' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
@@ -281,28 +294,14 @@
 
 	//CMDlets One Wire Bus
 #define CMD_scow	('s' << 8 * 3) + ('c' << 8 * 2) + ('o' << 8 * 1) + ('w' << 8 * 0)
-#define CMD_stpi	('s' << 8 * 3) + ('t' << 8 * 2) + ('p' << 8 * 1) + ('i' << 8 * 0)
+#define CMD_lmlc	('l' << 8 * 3) + ('m' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
+#define CMD_lmup	('l' << 8 * 3) + ('m' << 8 * 2) + ('u' << 8 * 1) + ('p' << 8 * 0)
 
 
 	//CMDlets Battery monitor
 #define CMD_bath	('b' << 8 * 3) + ('a' << 8 * 2) + ('t' << 8 * 1) + ('h' << 8 * 0)
 #define CMD_batl	('b' << 8 * 3) + ('a' << 8 * 2) + ('t' << 8 * 1) + ('l' << 8 * 0)
 
-
-//STATI OF THE ADC
-#define STATUS_IDLE				BIT0
-#define STATUS_PEEKING			BIT1
-#define STATUS_RECORDING		BIT2
-#define STATUS_WAITING			BIT3
-#define STATUS_TCPCONF_CONN		BIT4
-#define STATUS_TCPMES_CONN		BIT5
-#define STATUS_WIFI_CONN		BIT6
-#define STATUS_HOTSPOT			BIT7
-#define STATUS_STATION			BIT8
-#define STATUS_SCANNING			BIT9
-
-#define BITS_STATI			STATUS_IDLE | STATUS_PEEKING | STATUS_RECORDING | STATUS_WAITING
-#define BITS_COMM			STATUS_WIFI_CONN | STATUS_TCPMES_CONN | STATUS_TCPCONF_CONN
 
 
 
@@ -341,9 +340,7 @@
 							"|ssid|%s|\t\tSSID of access point:\n"\
 							"|pass|%s|\t\tPassword of access point:\n"\
 							"|user|SOCKETS\n"\
-							"|ipme|%s|\t\tIP of measurement server:\n"\
 							"|pome|%d|\t\tPort of measurement server:\n"\
-							"|ipco|%s|\t\tIP of config server:\n"\
 							"|poco|%d|\t\tPort of config server:\n"\
 							"|iptr|%s|\t\tIP of trigger:\n"\
 							"|potr|%d|\t\tPort of trigger:\n"\
@@ -372,9 +369,12 @@
 #define TAG_TEMPINT	"TEMPINT"
 #define TAG_REDUND	"REDUND"
 #define TAG_STORAGE "STORAGE"
+#define TAG_TEST "TEST"
 
 //ERRORS
 #define ERR_RECORDING		10
+#define ERR_MOREINFO		21
 #define ERR_MPER_TOO_LOW	20
+#define ERR_VALUEOUTOFRANGE	22
 
 #endif /* MAIN_DEFINES_H_ */

@@ -22,8 +22,8 @@
 #include "driver/ledc.h"
 #include <esp_event.h>
 
-#include "defines.h"
 #include "globals.h"
+#include "aux.h"
 
 
 
@@ -32,10 +32,12 @@ void cb_timerBlink	(void* param);
 void fblinkInit 	(void);
 
 void fblinkConfig	(uint32_t CMDlet,
-					ledc_timer_config_t* ledcTimergstu_config,
-					ledc_channel_config_t* ledcChannelgstu_config);
+					ledc_timer_config_t* ledcTimerBlink,
+					ledc_channel_config_t* ledcChannelBlink);
 
-void t_blinkRun		(void *arg);
+void	t_blinkRun		(void *arg);
+
+int		frestartBlinkTimer	(void);
 
 
 #endif /* MAIN_BLINK_H_ */

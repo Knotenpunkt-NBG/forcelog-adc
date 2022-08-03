@@ -1,6 +1,0 @@
-Reference, Quantity, Value, Footprint, Datasheet
-P1 ,1,"UART","Connector_JST:JST_XH_B8B-XH-A_1x08_P2.50mm_Vertical","https://www.reichelt.de/jst-stiftleiste-gerade-1x8-polig-xh-jst-xh8p-st-p185078.html?&trstct=pos_0&nbc=1"
-P2 ,1,"LED","Connector_JST:JST_XH_B5B-XH-A_1x05_P2.50mm_Vertical","https://www.reichelt.de/jst-stiftleiste-gerade-1x5-polig-xh-jst-xh5p-st-p185076.html?&trstct=pos_2&nbc=1"
-P3 P4 P5 P6 ,4,"CONN_01X01","MountingHole:MountingHole_3.2mm_M3_DIN965_Pad",""
-R1 R2 R3 R4 ,4,"150","Resistor_SMD:R_1206_3216Metric_Pad1.42x1.75mm_HandSolder","https://www.reichelt.de/smd-widerstand-1206-150-ohm-250-mw-1-rnd-1206-1-150-p183351.html?&trstct=pol_0&nbc=1"
-U1 ,1,"FT232breakout","buck:ft232rl_breakout_combined","https://www.banggood.com/FT232RL-FT232-RS232-FTDI-Micro-USB-to-TTL-3_3V-5_5V-Serial-Adapter-Module-Download-Cable-for-Mini-Port-p-1599806.html?rmmds=search&cur_warehouse=CN"

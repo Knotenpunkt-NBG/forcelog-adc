@@ -39,7 +39,7 @@ void tbatmonRun	(void* param)
 			{
 				for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
 				{
-					f_batVol += fmap(adc1_get_raw(BATMON_CHANNEL),gstu_config->batMon.i_batRawLow, gstu_config->batMon.f_batVolLow, gstu_config->batMon.i_batRawHigh, gstu_config->batMon.f_batVolHigh);
+					f_batVol += fmap(adc1_get_raw(BATMON_CHANNEL),pstu_batMonConfig->i_batRawLow, pstu_batMonConfig->f_batVolLow, pstu_batMonConfig->i_batRawHigh, pstu_batMonConfig->f_batVolHigh);
 					i_batRaw += adc1_get_raw(BATMON_CHANNEL);
 				}
 				f_batVol /= BATMON_NUM_SAMPLES;
@@ -69,9 +69,9 @@ void fconfigBatMon	(uint32_t ui_cmdlet)
 	case CMD_bath:
 		for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
 		{
-			gstu_config->batMon.i_batRawHigh += adc1_get_raw(BATMON_CHANNEL);
+			pstu_batMonConfig->i_batRawHigh += adc1_get_raw(BATMON_CHANNEL);
 		}
-		gstu_config->batMon.i_batRawHigh /= BATMON_NUM_SAMPLES;
+		pstu_batMonConfig->i_batRawHigh /= BATMON_NUM_SAMPLES;
 		xEventGroupSync( eg_sync,
 				BIT_BATMON_SYNC,
 				BIT_BATMON_SYNC | BIT_CONFIG_SYNC,
@@ -85,9 +85,9 @@ void fconfigBatMon	(uint32_t ui_cmdlet)
 	case CMD_batl:
 		for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
 		{
-			gstu_config->batMon.i_batRawLow += adc1_get_raw(BATMON_CHANNEL);
+			pstu_batMonConfig->i_batRawLow += adc1_get_raw(BATMON_CHANNEL);
 		}
-		gstu_config->batMon.i_batRawLow /= BATMON_NUM_SAMPLES;
+		pstu_batMonConfig->i_batRawLow /= BATMON_NUM_SAMPLES;
 		xEventGroupSync( eg_sync,
 				BIT_BATMON_SYNC,
 				BIT_BATMON_SYNC | BIT_CONFIG_SYNC,

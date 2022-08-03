@@ -2,9 +2,19 @@
 
 void app_main()
 {
+	uint8_t gb_moduleID;
 	esp_log_level_set("*", ESP_LOG_ERROR);
 	fsetLogLevel(LOG_DEBUG);
 
+	pstu_adcConfig = malloc(sizeof(struct stu_adcConfig));
+	pstu_sensorConfig = malloc(sizeof(struct stu_sensorConfig));
+	pstu_blinkConfig = malloc(sizeof(struct stu_blinkConfig));
+	pstu_triggerConfig = malloc(sizeof(struct stu_triggerConfig));
+	pstu_hotspotConfig = malloc(sizeof(struct stu_apConfig));
+	pstu_batMonConfig = malloc(sizeof(struct stu_batmonConfig));
+	pstu_tempConfig = malloc(sizeof(struct stu_tempConfig));
+	pstu_staConfigMom = malloc(sizeof(struct stu_staConfig));
+	pstu_staConfig = malloc(sizeof(struct stu_staConfig));
 
 	h_netif = 0;
 	ht_wifiBroadcast = 0;
@@ -21,6 +31,8 @@ void app_main()
 	eg_config	= xEventGroupCreate();
 	eg_status	= xEventGroupCreate();
 
+
+
 	//Creating queues q_time_temp
 	q_rgb_status 		=	xQueueCreate(	10, sizeof(uint32_t));
 	q_tcpMessages		=	xQueueCreate(	10,	sizeof(char *));
@@ -28,10 +40,10 @@ void app_main()
 	q_send				=	xQueueCreate(	1,	sizeof(void *));
 	q_recv				=	xQueueCreate(	1,	sizeof(void *));
 	q_pconfigIn			=	xQueueCreate(	5,	sizeof(void *));
-	q_pconfigOut		=	xQueueCreate(	5,	sizeof(void *));
+	q_pconfigOut		=	xQueueCreate(	5,	sizeof(stu_configMessage));
 
-	q_measurements			=	xQueueCreate(	50,	sizeof(struct stu_mesCell));
-	q_measurements_redund	=	xQueueCreate(	50,	sizeof(struct stu_mesCell));
+	q_measurements			=	xQueueCreate(	50,	sizeof(stu_mesCell));
+	q_measurements_redund	=	xQueueCreate(	50,	sizeof(stu_mesCell));
 
 
 	//CHECKING FOR MODULE ID
@@ -57,20 +69,14 @@ void app_main()
 	fblinkInit();
 	fbatMonInit();
 	ftempIntInit();
-//	if (gb_moduleID == 0x00)
-	if(1)
+	if (gb_moduleID == MODULE_ID)
 	{
-		ESP_LOGE(TAG_CONF, "NO LOADCELL PRESENT. STARTING SIMULATION");
-		fsimADCInit();
-	}
-	else if (gb_moduleID == (uint8_t)MODULE_ID_HX711)
-	{
-		ESP_LOGE(TAG_CONF, "MODULE MATCH STARTING ADC FOR MODULE(0x%02X)", MODULE_ID_HX711);
+		ESP_LOGE(TAG_CONF, "MODULE FOUND STARTING %s", MODULE_NAME);
 		fADCInit();
 	}
 	else
 	{
-		ESP_LOGE(TAG_CONF, "ADC MODULE MISMATCH! MODULE(0x%02X) does not equal Firmware(0x%02X)\n", gb_moduleID,MODULE_ID_HX711);
+		ESP_LOGE(TAG_CONF, "ADC MODULE MISMATCH! MODULE ID(0x%02X) for %s does not equal Firmware(0x%02X)\n", gb_moduleID, MODULE_NAME, MODULE_ID);
 		while(1)
 			vTaskDelay(100);
 	}

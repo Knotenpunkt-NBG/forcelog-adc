@@ -32,9 +32,8 @@
 #include "owb.h"
 #include "dirent.h"
 
-
-#include "defines.h"
 #include "globals.h"
+#include "aux.h"
 
 #define MOUNT_POINT "/sdcard"
 #define USE_SPI_MODE
@@ -48,11 +47,17 @@
 #define max_files	2
 
 void			fstorageInit	(void);
+
 void			tstorageRun		(void* param);
+
 void			fsdConfig		(uint32_t ui_cmdlet);
+
 esp_err_t		fFormatSD		();
+
 uint32_t		fwriteInit		(void);
-char*			ffileList		(char* pc_fileName);
+
+uint32_t		ffileList		(char* pc_fileName,
+								char* pc_configOut);
 char*			floadInit		();
 
 sdmmc_card_t*	card;

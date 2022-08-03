@@ -27,71 +27,71 @@ $EndSheet
 $Comp
 L Mechanical:MountingHole H3
 U 1 1 611A1CE9
-P 1100 1250
-F 0 "H3" H 1200 1296 50  0000 L CNN
-F 1 "M4" H 1200 1205 50  0000 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1100 1250 50  0001 C CNN
-F 3 "~" H 1100 1250 50  0001 C CNN
-	1    1100 1250
+P 1050 1850
+F 0 "H3" H 1150 1896 50  0000 L CNN
+F 1 "M4" H 1150 1805 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1050 1850 50  0001 C CNN
+F 3 "~" H 1050 1850 50  0001 C CNN
+	1    1050 1850
 	1    0    0    -1  
 $EndComp
 $Comp
 L Mechanical:MountingHole H2
 U 1 1 611A1EC5
-P 1100 1050
-F 0 "H2" H 1200 1096 50  0000 L CNN
-F 1 "M4" H 1200 1005 50  0000 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1100 1050 50  0001 C CNN
-F 3 "~" H 1100 1050 50  0001 C CNN
-	1    1100 1050
+P 1050 1650
+F 0 "H2" H 1150 1696 50  0000 L CNN
+F 1 "M4" H 1150 1605 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1050 1650 50  0001 C CNN
+F 3 "~" H 1050 1650 50  0001 C CNN
+	1    1050 1650
 	1    0    0    -1  
 $EndComp
 $Comp
 L Mechanical:MountingHole H1
 U 1 1 611A21EB
-P 1100 850
-F 0 "H1" H 1200 896 50  0000 L CNN
-F 1 "M4" H 1200 805 50  0000 L CNN
-F 2 "MountingHole:MountingHole_4.3mm_M4_Pad_Via" H 1100 850 50  0001 C CNN
-F 3 "~" H 1100 850 50  0001 C CNN
-	1    1100 850 
+P 1050 1450
+F 0 "H1" H 1150 1496 50  0000 L CNN
+F 1 "M4" H 1150 1405 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4.3mm_M4_Pad_Via" H 1050 1450 50  0001 C CNN
+F 3 "~" H 1050 1450 50  0001 C CNN
+	1    1050 1450
 	1    0    0    -1  
 $EndComp
 $Comp
 L Mechanical:MountingHole_Pad H4
 U 1 1 611A25E6
-P 1100 1500
-F 0 "H4" H 1200 1549 50  0000 L CNN
-F 1 "M4" H 1200 1458 50  0000 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1100 1500 50  0001 C CNN
-F 3 "~" H 1100 1500 50  0001 C CNN
-	1    1100 1500
+P 1050 2100
+F 0 "H4" H 1150 2149 50  0000 L CNN
+F 1 "M4" H 1150 2058 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1050 2100 50  0001 C CNN
+F 3 "~" H 1050 2100 50  0001 C CNN
+	1    1050 2100
 	1    0    0    -1  
 $EndComp
 $Comp
 L Mechanical:MountingHole_Pad H5
 U 1 1 617ADB9E
-P 1100 2550
-F 0 "H5" H 1200 2599 50  0000 L CNN
-F 1 "M3_FEM-FEM" H 1200 2508 50  0000 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1100 2550 50  0001 C CNN
-F 3 "~" H 1100 2550 50  0001 C CNN
-	1    1100 2550
+P 1050 3150
+F 0 "H5" H 1150 3199 50  0000 L CNN
+F 1 "M3_FEM-FEM" H 1150 3108 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1050 3150 50  0001 C CNN
+F 3 "~" H 1050 3150 50  0001 C CNN
+	1    1050 3150
 	1    0    0    -1  
 $EndComp
-NoConn ~ 1100 2650
+NoConn ~ 1050 3250
 $Comp
 L Mechanical:MountingHole_Pad H6
 U 1 1 617BC886
-P 1100 2850
-F 0 "H6" H 1200 2899 50  0000 L CNN
-F 1 "M3_FEM-FEM" H 1200 2808 50  0000 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1100 2850 50  0001 C CNN
-F 3 "~" H 1100 2850 50  0001 C CNN
-	1    1100 2850
+P 1050 3450
+F 0 "H6" H 1150 3499 50  0000 L CNN
+F 1 "M3_FEM-FEM" H 1150 3408 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1050 3450 50  0001 C CNN
+F 3 "~" H 1050 3450 50  0001 C CNN
+	1    1050 3450
 	1    0    0    -1  
 $EndComp
-NoConn ~ 1100 2950
+NoConn ~ 1050 3550
 $Sheet
 S 2450 5800 1100 1200
 U 604FEE2B
@@ -176,12 +176,12 @@ $EndSheet
 $Comp
 L power:GND #PWR03
 U 1 1 6086D653
-P 1100 1600
-F 0 "#PWR03" H 1100 1350 50  0001 C CNN
-F 1 "GND" H 1105 1427 50  0000 C CNN
-F 2 "" H 1100 1600 50  0001 C CNN
-F 3 "" H 1100 1600 50  0001 C CNN
-	1    1100 1600
+P 1050 2200
+F 0 "#PWR03" H 1050 1950 50  0001 C CNN
+F 1 "GND" H 1055 2027 50  0000 C CNN
+F 2 "" H 1050 2200 50  0001 C CNN
+F 3 "" H 1050 2200 50  0001 C CNN
+	1    1050 2200
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -442,23 +442,23 @@ Wire Wire Line
 $Comp
 L Mechanical:MountingHole H8
 U 1 1 5FD8EDCC
-P 1100 600
-F 0 "H8" H 1200 646 50  0000 L CNN
-F 1 "M4" H 1200 555 50  0000 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1100 600 50  0001 C CNN
-F 3 "~" H 1100 600 50  0001 C CNN
-	1    1100 600 
+P 1050 1200
+F 0 "H8" H 1150 1246 50  0000 L CNN
+F 1 "M4" H 1150 1155 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3_Pad_Via" H 1050 1200 50  0001 C CNN
+F 3 "~" H 1050 1200 50  0001 C CNN
+	1    1050 1200
 	1    0    0    -1  
 $EndComp
 $Comp
 L Mechanical:MountingHole H7
 U 1 1 5FD8F140
-P 1100 400
-F 0 "H7" H 1200 446 50  0000 L CNN
-F 1 "M4" H 1200 355 50  0000 L CNN
-F 2 "MountingHole:MountingHole_4.3mm_M4_Pad_Via" H 1100 400 50  0001 C CNN
-F 3 "~" H 1100 400 50  0001 C CNN
-	1    1100 400 
+P 1050 1000
+F 0 "H7" H 1150 1046 50  0000 L CNN
+F 1 "M4" H 1150 955 50  0000 L CNN
+F 2 "MountingHole:MountingHole_4.3mm_M4_Pad_Via" H 1050 1000 50  0001 C CNN
+F 3 "~" H 1050 1000 50  0001 C CNN
+	1    1050 1000
 	1    0    0    -1  
 $EndComp
 $Comp

@@ -38,9 +38,14 @@ void	fsendAck		(int sock);
 int		fsendKeepAlive	(int sock);
 int		fconnSock		(in_port_t* port);
 void 	fconfigTcp		(uint32_t ui_cmdlet,
-						in_port_t port,
 						int* sock);
 
+uint32_t	fgetMessage		(int sock,
+							char* pc_configIn,
+							uint32_t ui_timeout);
+
+uint32_t	fsendMessage	(int sock,
+							char* pc_configOut);
 void	ttcpMes			(void* param);
 void	ttcpConf		(void* param);
 

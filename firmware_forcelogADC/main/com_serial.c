@@ -26,12 +26,12 @@ void fserialInit	(void)
 
 void tserialRun	(void* param)
 {
-	char* pc_configOut = NULL;
-	char* pc_configIn = malloc(64);
+	char* pc_configIn = malloc(128);
 	int i_flag = 0;
+	stu_configMessage stu_response;
 	while (1)
 	{
-		i_flag = freadUartString(pc_configIn, 64);
+		i_flag = freadUartString(pc_configIn, 128);
 //		ESP_LOGD(TAG_UART, "i_flag:%d", i_flag);
 		if (i_flag < 0 )
 		{
@@ -40,59 +40,52 @@ void tserialRun	(void* param)
 		}
 		else if (i_flag > 0)
 		{
-			xSemaphoreTake(hs_configCom, portMAX_DELAY);
-			xQueueSend(q_pconfigIn,&pc_configIn, portMAX_DELAY);
-			xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
-			if (pc_configOut == 0) //Config said it does not need more info
+			i_flag = 0;
+			xSemaphoreTake(hs_configCom,
+					portMAX_DELAY);
+			xQueueSend(q_pconfigIn,
+					&pc_configIn,
+					portMAX_DELAY);
+			xQueueReceive(q_pconfigOut,
+					&stu_response,
+					portMAX_DELAY);
+
+			while (stu_response.pc_response)// as long as no NULL pointer is sent from task keep comm blocked
 			{
-				xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
-				printf("%s", pc_configOut);
-				xEventGroupSync( eg_config, BIT_COMM_SYNC, BIT_COMM_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
-				pc_configOut = 0;
-			}
-			else //config requested more info
-			{
-				int i_result = 0;
-				while (pc_configOut != 0)
+				printf("%s", stu_response.pc_response);
+				free(stu_response.pc_response);
+				stu_response.pc_response = 0;
+
+				while (stu_response.uc_numResponses > 0) //check if task expects response
 				{
-					//sending response from config
-					printf("%s", pc_configOut);
-					//checking uart for more strings with timeout
-					for(int i = 0; (i < COM_CYCLES_TIMEOUT) && (i_result == 0); i++)
+					while(i_flag <= 0)
 					{
-						i_result = freadUartString(pc_configIn, 64);
-						vTaskDelay(100 / portTICK_PERIOD_MS);
-					}
-					//success
-					if(i_result > 0)
-					{
-						xQueueSend(q_pconfigIn,&pc_configIn, portMAX_DELAY);
-						xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
-						if (pc_configOut == 0)
+						i_flag = freadUartString(pc_configIn, 128);
+						//		ESP_LOGD(TAG_UART, "i_flag:%d", i_flag);
+						if (i_flag < 0 )
 						{
-							xQueueReceive(q_pconfigOut, &pc_configOut, portMAX_DELAY);
+							ESP_LOGD(TAG_UART, "SENDING ERROR MESSAGE\n");
+							printf(MESS_INVALID);
 						}
-						printf("%s", pc_configOut);
-						xEventGroupSync( eg_config, BIT_COMM_SYNC, BIT_COMM_SYNC | BIT_CONFIG_SYNC, portMAX_DELAY );
-						pc_configOut = 0;
-					}
-					//timeout
-					else if (i_result == 0)
-					{
-						xQueueSend(q_pconfigIn,&i_result, portMAX_DELAY);
-						pc_configOut = 0;
-						printf("timeout ocurred\n");
-					}
-					//error
-					else
-					{
-						printf(MESS_INVALID);
-						pc_configOut = 0;
+						else if (i_flag == 0)
+						{
+							vTaskDelay(100 / portTICK_PERIOD_MS);
+						}
+						else
+						{
+							xQueueSend(q_pconfigIn,
+									&pc_configIn,
+									portMAX_DELAY);
+							stu_response.uc_numResponses--;
+						}
 					}
 				}
+				xQueueReceive(q_pconfigOut,
+						&stu_response,
+						portMAX_DELAY);
 			}
+
 			xSemaphoreGive(hs_configCom);
-			ESP_LOGD(TAG_UART, "SEMAPHORE GIVEN");
 		}
 		else
 		{

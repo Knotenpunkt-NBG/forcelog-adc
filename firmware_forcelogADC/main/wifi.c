@@ -102,6 +102,7 @@ void tWifiRun(void* param)
 				}
 
 				xEventGroupSetBits(eg_status, STATUS_WIFI_CONN);
+				*pstu_staConfig = *pstu_staConfigMom;
 			    if(ht_wifiBroadcast)
 			    {
 			    	vTaskDelete(ht_wifiBroadcast);
@@ -124,11 +125,11 @@ void tWifiRun(void* param)
 				{
 					if (!htim_staTimeOut)
 					{
-						if (gstu_config->staConfig.ui_wifiTimeout)
+						if (pstu_staConfigMom->ui_wifiTimeout)
 						{
 							ESP_LOGD(TAG_WIFI, "CREATING WIFI TIMEOUT");
 							htim_staTimeOut = xTimerCreate("wifiTimeout",
-									gstu_config->staConfig.ui_wifiTimeout * 1000 / portTICK_PERIOD_MS,
+									pstu_staConfigMom->ui_wifiTimeout * 1000 / portTICK_PERIOD_MS,
 									pdFALSE,
 									NULL,
 									cb_staTimeout);
@@ -166,18 +167,18 @@ void tWifiBroadcast(void* param)
 	uint8_t mac[6];
 	esp_read_mac(mac, 0);
 	ui_charCount += sprintf(ac_broadCast,
-				"\1\2FLADC\3_"MOUDLE_NAME"_\2%X-%X-%X-%X-%X-%X\3 at \2%s\3:",
+				"\1\2FLADC\3_"MODULE_NAME"_\2%X-%X-%X-%X-%X-%X\3 at \2%s\3:",
 				mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], ipConf);
 	struct sockaddr_in dest_addr;
 	if (xEventGroupGetBits(eg_status) & STATUS_HOTSPOT)
 	{
-		sprintf(ac_broadCast + ui_charCount, "\2%d\3\n\4", gstu_config->apConfig.portConf);
-		dest_addr.sin_port = htons(gstu_config->apConfig.portBroad);
+		sprintf(ac_broadCast + ui_charCount, "\2%d\3\4\n", pstu_hotspotConfig->portConf);
+		dest_addr.sin_port = htons(pstu_hotspotConfig->portBroad);
 	}
 	else
 	{
-		sprintf(ac_broadCast + ui_charCount, "\2%d\3\n\4", gstu_config->staConfig.portConf);
-		dest_addr.sin_port = htons(gstu_config->staConfig.portBroad);
+		sprintf(ac_broadCast + ui_charCount, "\2%d\3\4\n", pstu_staConfigMom->portConf);
+		dest_addr.sin_port = htons(pstu_staConfigMom->portBroad);
 	}
 	dest_addr.sin_addr.s_addr = ip_info.ip.addr | (~ip_info.netmask.addr);
 	dest_addr.sin_family = AF_INET;
@@ -213,8 +214,12 @@ void tWifiBroadcast(void* param)
 
 }
 
-void fWifiConfig(uint32_t ui_cmdlet)
+void	fWifiConfig			(uint32_t ui_cmdlet)
 {
+	char* pc_configOut = 0;
+	char* pc_configIn = 0;
+	char* pc_value = 0;
+
 	switch(ui_cmdlet)
 	{
 	case CMD_ldwi:
@@ -229,14 +234,53 @@ void fWifiConfig(uint32_t ui_cmdlet)
 				portMAX_DELAY );
 		break;
 
-	case CMD_wity:
 	case CMD_ssid:
-	case CMD_pass:
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|ack|0|\t\tEnter ssid.\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
+		{
+			pc_configOut = malloc(200);
+			portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+			portENTER_CRITICAL(&mux);
+			strcpy(pstu_staConfigMom->ac_ssid, pc_value);
+			portEXIT_CRITICAL(&mux);
+
+			sprintf(pc_configOut,
+					"\1|\2ssid\3|\2%s\3\4|\t\tOK, ssid set to %s.\n",
+					pstu_staConfigMom->ac_ssid, pstu_staConfigMom->ac_ssid);
+			fsendResponse(0, 1, pc_configOut);
+		}
 		xEventGroupSync( eg_sync,
 				BIT_WIFI_SYNC,
 				BIT_WIFI_SYNC | BIT_CONFIG_SYNC,
 				portMAX_DELAY );
-		xEventGroupSync( eg_config,
+		break;
+
+	case CMD_pass:
+		xQueueReceive(q_pconfigIn,
+				&pc_configIn,
+				portMAX_DELAY);
+		pc_configOut = malloc(64);
+		sprintf(pc_configOut, "|ack|0|\t\tEnter password.\n");
+		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
+		if(pc_value != 0)
+		{
+			pc_configOut = malloc(200);
+			portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
+			portENTER_CRITICAL(&mux);
+			strcpy(pstu_staConfigMom->ac_pass, pc_value);
+			portEXIT_CRITICAL(&mux);
+
+			sprintf(pc_configOut,
+					"|pass|%s|\t\tOK, password set to %s.\n",
+					pstu_staConfigMom->ac_pass, pstu_staConfigMom->ac_pass);
+			fsendResponse(0, 1, pc_configOut);
+		}
+		xEventGroupSync( eg_sync,
 				BIT_WIFI_SYNC,
 				BIT_WIFI_SYNC | BIT_CONFIG_SYNC,
 				portMAX_DELAY );
@@ -285,13 +329,14 @@ void fWifiConfig(uint32_t ui_cmdlet)
 		xQueueSend(q_recv,&ap_info, portMAX_DELAY);
 		ESP_LOGD(TAG_WIFI, "FINISHED SCWI");
 		break;
+
 	default:
 		ESP_LOGD(TAG_WIFI, "WRONG CMDLET");
 		break;
 	}
 }
 
-void fWifiConnSTA(void)
+void fWifiConnSTA()
 {
 	if (h_netif)
 	{
@@ -319,8 +364,8 @@ void fWifiConnSTA(void)
             },
         },
     };
-    strcpy((char*)station.sta.password, gstu_config->staConfig.ac_pass);
-    strcpy((char*)station.sta.ssid, gstu_config->staConfig.ac_ssid);
+    strcpy((char*)station.sta.password, pstu_staConfigMom->ac_pass);
+    strcpy((char*)station.sta.ssid, pstu_staConfigMom->ac_ssid);
 
 	ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA));
 	ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &station));
@@ -331,7 +376,7 @@ void fWifiConnSTA(void)
 //	vEventGroupDelete(eg_wifi);
 }
 
-void fWifiConnAp(void)
+void fWifiConnAp()
 {
 	if (h_netif)
 	{
@@ -339,9 +384,9 @@ void fWifiConnAp(void)
 	}
 	ESP_LOGD(TAG_WIFI, "STARTING AP");
 	h_netif = esp_netif_create_default_wifi_ap();
-	ESP_ERROR_CHECK(esp_netif_set_hostname(h_netif, gstu_config->apConfig.ac_hostName));
+	ESP_ERROR_CHECK(esp_netif_set_hostname(h_netif, pstu_hotspotConfig->ac_hostName));
 	ESP_ERROR_CHECK(esp_netif_dhcps_stop(h_netif));
-	ESP_ERROR_CHECK(esp_netif_set_ip_info(h_netif, &gstu_config->apConfig.ipInfo));
+	ESP_ERROR_CHECK(esp_netif_set_ip_info(h_netif, &pstu_hotspotConfig->ipInfo));
 	ESP_ERROR_CHECK(esp_netif_dhcps_start(h_netif));
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
@@ -361,12 +406,12 @@ void fWifiConnAp(void)
             },
         };
 
-    strcpy((char*)accessPoint.ap.password, gstu_config->apConfig.ac_pass);
-    strcpy((char*)accessPoint.ap.ssid, gstu_config->apConfig.ac_ssid);
+    strcpy((char*)accessPoint.ap.password, pstu_hotspotConfig->ac_pass);
+    strcpy((char*)accessPoint.ap.ssid, pstu_hotspotConfig->ac_ssid);
     accessPoint.ap.channel = 9;
     accessPoint.ap.max_connection = 2;
     accessPoint.ap.authmode = WIFI_AUTH_WPA_WPA2_PSK;
-    accessPoint.ap.ssid_len = strlen(gstu_config->apConfig.ac_ssid);
+    accessPoint.ap.ssid_len = strlen(pstu_hotspotConfig->ac_ssid);
 
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_AP, &accessPoint));

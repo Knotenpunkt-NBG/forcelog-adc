@@ -108,15 +108,4 @@ F 3 "~" H 3750 4550 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 NoConn ~ 3750 4650
-$Comp
-L Device:RFShield_TwoPieces J9
-U 1 1 60087E5A
-P 3200 6200
-F 0 "J9" H 3930 6264 50  0000 L CNN
-F 1 "RFShield_TwoPieces" H 3930 6173 50  0000 L CNN
-F 2 "shields_rf:Shield_TE2118726-2" H 3200 6100 50  0001 C CNN
-F 3 "~" H 3200 6100 50  0001 C CNN
-	1    3200 6200
-	1    0    0    -1  
-$EndComp
 $EndSCHEMATC

@@ -52,7 +52,5 @@ Mkfile.old
 dkms.conf
 
 /cad/
-firmware/build/
 /.metadata/
-
 firmware_forcelogADC/build/

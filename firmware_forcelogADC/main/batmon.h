@@ -20,8 +20,6 @@
 #include "globals.h"
 
 
-
-
 void	fbatMonInit		(void);
 void	tbatmonRun		(void* param);
 void	callback_timerBatmon	(void* param);
