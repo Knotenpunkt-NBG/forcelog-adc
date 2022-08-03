@@ -54,3 +54,5 @@ dkms.conf
 /cad/
 /.metadata/
 firmware_forcelogADC/build/
+
+ignore/thermistor_calculator/
