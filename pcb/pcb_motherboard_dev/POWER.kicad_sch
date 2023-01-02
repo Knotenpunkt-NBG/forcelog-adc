@@ -4,6 +4,11 @@
 
   (paper "A4")
 
+  (title_block
+    (title "ForcelogADC_MB-DEV_v${VERSION}")
+    (rev "${REVISION}")
+  )
+
   (lib_symbols
     (symbol "Connector:Conn_01x02_Male" (pin_names (offset 1.016) hide) (in_bom yes) (on_board yes)
       (property "Reference" "J" (id 0) (at 0 2.54 0)
@@ -3345,6 +3350,10 @@
     (pin "2" (uuid a72e8161-c7d3-444b-b8bf-8895669d39f4))
     (pin "7" (uuid cb668fef-1ce1-4b25-928c-56041fc4a65c))
     (pin "8" (uuid dd541050-73b9-4ab3-a94b-b1a82baf515d))
+    (pin "3" (uuid 781b66f7-ca64-4c53-9860-6fc49c7a9c53))
+    (pin "4" (uuid 14efba01-ebbb-47c1-aa2b-00d5c1612028))
+    (pin "5" (uuid 0fba4dd7-6d67-46c3-bf00-cd10a642789f))
+    (pin "6" (uuid 47e87e40-bd3f-463e-98ed-aebe941287ae))
   )
 
   (symbol (lib_id "Device:Q_Dual_NMOS_S1G1S2G2D2D2D1D1") (at 137.16 109.22 270) (unit 2)
@@ -3366,6 +3375,10 @@
     (property "Digikey" "DMG9926USD-13DICT-ND" (id 5) (at 137.16 109.22 0)
       (effects (font (size 1.27 1.27)) hide)
     )
+    (pin "1" (uuid aa32c221-2620-4983-bf94-332b9a03e868))
+    (pin "2" (uuid ac94987a-abc1-4707-9867-8c66b3e7c3fc))
+    (pin "7" (uuid c143f5ee-1433-4fc1-a5fa-32170cb518fe))
+    (pin "8" (uuid d363f4e2-9435-4523-8bd8-483425120b9e))
     (pin "3" (uuid 801f04dc-dd60-49b2-b9e0-d06f81897ddd))
     (pin "4" (uuid 83012ce6-a2f8-47cd-9c4d-9feaad62eacc))
     (pin "5" (uuid 9c8514e5-1a18-4724-823a-ab84831b39a5))

@@ -148,7 +148,7 @@ void tWifiRun(void* param)
 			}
 			else
 			{
-				ESP_LOGE(TAG_WIFI, "UNEXPECTED EVENT:0x%X", bits);
+				ESP_LOGE(TAG_WIFI, "UNEXPECTED EVENT:0x%X", (unsigned int) bits);
 			}
 
 		}

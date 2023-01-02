@@ -56,3 +56,11 @@ dkms.conf
 firmware_forcelogADC/build/
 
 ignore/thermistor_calculator/
+
+firmware_forcelogADC/.metadata/
+
+firmware_forcelogADC/.project
+
+firmware_forcelogADC/.cproject
+
+modules/

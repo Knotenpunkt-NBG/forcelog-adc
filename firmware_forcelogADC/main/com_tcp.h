@@ -23,7 +23,7 @@
 #include "globals.h"
 #include "config.h"
 
-struct timeval receiving_timeout;
+
 
 
 

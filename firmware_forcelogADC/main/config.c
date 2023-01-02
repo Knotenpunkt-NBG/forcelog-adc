@@ -770,7 +770,7 @@ void tconfigRun	(void* param)
 				pc_value = fgetValuePointer(pc_configIn, "|ack|0|\t\tEnter station Timeout in s.\n");
 				if(pc_value != 0)
 				{
-					uint32_t ui_stationTimeout = 0;
+					unsigned int ui_stationTimeout = 0;
 					pc_configOut = malloc(64);
 					ui_stationTimeout = strtol(pc_value, NULL, 10);
 					if(ui_stationTimeout !=0)
@@ -851,7 +851,7 @@ void tconfigRun	(void* param)
 				if(pc_value != 0)
 				{
 					pc_configOut = malloc(64);
-					uint32_t ui_port = (uint32_t)strtol(pc_value, NULL, 10);
+					unsigned int ui_port = (uint32_t)strtol(pc_value, NULL, 10);
 					if(ui_port <= 65353)
 					{
 						pstu_hotspotConfig->portConf = ui_port;
@@ -879,7 +879,7 @@ void tconfigRun	(void* param)
 				if(pc_value != 0)
 				{
 					pc_configOut = malloc(64);
-					uint32_t ui_port = (uint32_t)strtol(pc_value, NULL, 10);
+					unsigned int ui_port = (uint32_t)strtol(pc_value, NULL, 10);
 					if(ui_port <= 65353)
 					{
 						xSemaphoreTake(hs_pointerQueue, portMAX_DELAY);
@@ -909,7 +909,7 @@ void tconfigRun	(void* param)
 			}
 			else
 			{
-				uint32_t ui_port = 0;
+				unsigned int ui_port = 0;
 				if (fgetNextString(pc_configIn))
 				{
 					ui_port = atoi(pc_configIn + fgetNextString(pc_configIn));
@@ -950,7 +950,7 @@ void tconfigRun	(void* param)
 				if(pc_value != 0)
 				{
 
-					uint32_t ui_port = (uint32_t)strtol(pc_value, NULL, 10);
+					unsigned int ui_port = (uint32_t)strtol(pc_value, NULL, 10);
 					if(ui_port <= 65353)
 					{
 						pc_configOut = malloc(64);
@@ -1003,7 +1003,7 @@ void tconfigRun	(void* param)
 			}
 			else
 			{
-				uint32_t ui_port = 0;
+				unsigned int ui_port = 0;
 				if (fgetNextString(pc_configIn))
 				{
 					ui_port = atoi(pc_configIn + fgetNextString(pc_configIn));

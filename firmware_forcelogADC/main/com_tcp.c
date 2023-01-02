@@ -7,6 +7,7 @@
 
 #include "com_tcp.h"
 
+struct timeval receiving_timeout;
 
 void ftcpInit()
 {
@@ -513,7 +514,7 @@ void fconfigTcp	(uint32_t ui_cmdlet,
 		if(pc_value != 0)
 		{
 			pc_configOut = malloc(64);
-			uint32_t ui_port = (uint32_t)strtol(pc_value, NULL, 10);
+			unsigned int ui_port = (uint32_t)strtol(pc_value, NULL, 10);
 			if(ui_port <= 65353)
 			{
 				pc_configOut = malloc(64);

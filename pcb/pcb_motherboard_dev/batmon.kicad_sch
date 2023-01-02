@@ -4,6 +4,11 @@
 
   (paper "A4")
 
+  (title_block
+    (title "ForcelogADC_MB-DEV_v${VERSION}")
+    (rev "${REVISION}")
+  )
+
   (lib_symbols
     (symbol "Amplifier_Operational:MCP6002-xSN" (pin_names (offset 0.127)) (in_bom yes) (on_board yes)
       (property "Reference" "U" (id 0) (at 0 5.08 0)
@@ -642,9 +647,6 @@
   (junction (at 142.24 92.71) (diameter 0) (color 0 0 0 0)
     (uuid f41e4c05-0e99-458b-9ab8-02cf11d5f8ca)
   )
-  (junction (at 153.67 125.73) (diameter 0) (color 0 0 0 0)
-    (uuid f9b30b40-7bf6-4e31-9bb4-7f34e740cd2d)
-  )
 
   (no_connect (at 189.23 111.76) (uuid b4f7722d-7e5d-4d82-a603-1bfc1c1c1d4a))
 
@@ -795,7 +797,7 @@
     (pin "1" (uuid c6a9bc83-ca74-4ca1-a41e-ea571fe21c97))
   )
 
-  (symbol (lib_id "Amplifier_Operational:MCP6002-xSN") (at 196.85 111.76 0) (mirror y)
+  (symbol (lib_id "Amplifier_Operational:MCP6002-xSN") (at 196.85 111.76 0) (mirror y) (unit 2)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-00006000e113)
     (property "Reference" "U9" (id 0) (at 196.85 102.4382 0))
@@ -812,12 +814,17 @@
     (property "Digikey" "MCP6002-I/SN-ND" (id 5) (at 196.85 111.76 0)
       (effects (font (size 1.27 1.27)) hide)
     )
+    (pin "1" (uuid ed6af16a-f531-43b4-b240-2e1f04c0862f))
+    (pin "2" (uuid 147f8baa-ae40-426e-a411-0472bfc409ca))
+    (pin "3" (uuid acdf2cff-6e3c-463b-8233-73a2a63d8f64))
     (pin "5" (uuid 4eb9dc01-84e4-470a-bddd-336f2206d841))
     (pin "6" (uuid fa75329b-3cd9-4e19-b5e0-98e35d8ab95d))
     (pin "7" (uuid d32cc096-740c-442c-84ac-39c08c94919c))
+    (pin "4" (uuid dc674fdf-0394-4545-af95-69ad1a7161f4))
+    (pin "8" (uuid d00ace35-e080-4337-aeac-21498cfe26be))
   )
 
-  (symbol (lib_id "power:GND") (at 204.47 109.22 90)
+  (symbol (lib_id "power:GND") (at 204.47 109.22 90) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060010899)
     (property "Reference" "#PWR0148" (id 0) (at 210.82 109.22 0)
@@ -851,7 +858,7 @@
     (pin "1" (uuid a1ffd448-5fd7-4a6d-94bc-e33bf17d104b))
   )
 
-  (symbol (lib_id "Device:D_Schottky_Dual_Series_AKC") (at 105.41 83.82 0) (mirror y)
+  (symbol (lib_id "Device:D_Schottky_Dual_Series_AKC") (at 105.41 83.82 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060397e70)
     (property "Reference" "D12" (id 0) (at 105.41 81.788 90)
@@ -877,7 +884,7 @@
     (pin "3" (uuid c77bebbf-ae9a-4947-8b4a-131b67ad8bd0))
   )
 
-  (symbol (lib_id "power:GND") (at 113.03 83.82 90)
+  (symbol (lib_id "power:GND") (at 113.03 83.82 90) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000603a118e)
     (property "Reference" "#PWR0144" (id 0) (at 119.38 83.82 0)
@@ -945,7 +952,7 @@
     (pin "1" (uuid 778725e4-1673-4d1d-83c2-3e293cc039b7))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 95.25 88.9 180)
+  (symbol (lib_id "Connector:TestPoint") (at 95.25 88.9 180) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000604b7031)
     (property "Reference" "TP8" (id 0) (at 96.7232 89.5604 0)
@@ -963,7 +970,7 @@
     (pin "1" (uuid 24c15d01-09b5-4670-b959-8af6e6af1e8b))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 165.1 90.17 0)
+  (symbol (lib_id "Connector:TestPoint") (at 165.1 90.17 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000604ca58f)
     (property "Reference" "TP9" (id 0) (at 166.5732 87.1728 0)
@@ -981,7 +988,7 @@
     (pin "1" (uuid a54bb4a4-64bd-4fc7-8376-db68e860606d))
   )
 
-  (symbol (lib_id "Device:R") (at 121.92 82.55 0)
+  (symbol (lib_id "Device:R") (at 121.92 82.55 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599d87)
     (property "Reference" "R38" (id 0) (at 123.698 81.3816 0)
@@ -1006,7 +1013,7 @@
     (pin "2" (uuid 8ee9e747-62ba-4924-8569-0c230a7db8de))
   )
 
-  (symbol (lib_id "Device:R") (at 121.92 92.71 0)
+  (symbol (lib_id "Device:R") (at 121.92 92.71 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599d8d)
     (property "Reference" "R39" (id 0) (at 123.698 91.5416 0)
@@ -1031,7 +1038,7 @@
     (pin "2" (uuid a8fb4119-650e-4ac6-94c5-3cf1ab9f9325))
   )
 
-  (symbol (lib_id "Device:C") (at 110.49 92.71 0)
+  (symbol (lib_id "Device:C") (at 110.49 92.71 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599d93)
     (property "Reference" "C17" (id 0) (at 113.411 91.5416 0)
@@ -1056,7 +1063,7 @@
     (pin "2" (uuid 2211dc9b-c955-4613-93c5-41b96fa1230a))
   )
 
-  (symbol (lib_id "power:GND") (at 118.11 96.52 0)
+  (symbol (lib_id "power:GND") (at 118.11 96.52 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599d9c)
     (property "Reference" "#PWR074" (id 0) (at 118.11 102.87 0)
@@ -1072,7 +1079,7 @@
     (pin "1" (uuid 0101dc85-6056-4085-bd10-729f0ab31d8d))
   )
 
-  (symbol (lib_id "Amplifier_Operational:MCP6002-xSN") (at 149.86 92.71 0) (mirror y)
+  (symbol (lib_id "Amplifier_Operational:MCP6002-xSN") (at 149.86 92.71 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599dad)
     (property "Reference" "U9" (id 0) (at 149.86 83.3882 0))
@@ -1092,9 +1099,14 @@
     (pin "1" (uuid 601be67a-3556-4643-a537-e7891171212e))
     (pin "2" (uuid 01fec0dc-78cf-4a7d-851f-e24a9edd4a86))
     (pin "3" (uuid 92e30d01-6115-49a3-bead-4b8b74d533c9))
+    (pin "5" (uuid 0b5b215c-04db-4522-88a7-4579214cb24d))
+    (pin "6" (uuid a1988255-d31d-4657-b8b1-11e804e95587))
+    (pin "7" (uuid 778151f8-3063-4c1e-8fe8-880175511281))
+    (pin "4" (uuid 1d8c9539-3f80-4fdc-a596-490a8410228f))
+    (pin "8" (uuid 857328cf-49a5-460a-98e4-1933bd4fd914))
   )
 
-  (symbol (lib_id "Amplifier_Operational:MCP6002-xSN") (at 156.21 118.11 0)
+  (symbol (lib_id "Amplifier_Operational:MCP6002-xSN") (at 156.21 118.11 0) (unit 3)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599db3)
     (property "Reference" "U9" (id 0) (at 155.1432 116.9416 0)
@@ -1115,11 +1127,17 @@
     (property "Digikey" "MCP6002-I/SN-ND" (id 5) (at 156.21 118.11 0)
       (effects (font (size 1.27 1.27)) hide)
     )
+    (pin "1" (uuid 79066d49-1469-4cd0-a5b1-9af90c6ef256))
+    (pin "2" (uuid 3f9efef2-eb7d-4436-b9b4-db43c3d88d3b))
+    (pin "3" (uuid 588f4f8a-377a-425d-9c4b-65c80c2fe57a))
+    (pin "5" (uuid 64bf5a9f-ec1b-47d0-a460-0c518c094300))
+    (pin "6" (uuid dc2d2249-0531-4770-a0b3-e4174f3b914a))
+    (pin "7" (uuid 27494d0a-a3c8-4648-a95a-935baae61a45))
     (pin "4" (uuid 88ac54d2-fbab-47d5-99b7-9af1eb96e113))
     (pin "8" (uuid a57ab11c-092f-4f9a-9ff5-adee03ba2e25))
   )
 
-  (symbol (lib_id "Jumper:Jumper_3_Open") (at 121.92 74.93 0)
+  (symbol (lib_id "Jumper:Jumper_3_Open") (at 121.92 74.93 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599db9)
     (property "Reference" "JP3" (id 0) (at 121.92 71.5518 0))
@@ -1137,7 +1155,7 @@
     (pin "3" (uuid e11d5b20-2fc4-4d1a-b409-dd6d156fe724))
   )
 
-  (symbol (lib_id "Device:R_Potentiometer") (at 177.8 90.17 180)
+  (symbol (lib_id "Device:R_Potentiometer") (at 177.8 90.17 180) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599dcb)
     (property "Reference" "RV3" (id 0) (at 179.578 91.3384 0)
@@ -1163,7 +1181,7 @@
     (pin "3" (uuid 7a1c5a6b-af6c-4c2f-9b1b-a52569209af3))
   )
 
-  (symbol (lib_id "Device:R") (at 177.8 82.55 0) (mirror y)
+  (symbol (lib_id "Device:R") (at 177.8 82.55 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599dd1)
     (property "Reference" "R51" (id 0) (at 179.578 81.3816 0)
@@ -1188,7 +1206,7 @@
     (pin "2" (uuid 1618814f-0505-4c75-87a3-5639a90ae5f7))
   )
 
-  (symbol (lib_id "Device:R") (at 177.8 99.06 0) (mirror y)
+  (symbol (lib_id "Device:R") (at 177.8 99.06 0) (mirror y) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599dd7)
     (property "Reference" "R52" (id 0) (at 179.578 97.8916 0)
@@ -1213,7 +1231,7 @@
     (pin "2" (uuid 4c768091-718d-4ee2-b919-91610b4989bf))
   )
 
-  (symbol (lib_id "power:GND") (at 177.8 102.87 0)
+  (symbol (lib_id "power:GND") (at 177.8 102.87 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599de6)
     (property "Reference" "#PWR083" (id 0) (at 177.8 109.22 0)
@@ -1229,7 +1247,7 @@
     (pin "1" (uuid cb5517dd-1a43-4e3c-9396-33a6288eccb5))
   )
 
-  (symbol (lib_id "power:GND") (at 153.67 125.73 0)
+  (symbol (lib_id "power:GND") (at 153.67 125.73 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599dec)
     (property "Reference" "#PWR078" (id 0) (at 153.67 132.08 0)
@@ -1245,7 +1263,7 @@
     (pin "1" (uuid e0bd09ff-f854-417c-a912-cb3a8a969afe))
   )
 
-  (symbol (lib_id "Device:C") (at 165.1 93.98 0)
+  (symbol (lib_id "Device:C") (at 165.1 93.98 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599df5)
     (property "Reference" "C23" (id 0) (at 168.021 92.8116 0)
@@ -1270,7 +1288,7 @@
     (pin "2" (uuid cc121207-edb7-42bb-ba57-4c5d2355765d))
   )
 
-  (symbol (lib_id "power:GND") (at 165.1 97.79 0)
+  (symbol (lib_id "power:GND") (at 165.1 97.79 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599dfd)
     (property "Reference" "#PWR081" (id 0) (at 165.1 104.14 0)
@@ -1286,7 +1304,7 @@
     (pin "1" (uuid 958df038-6a8f-4864-86ee-b0a557ddd3fc))
   )
 
-  (symbol (lib_id "Device:C") (at 143.51 118.11 0)
+  (symbol (lib_id "Device:C") (at 143.51 118.11 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-000060599e03)
     (property "Reference" "C22" (id 0) (at 146.431 116.9416 0)
@@ -1311,7 +1329,7 @@
     (pin "2" (uuid 78c5a3ed-d638-4662-b39f-6e6d6e26ce82))
   )
 
-  (symbol (lib_id "power:GND") (at 204.47 59.69 0)
+  (symbol (lib_id "power:GND") (at 204.47 59.69 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-00006070525f)
     (property "Reference" "#PWR085" (id 0) (at 204.47 66.04 0)

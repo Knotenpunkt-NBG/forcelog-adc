@@ -4,6 +4,11 @@
 
   (paper "A4")
 
+  (title_block
+    (title "ForcelogADC_MB-DEV_v${VERSION}")
+    (rev "${REVISION}")
+  )
+
   (lib_symbols
     (symbol "Mechanical:MountingHole" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
       (property "Reference" "H" (id 0) (at 0 5.08 0)
@@ -2146,6 +2151,9 @@
     )
     (path "/00000000-0000-0000-0000-00005fd1fa3f/00000000-0000-0000-0000-00006004e3c6"
       (reference "TP22") (unit 1) (value "ID") (footprint "Connector_PinHeader_2.54mm:PinHeader_1x01_P2.54mm_Vertical")
+    )
+    (path "/00000000-0000-0000-0000-00005fd1fa3f/5ea152c1-83db-4d14-9af9-99ab4f38f743"
+      (reference "TP23") (unit 1) (value "FLASH") (footprint "PinHeader:PinHeader_1x02_P2.54mm_Vertical")
     )
     (path "/00000000-0000-0000-0000-00005fd1fa19/00000000-0000-0000-0000-00005fe127e5"
       (reference "U1") (unit 1) (value "TP4056") (footprint "Package_SO:SOIC-8-1EP_3.9x4.9mm_P1.27mm_EP2.29x3mm_ThermalVias")

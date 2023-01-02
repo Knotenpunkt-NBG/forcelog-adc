@@ -9,39 +9,60 @@
 #define MAIN_GLOBALS_H_
 
 
-#include "limits.h"
-#include "esp_wifi.h"
-#include "freertos/event_groups.h"
 #include "freertos/FreeRTOS.h"
+#include "freertos/event_groups.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "driver/ledc.h"
 #include "esp_log.h"
-#include "owb.h"
-#include "ds18b20.h"
 #include "lwip/sockets.h"
+#include "esp_mac.h"
+#include "limits.h"
+
+#include "esp_timer.h"
+#include "esp_wifi.h"
+#include "ds18b20.h"
+
 #include "defines.h"
-#include "adc_globals.h"
 
 
-//struct stu_initConfig* gstu_config;
+extern struct stu_initConfig* gstu_config;
 
-struct stu_adcConfig*		pstu_adcConfig;
-struct stu_sensorConfig*	pstu_sensorConfig;
-struct stu_blinkConfig*		pstu_blinkConfig;
-struct stu_triggerConfig*	pstu_triggerConfig;
-struct stu_apConfig*		pstu_hotspotConfig;
-struct stu_batmonConfig* 	pstu_batMonConfig;
-struct stu_tempConfig*		pstu_tempConfig;
-struct stu_staConfig*		pstu_staConfigMom;
-struct stu_staConfig*		pstu_staConfig;
+extern struct stu_adcConfig*		pstu_adcConfig;
+extern struct stu_sensorConfig*	pstu_sensorConfig;
+extern struct stu_blinkConfig*		pstu_blinkConfig;
+extern struct stu_triggerConfig*	pstu_triggerConfig;
+extern struct stu_apConfig*		pstu_hotspotConfig;
+extern struct stu_batmonConfig* 	pstu_batMonConfig;
+extern struct stu_tempConfig*		pstu_tempConfig;
+extern struct stu_staConfig*		pstu_staConfigMom;
+extern struct stu_staConfig*		pstu_staConfig;
 
-EXTERN uint64_t ul_zeroTime;
+EXTERN unsigned long long ul_zeroTime;
 
 // Config structs
+
+//ADC MODULE STRUCTS
+struct stu_sensorConfig{
+	char		ac_name[17];
+	double 		d_calValue;
+	int	i_tareValue;
+	int	i_tareZero;
+	int8_t i8_perOverload;
+	uint8_t ui8_maxLoad;
+};
+
+typedef struct
+{
+	char		str_type[5];
+	char		str_data[NUM_DATA_CHARS];
+	unsigned long long	ul_time;
+} stu_mesCell;
+
+
 struct stu_adcConfig{
-	uint64_t	ul_adcPeriod;
+	unsigned long long	ul_adcPeriod;
 	uint8_t		uc_txMode;
 	uint8_t		uc_numDecimals;
 	uint8_t		uc_unit;
@@ -56,16 +77,16 @@ struct stu_batmonConfig
 };
 struct stu_blinkConfig
 {
-	uint32_t	ui_blinkPeriod;
-	uint32_t	ui_blinkDuration;
-	uint32_t	ui_blinkBrightness;
-	uint32_t	ui_blinkFrequency;
+	unsigned int	ui_blinkPeriod;
+	unsigned int	ui_blinkDuration;
+	unsigned int	ui_blinkBrightness;
+	unsigned int	ui_blinkFrequency;
 };
 
 struct stu_triggerConfig
 {
 	bool b_pinMode;
-	uint32_t ui_timeout;
+	unsigned int ui_timeout;
 };
 struct stu_apConfig
 {
@@ -77,7 +98,7 @@ struct stu_apConfig
 	in_port_t	portMes;
 	in_port_t	portBroad;
 	in_port_t	portTrig;
-	uint32_t	ipTrig;
+	unsigned int	ipTrig;
 };
 struct stu_staConfig
 {
@@ -88,15 +109,15 @@ struct stu_staConfig
 	in_port_t	portMes;
 	in_port_t	portBroad;
 	in_port_t	portTrig;
-	uint32_t	ipTrig;
-	uint32_t	ui_wifiTimeout;
+	unsigned int	ipTrig;
+	unsigned int	ui_wifiTimeout;
 };
 struct stu_tempConfig
 {
-	OneWireBus_ROMCode	romInt;
-	OneWireBus_ROMCode	romExt;
-	uint32_t			ui_perInt;
-	uint32_t			ui_perExt;
+	uint8_t	romInt[8];
+	uint8_t	romExt[8];
+	unsigned int			ui_perInt;
+	unsigned int			ui_perExt;
 };
 
 struct stu_initConfig
@@ -118,58 +139,61 @@ typedef struct	{
 } stu_configMessage;
 
 
+
+
 //Event groups
-EventGroupHandle_t eg_wifi;
-EventGroupHandle_t eg_sync;
-EventGroupHandle_t eg_config;
-EventGroupHandle_t eg_status;
+extern EventGroupHandle_t eg_wifi;
+extern EventGroupHandle_t eg_sync;
+extern EventGroupHandle_t eg_config;
+extern EventGroupHandle_t eg_status;
 
 
 //Queues
-QueueHandle_t q_send;
-QueueHandle_t q_recv;
-QueueHandle_t q_rgb_status;
-QueueHandle_t q_tcpMessages;
-QueueHandle_t q_uartMessages;
-QueueHandle_t q_pconfigIn;
-QueueHandle_t q_pconfigOut;
+extern QueueHandle_t q_send;
+extern QueueHandle_t q_recv;
+extern QueueHandle_t q_rgb_status;
+extern QueueHandle_t q_tcpMessages;
+extern QueueHandle_t q_uartMessages;
+extern QueueHandle_t q_pconfigIn;
+extern QueueHandle_t q_pconfigOut;
 
-QueueHandle_t q_measurements;
-QueueHandle_t q_measurements_redund;
+extern QueueHandle_t q_measurements;
+extern QueueHandle_t q_measurements_redund;
 
 
 //Semaphores
-SemaphoreHandle_t hs_oneWire;
-SemaphoreHandle_t hs_pointerQueue;
-SemaphoreHandle_t hs_configCom;
+extern SemaphoreHandle_t hs_oneWire;
+extern SemaphoreHandle_t hs_pointerQueue;
+extern SemaphoreHandle_t hs_configCom;
 
 
 //Timers
-esp_timer_handle_t 	htim_periodicAdc;
-TimerHandle_t 		h_timerBlink;
-TimerHandle_t 		h_timerBatMon;
-TimerHandle_t		htim_tcpSend;
-TimerHandle_t		htim_oneWire;
-TimerHandle_t		htim_staTimeOut;
+extern esp_timer_handle_t 	htim_periodicAdc;
+extern TimerHandle_t 		h_timerBlink;
+extern TimerHandle_t 		h_timerBatMon;
+extern TimerHandle_t		htim_tcpSend;
+extern TimerHandle_t		htim_oneWire;
+extern TimerHandle_t		htim_staTimeOut;
 
 
 //Tasks Handles
-TaskHandle_t ht_blinkRun;
-TaskHandle_t ht_tcpMes;
-TaskHandle_t ht_tcpConf;
-TaskHandle_t ht_udpWait;
-TaskHandle_t ht_adcRun;
-TaskHandle_t ht_storageRun;
-TaskHandle_t ht_wifiRun;
-TaskHandle_t ht_batmonRun;
-TaskHandle_t ht_serialRun;
-TaskHandle_t ht_tempIntRun;
-TaskHandle_t ht_tempExtRun;
-TaskHandle_t ht_configRun;
-TaskHandle_t ht_wifiBroadcast;
+extern TaskHandle_t ht_blinkRun;
+extern TaskHandle_t ht_tcpMes;
+extern TaskHandle_t ht_tcpConf;
+extern TaskHandle_t ht_udpWait;
+extern TaskHandle_t ht_adcRun;
+extern TaskHandle_t ht_storageRun;
+extern TaskHandle_t ht_wifiRun;
+extern TaskHandle_t ht_batmonRun;
+extern TaskHandle_t ht_serialRun;
+extern TaskHandle_t ht_tempIntRun;
+extern TaskHandle_t ht_tempExtRun;
+extern TaskHandle_t ht_configRun;
+extern TaskHandle_t ht_wifiBroadcast;
 
 //General Handles
-esp_netif_t* h_netif;
+extern esp_netif_t* h_netif;
+
 
 //Functions
 EXTERN void	sendRgbLedStatus(int i);

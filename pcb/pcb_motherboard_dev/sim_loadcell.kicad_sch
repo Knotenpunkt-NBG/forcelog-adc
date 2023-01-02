@@ -4,6 +4,11 @@
 
   (paper "A4")
 
+  (title_block
+    (title "ForcelogADC_MB-DEV_v${VERSION}")
+    (rev "${REVISION}")
+  )
+
   (lib_symbols
     (symbol "Connector:TestPoint" (pin_numbers hide) (pin_names (offset 0.762) hide) (in_bom yes) (on_board yes)
       (property "Reference" "TP" (id 0) (at 0 6.858 0)
@@ -671,7 +676,7 @@
     (pin "2" (uuid f9e7c164-0715-414a-9bc1-2705d14f155e))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 186.69 132.08 0)
+  (symbol (lib_id "Connector:TestPoint") (at 186.69 132.08 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000605a812a)
     (property "Reference" "TP14" (id 0) (at 188.1632 129.0828 0)
@@ -689,7 +694,7 @@
     (pin "1" (uuid 41568218-681a-410c-9bd0-ca60fb10f910))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 194.31 132.08 0)
+  (symbol (lib_id "Connector:TestPoint") (at 194.31 132.08 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000605a8e8f)
     (property "Reference" "TP16" (id 0) (at 195.7832 129.0828 0)
@@ -707,7 +712,7 @@
     (pin "1" (uuid f903223e-3711-41e5-b965-51efe6596c56))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 201.93 132.08 0)
+  (symbol (lib_id "Connector:TestPoint") (at 201.93 132.08 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000605a9337)
     (property "Reference" "TP18" (id 0) (at 203.4032 129.0828 0)
@@ -725,7 +730,7 @@
     (pin "1" (uuid ffdea284-ed58-4b8e-8908-ef1b9e4fe3b1))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 209.55 132.08 0)
+  (symbol (lib_id "Connector:TestPoint") (at 209.55 132.08 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000605a991e)
     (property "Reference" "TP20" (id 0) (at 211.0232 129.0828 0)
@@ -743,7 +748,7 @@
     (pin "1" (uuid c7699f1d-7e78-4991-9876-ff3a83ea094a))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 186.69 140.97 0)
+  (symbol (lib_id "Connector:TestPoint") (at 186.69 140.97 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000605b0c50)
     (property "Reference" "TP15" (id 0) (at 188.1632 137.9728 0)
@@ -761,7 +766,7 @@
     (pin "1" (uuid 8521b94c-cc82-48b8-85e6-12a0bdf81150))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 194.31 140.97 0)
+  (symbol (lib_id "Connector:TestPoint") (at 194.31 140.97 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000605b0d31)
     (property "Reference" "TP17" (id 0) (at 195.7832 137.9728 0)
@@ -779,7 +784,7 @@
     (pin "1" (uuid 78448228-43bd-4efb-b90f-bd5e6ea645ac))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 201.93 140.97 0)
+  (symbol (lib_id "Connector:TestPoint") (at 201.93 140.97 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000605b0d3b)
     (property "Reference" "TP19" (id 0) (at 203.4032 137.9728 0)
@@ -797,7 +802,7 @@
     (pin "1" (uuid bddd93d5-6bcf-4a37-8f3c-1979a6faa688))
   )
 
-  (symbol (lib_id "Connector:TestPoint") (at 209.55 140.97 0)
+  (symbol (lib_id "Connector:TestPoint") (at 209.55 140.97 0) (unit 1)
     (in_bom yes) (on_board yes)
     (uuid 00000000-0000-0000-0000-0000605b0d45)
     (property "Reference" "TP21" (id 0) (at 211.0232 137.9728 0)

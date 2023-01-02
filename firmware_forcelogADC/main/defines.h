@@ -12,7 +12,6 @@
 #define EXTERN extern
 #endif
 
-#include "adc_defines.h"
 
 #define FIRMWARE_VERSION		"1.0"
 //TODO: implement versions in config to automaticly rewrite the init config when firmware update has been flashed
@@ -78,7 +77,7 @@
 #define BATMON_PERIOD		1*1000
 #define BAT_CUTOFF			3.3			//Low Voltage battery protection. This is a soft cutoff that disables most functions. Additional protection is implemented in hardware.
 #define BATMON_NUM_SAMPLES	50			//Number of measurements to be averaged for one battery measurement.
-#define BATMON_CHANNEL		ADC1_CHANNEL_7
+#define BATMON_CHANNEL		ADC_CHANNEL_7
 
 
 //ID SHIFT REGISTER
@@ -261,6 +260,8 @@
 #define CMD_ldtc	('l' << 8 * 3) + ('d' << 8 * 2) + ('t' << 8 * 1) + ('c' << 8 * 0)
 #define CMD_ldtm	('l' << 8 * 3) + ('d' << 8 * 2) + ('t' << 8 * 1) + ('m' << 8 * 0)
 #define CMD_ldbl	('l' << 8 * 3) + ('d' << 8 * 2) + ('b' << 8 * 1) + ('l' << 8 * 0)
+//LoaD LoadCell
+//Loads the Loadcell from storage und writes it to gloabl struct
 #define CMD_ldlc	('l' << 8 * 3) + ('d' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
 #define CMD_ldwi	('l' << 8 * 3) + ('d' << 8 * 2) + ('w' << 8 * 1) + ('i' << 8 * 0)
 #define CMD_ldst	('l' << 8 * 3) + ('d' << 8 * 2) + ('s' << 8 * 1) + ('t' << 8 * 0)
@@ -293,6 +294,7 @@
 
 
 	//CMDlets One Wire Bus
+//SCan OneWire
 #define CMD_scow	('s' << 8 * 3) + ('c' << 8 * 2) + ('o' << 8 * 1) + ('w' << 8 * 0)
 #define CMD_lmlc	('l' << 8 * 3) + ('m' << 8 * 2) + ('l' << 8 * 1) + ('c' << 8 * 0)
 #define CMD_lmup	('l' << 8 * 3) + ('m' << 8 * 2) + ('u' << 8 * 1) + ('p' << 8 * 0)
@@ -345,13 +347,13 @@
 							"|iptr|%s|\t\tIP of trigger:\n"\
 							"|potr|%d|\t\tPort of trigger:\n"\
 
-#define MEASUREMENT_MESSAGE	"|moid|"STR(ADC_MODULE_ID)"|\t\tModule ID\n\4"\
+#define MEASUREMENT_MESSAGE	"|moid|"STR(MODULE_ID)"|\t\tModule ID\n\4"\
 							"|fwve|"FIRMWARE_VERSION"|\t\tFirmware version\n\4"\
 							"|mper|%llu|\t\tMeasurement Period\n\4"\
 							"|calv|%f|\t\tCalibration Value\n\4"\
 							"|tare|%u|\t\tTare Value\n\4"\
 							"|bper|%d|\t\tBlink period\n\4"\
-							"|bdur|%u|\t\tBlink duration\n\4"\
+							"|bdur|%u|\t\tBlink duration\n\4"
 
 #define GREETING_MESSAGE	"|user|send man for manual\n"
 #define MESS_INVALID		"|inv|Message could not be received correctly\n"
@@ -376,5 +378,21 @@
 #define ERR_MOREINFO		21
 #define ERR_MPER_TOO_LOW	20
 #define ERR_VALUEOUTOFRANGE	22
+
+//ADC MODULE DEFINES
+#define GPIO_HX711_DT_PIN 19
+#define GPIO_HX711_SCK_PIN 18
+#define GPIO_HX711_RATE_PIN 21
+
+#define GPIO_INPUT_ADC ((1ULL<<GPIO_HX711_DT_PIN))
+#define GPIO_OUTPUT_ADC ((1ULL<<GPIO_HX711_SCK_PIN) | (1ULL<<GPIO_HX711_RATE_PIN))
+
+#define NUM_DATA_CHARS 20
+
+#define MODULE_ID 0x01
+#define MODULE_NAME	"hx711-a"
+
+#define ADC_MIN_PERIOD 	12500
+#define ADC_CAL_PERIOD	100000		//the measurement period used for calibration
 
 #endif /* MAIN_DEFINES_H_ */

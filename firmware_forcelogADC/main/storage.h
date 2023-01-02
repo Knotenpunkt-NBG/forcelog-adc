@@ -29,7 +29,7 @@
 #include "driver/sdmmc_host.h"
 #include "driver/sdspi_host.h"
 #include "sdmmc_cmd.h"
-#include "owb.h"
+//#include "owb.h"
 #include "dirent.h"
 
 #include "globals.h"
@@ -60,10 +60,7 @@ uint32_t		ffileList		(char* pc_fileName,
 								char* pc_configOut);
 char*			floadInit		();
 
-sdmmc_card_t*	card;
-BYTE pdrv;
-FATFS* fs;
-size_t alloc_unit_size;
+
 
 
 #endif /* MAIN_STORAGE_H_ */

@@ -7,10 +7,26 @@
 
 #include "batmon.h"
 
+adc_oneshot_unit_handle_t adc1_handle;
+
 void fbatMonInit(void)
 {
-	adc1_config_width(ADC_WIDTH_BIT_12);
-	adc1_config_channel_atten(BATMON_CHANNEL, ADC_ATTEN_DB_11);
+    //-------------ADC1 Init---------------//
+
+    adc_oneshot_unit_init_cfg_t init_config1 = {
+        .unit_id = ADC_UNIT_1,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config1, &adc1_handle));
+
+    //-------------ADC1 Config---------------//
+    adc_oneshot_chan_cfg_t config = {
+        .bitwidth = ADC_BITWIDTH_12,
+        .atten = ADC_ATTEN_DB_11,
+    };
+    ESP_ERROR_CHECK(adc_oneshot_config_channel(adc1_handle, BATMON_CHANNEL, &config));
+
+
+    //-------------Starting Task---------------//
 	xTaskCreate(tbatmonRun,		"t_batmonRun",		2048, NULL, 10, &ht_batmonRun);
 }
 
@@ -19,6 +35,7 @@ void tbatmonRun	(void* param)
 	uint32_t ui_cmdlet = 0;
 	float f_batVol = 0.0;
 	int		i_batRaw = 0;
+	static int adc_raw[2][10];
 	char *message = NULL;
 	while(ui_cmdlet != CMD_init)
 	{
@@ -39,8 +56,9 @@ void tbatmonRun	(void* param)
 			{
 				for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
 				{
-					f_batVol += fmap(adc1_get_raw(BATMON_CHANNEL),pstu_batMonConfig->i_batRawLow, pstu_batMonConfig->f_batVolLow, pstu_batMonConfig->i_batRawHigh, pstu_batMonConfig->f_batVolHigh);
-					i_batRaw += adc1_get_raw(BATMON_CHANNEL);
+					//TODO: rewrite Batmon mmeasuring for 5.0 adc oneshot
+					//f_batVol += fmap(adc1_get_raw(BATMON_CHANNEL),pstu_batMonConfig->i_batRawLow, pstu_batMonConfig->f_batVolLow, pstu_batMonConfig->i_batRawHigh, pstu_batMonConfig->f_batVolHigh);
+					i_batRaw += adc_oneshot_read(adc1_handle, BATMON_CHANNEL, &adc_raw[0][0]);
 				}
 				f_batVol /= BATMON_NUM_SAMPLES;
 				i_batRaw /= BATMON_NUM_SAMPLES;
@@ -69,7 +87,8 @@ void fconfigBatMon	(uint32_t ui_cmdlet)
 	case CMD_bath:
 		for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
 		{
-			pstu_batMonConfig->i_batRawHigh += adc1_get_raw(BATMON_CHANNEL);
+			//TODO: rewrite battery read with 5.0 adc oneshot
+			//pstu_batMonConfig->i_batRawHigh += adc1_get_raw(BATMON_CHANNEL);
 		}
 		pstu_batMonConfig->i_batRawHigh /= BATMON_NUM_SAMPLES;
 		xEventGroupSync( eg_sync,
@@ -85,7 +104,7 @@ void fconfigBatMon	(uint32_t ui_cmdlet)
 	case CMD_batl:
 		for (int i = 0; i < BATMON_NUM_SAMPLES; i++)
 		{
-			pstu_batMonConfig->i_batRawLow += adc1_get_raw(BATMON_CHANNEL);
+			//pstu_batMonConfig->i_batRawLow += adc1_get_raw(BATMON_CHANNEL);
 		}
 		pstu_batMonConfig->i_batRawLow /= BATMON_NUM_SAMPLES;
 		xEventGroupSync( eg_sync,

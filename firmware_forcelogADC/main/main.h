@@ -19,7 +19,7 @@
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
 #include "esp_system.h"
-#include "esp_spi_flash.h"
+#include "spi_flash_mmap.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
 #include "esp_wifi.h"
@@ -31,7 +31,7 @@
 #include "lwip/sys.h"
 #include "freertos/semphr.h"
 
-#include "adc.h"
+#include "adc_task.h"
 #include "com_tcp.h"
 #include "status_led.h"
 #include "defines.h"

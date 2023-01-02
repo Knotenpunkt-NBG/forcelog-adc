@@ -9,7 +9,7 @@
 #define MAIN_BATMON_H_
 
 #include "freertos/FreeRTOS.h"
-#include <driver/adc.h>
+#include "esp_adc/adc_oneshot.h"
 #include "esp_system.h"
 #include <esp_event.h>
 #include "sdkconfig.h"
@@ -29,5 +29,6 @@ float	fmap			(int x,
 						float f_batVolLow,
 						int us_batRawHigh,
 						float f_batVolHigh);
+
 
 #endif /* MAIN_BATMON_H_ */

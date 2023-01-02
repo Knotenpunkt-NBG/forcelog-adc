@@ -11,7 +11,7 @@
 void fblinkInit (void)
 {
 	gpio_config_t io_conf;
-	io_conf.intr_type = GPIO_PIN_INTR_DISABLE;
+	io_conf.intr_type = GPIO_INTR_DISABLE;
 	io_conf.mode = GPIO_MODE_OUTPUT;
 	io_conf.pin_bit_mask = (1ULL<<LEDC_GPIO_BLINK);
 	io_conf.pull_down_en = 0;
@@ -142,7 +142,7 @@ void fblinkConfig	(uint32_t CMDlet,
 		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
 		if(pc_value != 0)
 		{
-			uint32_t ui_blinkBrightness = 0;
+			unsigned int ui_blinkBrightness = 0;
 			pc_configOut = malloc(64);
 			ui_blinkBrightness = strtol(pc_value, NULL, 10);
 			if(ui_blinkBrightness !=0)
@@ -183,7 +183,7 @@ void fblinkConfig	(uint32_t CMDlet,
 		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
 		if(pc_value != 0)
 		{
-			uint32_t ui_blinkDuration = 0;
+			unsigned int ui_blinkDuration = 0;
 			pc_configOut = malloc(64);
 			ui_blinkDuration = fconvertToMs(pc_value);
 			if(ui_blinkDuration !=0)
@@ -220,7 +220,7 @@ void fblinkConfig	(uint32_t CMDlet,
 		pc_value = fgetValuePointer(pc_configIn, pc_configOut);
 		if(pc_value != 0)
 		{
-			uint32_t ui_blinkPeriod = 0;
+			unsigned int ui_blinkPeriod = 0;
 			pc_configOut = malloc(64);
 			ui_blinkPeriod = fconvertToMs(pc_value);
 			if(ui_blinkPeriod !=0)
@@ -276,7 +276,7 @@ void fblinkConfig	(uint32_t CMDlet,
 		pc_value = fgetValuePointer(pc_configIn, pc_configOut);;
 		if(pc_value != 0)
 		{
-			uint32_t ui_blinkFrequency = 0;
+			unsigned int ui_blinkFrequency = 0;
 			pc_configOut = malloc(64);
 			ui_blinkFrequency = strtol(pc_value, NULL, 10);
 			if(ui_blinkFrequency !=0)

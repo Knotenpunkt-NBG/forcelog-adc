@@ -101,7 +101,7 @@ int freadUartString	(char* out,
 	uint8_t c_single = 0;
 	for (int i = 0; i < i_maxNumChars; i++)
 	{
-		if(uart_read_bytes(0, &c_single, 1, 5 / portTICK_RATE_MS) > 0)
+		if(uart_read_bytes(0, &c_single, 1, 5 / portTICK_PERIOD_MS) > 0)
 		{
 			if((c_single== '\r') || (c_single == '\n') || (c_single == '\0'))
 			{

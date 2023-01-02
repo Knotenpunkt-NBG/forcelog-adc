@@ -12,6 +12,8 @@ static sdmmc_card_t* s_card = NULL;
 static uint8_t s_pdrv = 0;
 static char * s_base_path = NULL;
 char* base_path = MOUNT_POINT;
+FATFS* fs;
+BYTE pdrv;
 
 void fstorageInit(void)
 {
@@ -21,13 +23,25 @@ void fstorageInit(void)
 
 	ESP_LOGI(TAG_REDUND, "Using SPI peripheral");
 	sdmmc_host_t host = SDSPI_HOST_DEFAULT();
-	sdspi_slot_config_t slot_config = SDSPI_SLOT_CONFIG_DEFAULT();
+	sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
 	sdmmc_card_t* out_card;
 
-	slot_config.gpio_miso = PIN_NUM_MISO;
-	slot_config.gpio_mosi = PIN_NUM_MOSI;
-	slot_config.gpio_sck  = PIN_NUM_CLK;
-	slot_config.gpio_cs   = 0;
+
+	spi_bus_config_t bus_cfg = {
+	        .mosi_io_num = PIN_NUM_MOSI,
+	        .miso_io_num = PIN_NUM_MISO,
+	        .sclk_io_num = PIN_NUM_CLK,
+	        .quadwp_io_num = -1,
+	        .quadhd_io_num = -1,
+	        .max_transfer_sz = 4000,
+	    };
+
+	esp_err_t ret = spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to initialize bus.");
+        return;
+    }
+
 
 	const size_t workbuf_size = 4096;
 	void* workbuf = NULL;
@@ -64,7 +78,7 @@ void fstorageInit(void)
 	}
 
 	// configure SD slot
-	err = sdspi_host_init_slot(host.slot,(const sdspi_slot_config_t*) &slot_config);
+	err = sdspi_host_init_device(host.slot,(const sdspi_device_config_t*) &slot_config);
 	if (err != ESP_OK) {
 		ESP_LOGD(TAG, "slot_config returned rc=0x%x", err);
 		goto fail;
@@ -120,7 +134,8 @@ void fstorageInit(void)
 				s_card->csd.sector_size,
 				allocation_unit_size);
 		ESP_LOGW(TAG, "formatting card, allocation unit size=%d", alloc_unit_size);
-		res = f_mkfs(drv, FM_ANY, alloc_unit_size, workbuf, workbuf_size);
+		//FIXME: Update to 5.0
+		//res = f_mkfs(drv, FM_ANY, alloc_unit_size, workbuf, workbuf_size);
 		if (res != FR_OK) {
 			err = ESP_FAIL;
 			ESP_LOGD(TAG, "f_mkfs failed (%d)", res);
@@ -969,7 +984,8 @@ esp_err_t fFormatSD()
 		pc_configOut = malloc(64);
 		sprintf(pc_configOut, "|ack|0|\t\tMaking Filesystem.\n");
 		fsendResponse(0, 0, pc_configOut);
-		res = f_mkfs(drv, FM_FAT32, alloc_unit_size, workbuf, workbuf_size);
+		//FIXME: Update to 5.0
+		//res = f_mkfs(drv, FM_FAT32, alloc_unit_size, workbuf, workbuf_size);
 		if (res != FR_OK) {
 			err = ESP_FAIL;
 			ESP_LOGD(TAG_REDUND, "f_mkfs failed (%d)", res);
@@ -1059,8 +1075,8 @@ uint32_t fwriteInit(void)
 
 	f = fopen(MOUNT_POINT"/general/temperature", "w");
 	struct stu_tempConfig tempConfig = {
-			.romExt = { .fields = {.family = {0}}},
-			.romInt = { .fields = {.family = {0}}},
+			.romExt = {0},
+			.romInt = {0},
 			.ui_perInt				= 10000,
 			.ui_perExt				= 10000};
 	fwrite(&tempConfig,
@@ -1133,7 +1149,7 @@ uint32_t		ffileList		(char* pc_fileName,
 	free(pc_fileAddress);
 	struct dirent* de = 0;
 	uint32_t ui_offset = 0;
-	uint32_t ui_fileNumber = 1;
+	unsigned int ui_fileNumber = 1;
 	while ((de = readdir(dr)) != NULL)
 	{
 		ui_offset += sprintf(pc_configOut + ui_offset, "\t%d:\2%s\3\n", ui_fileNumber, de->d_name);

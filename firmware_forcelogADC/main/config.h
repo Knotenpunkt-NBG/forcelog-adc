@@ -8,14 +8,15 @@
 #ifndef MAIN_CONFIG_H_
 #define MAIN_CONFIG_H_
 
+#include "freertos/FreeRTOS.h"
 #include <lwip/sockets.h>
-#include "adc.h"
+#include "adc_task.h"
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "esp_timer.h"
 #include "esp_system.h"
-#include <driver/adc.h>
-#include "owb.h"
+#include "esp_adc/adc_continuous.h"
+//#include "owb.h"
 #include "freertos/semphr.h"
 
 #include "globals.h"
